@@ -13,6 +13,7 @@
 
 typedef struct _WonXSerialPort {
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
 } _WonXSerialPort;
 
 /*****************************************************************************/

@@ -6,7 +6,7 @@
 #include <signal.h>
 
 #include "UNIXTimerP.h"
-#include "etc.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -171,6 +171,8 @@ int UNIXTimer_Unpause(UNIXTimer unix_timer)
 {
   if (unix_timer->pause == 0)
     WonX_Error("UNIXTimer_Unpause", "Duplicated unpause.");
+  if (unix_timer->pause < 0)
+    WonX_Error("UNIXTimer_Unpause", "Invalid pause.");
 
   if (unix_timer->pause == 1) {
     if (unix_timer->interrupt_in_pause > 0) {
@@ -198,6 +200,10 @@ int UNIXTimer_Unpause(UNIXTimer unix_timer)
 
       /* コールバック関数の呼び出し */
       UNIXTimer_CallBackFunction(0);
+    } else {
+      if (unix_timer->interrupt_in_pause < 0)
+	WonX_Error("UNIXTimer_Unpause", "Invalid interrupt_in_pause.");
+      unix_timer->pause--; /* ポーズはネストできる */
     }
   } else {
     unix_timer->pause--; /* ポーズはネストできる */

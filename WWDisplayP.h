@@ -19,6 +19,8 @@ typedef struct _WWDisplay {
   WWSprite sprite[128];
   WWScreen screen[2];
   WWLCDPanel lcd_panel;
+  WWText text;
+  WWCursor cursor;
 
   /* ディスプレイの属性情報 */
   int sprite_enable; /* スプライト表示イネーブルフラグ */

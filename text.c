@@ -10,6 +10,9 @@
 
 #include "WonX.h"
 #include "WWText.h"
+#include "WWDisplay.h"
+#include "WWCursor.h"
+#include "etc.h"
 
 /*****************************************************************************/
 /* 互換関数の定義                                                            */
@@ -33,11 +36,11 @@
 
 static void _text_window_init(int x, int y, int w, int h, unsigned int base)
 {
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   WWText_SetTextWindow(ww_text, x, y, w, h, base, ww_display);
 
@@ -112,11 +115,11 @@ int text_get_mode(void)
 
 static void _text_put_char(int x, int y, unsigned int c)
 {
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   WWText_PutCharacter(ww_text, x, y, c, ww_display);
 
@@ -130,7 +133,9 @@ void text_put_char(int x, int y, unsigned int c)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : text_put_char() : x = %d, y = %d, character = %u\n", x, y, (int)c);
+  printf("call : text_put_char() : x = %d, y = %d, character = \'", x, y);
+  wonx_print_character(stdout, c);
+  printf("\'\n");
   fflush(stdout);
 
   _text_put_char(x, y, c);
@@ -148,11 +153,11 @@ void text_put_char(int x, int y, unsigned int c)
 static int _text_put_string(int x, int y, char * string)
 {
   int i, len, ret;
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   len = strlen(string);
   ret = 0;
@@ -167,13 +172,16 @@ static int _text_put_string(int x, int y, char * string)
 int text_put_string(int x, int y, char * string)
 {
   int ret;
+  char * p;
 
   if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : text_put_string() : x = %d, y = %d, string = %s\n", x, y, string);
+  printf("call : text_put_string() : x = %d, y = %d, string = \"", x, y);
+  for (p = string; *p != '\0'; p++) wonx_print_character(stdout, *p);
+  printf("\"\n");
   fflush(stdout);
 
   ret = _text_put_string(x, y, string);
@@ -192,19 +200,21 @@ int text_put_string(int x, int y, char * string)
 int text_put_substring(int x, int y, char * s, int length)
 {
   int i, ret;
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
   if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : text_put_substring() : x = %d, y = %d, string = %s, length = %d\n", x, y, s, length);
+  printf("call : text_put_substring() : x = %d, y = %d, length = %d, string = \"", x, y, length);
+  for (i = 0; i < length; i++) wonx_print_character(stdout, s[i]);
+  printf("\"\n");
   fflush(stdout);
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   ret = 0;
   for (i = 0; i < length; i++) {
@@ -292,8 +302,8 @@ void text_fill_char(int x, int y, int length, int c)
 
 void text_set_palette(int palette_num)
 {
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -303,8 +313,8 @@ void text_set_palette(int palette_num)
   printf("call : text_set_palette() : palette = %d\n", palette_num);
   fflush(stdout);
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   WWText_SetPalette(ww_text, WWDisplay_GetPalette(ww_display, palette_num));
 
@@ -321,6 +331,7 @@ void text_set_palette(int palette_num)
 
 int text_get_palette(void)
 {
+  WWDisplay ww_display;
   WWText ww_text;
   int num;
 
@@ -332,7 +343,8 @@ int text_get_palette(void)
   printf("call : text_get_palette() : \n");
   fflush(stdout);
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   num = WWPalette_GetNumber(WWText_GetPalette(ww_text));
 
@@ -361,8 +373,8 @@ void text_get_fontdata(int c, void * buffer)
 
 void text_set_screen(int screen)
 {
-  WWText ww_text;
   WWDisplay ww_display;
+  WWText ww_text;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -372,8 +384,8 @@ void text_set_screen(int screen)
   printf("call : text_set_screen() : screen = %d\n", screen);
   fflush(stdout);
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   WWText_SetScreen(ww_text, WWDisplay_GetScreen(ww_display, screen));
 
@@ -390,6 +402,7 @@ void text_set_screen(int screen)
 
 int text_get_screen(void)
 {
+  WWDisplay ww_display;
   WWText ww_text;
   int n;
 
@@ -401,7 +414,8 @@ int text_get_screen(void)
   printf("call : text_get_screen() : \n");
   fflush(stdout);
 
-  ww_text = WonXText_GetWWText(WonX_GetWonXText());
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_text = WWDisplay_GetText(ww_display);
 
   n = WWScreen_GetNumber(WWText_GetScreen(ww_text));
 
@@ -418,29 +432,219 @@ int text_get_screen(void)
 
 void cursor_display(int flag)
 {
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_display() : flag = %d\n", flag);
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  switch (flag) {
+  case 0: WWCursor_OFF(ww_cursor); break;
+  case 1: WWCursor_ON( ww_cursor); break;
+  default:
+    WonX_Warning("cursor_display", "Cursor flag is 0 or 1.");
+    WWCursor_ON(ww_cursor); /* 一応 ON にしとく */
+  }
+
+  WonXDisplay_Flush(WonX_GetWonXDisplay());
+
+  printf("call : cursor_display() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return;
 }
 
 int cursor_status(void)
 {
-  return (0);
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+  int ret;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_status() : \n");
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  ret = WWCursor_IsON(ww_cursor) ? 1 : 0;
+
+  WonXDisplay_Sync(WonX_GetWonXDisplay());
+
+  printf("call : cursor_status() : return value = %d\n", ret);
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return (ret);
 }
 
 void cursor_set_location(int x, int y, int w, int h)
 {
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_set_location() : x = %d, y = %d, w = %d, h = %d",
+	 x, y, w, h);
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  if (x < 0)
+    WonX_Warning("cursor_set_location", "Value of x is too small.");
+  if (x > TEXT_SCREEN_WIDTH - 1)
+    WonX_Warning("cursor_set_location", "Value of x is too large.");
+  if (y < 0)
+    WonX_Warning("cursor_set_location", "Value of y is too small.");
+  if (y > TEXT_SCREEN_HEIGHT - 1)
+    WonX_Warning("cursor_set_location", "Value of y is too large.");
+  if (w <= 0)
+    WonX_Warning("cursor_set_location", "Value of w is too small.");
+  if (h <= 0)
+    WonX_Warning("cursor_set_location", "Value of h is too small.");
+
+  WWCursor_SetX(ww_cursor, x);
+  WWCursor_SetY(ww_cursor, y);
+  WWCursor_SetWidth( ww_cursor, w);
+  WWCursor_SetHeight(ww_cursor, h);
+
+  WonXDisplay_Flush(WonX_GetWonXDisplay());
+
+  printf("call : cursor_set_location() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return;
 }
 
 unsigned long int cursor_get_location(void)
 {
-  return (0);
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+  unsigned long int ret;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_get_location() : \n");
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  ret = 0;
+  ret |= (((unsigned long int)WWCursor_GetX(     ww_cursor) & 0xff) <<  0);
+  ret |= (((unsigned long int)WWCursor_GetY(     ww_cursor) & 0xff) <<  8);
+  ret |= (((unsigned long int)WWCursor_GetWidth( ww_cursor) & 0xff) << 16);
+  ret |= (((unsigned long int)WWCursor_GetHeight(ww_cursor) & 0xff) << 24);
+
+  WonXDisplay_Sync(WonX_GetWonXDisplay());
+
+  printf("call : cursor_get_location() : return value = 0x%08x\n", (int)ret);
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return (ret);
 }
 
 void cursor_set_type(int palette_num, int interval)
 {
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_set_type() : palette = %d, interval = %d",
+	 palette_num, interval);
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  if (palette_num < 0)
+    WonX_Error("cursor_set_type", "Palette number is too small.");
+  if (palette_num > 15)
+    WonX_Error("cursor_set_type", "Palette number is too large.");
+  if (interval < 0)
+    WonX_Warning("cursor_set_type", "Value of interval is too small.");
+  if (interval > 255)
+    WonX_Warning("cursor_set_type", "Value of interval is too small.");
+
+  WWCursor_SetPalette(ww_cursor,
+		      WWDisplay_GetPalette(ww_display, palette_num));
+  WWCursor_SetInterval(ww_cursor, interval);
+
+  WonXDisplay_Flush(WonX_GetWonXDisplay());
+
+  printf("call : cursor_set_type() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return;
 }
 
 unsigned long int cursor_get_type(void)
 {
-  return (0);
+  WWDisplay ww_display;
+  WWCursor ww_cursor;
+  unsigned long int ret;
+
+  if (!WonX_IsCreated()) WonX_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  printf("call : cursor_get_type() : \n");
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+  ww_cursor = WWDisplay_GetCursor(ww_display);
+
+  ret = WWPalette_GetNumber(WWCursor_GetPalette(ww_cursor));
+  ret |= (((unsigned long int)WWCursor_GetInterval(ww_cursor) & 0xff) << 8);
+
+  WonXDisplay_Sync(WonX_GetWonXDisplay());
+
+  printf("call : cursor_get_type() : return value = 0x%08x\n", (int)ret);
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return (ret);
 }
 
 int text_printf(int x, int y, const char *format, ...)

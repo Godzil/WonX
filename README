@@ -57,7 +57,7 @@ WonX は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
 サンプルプログラムをコンパイル・実行してみましょう．
 以下のようにしてみてください．
 
-~>% tar xvzf wonx.tgz
+~>% tar xvzf wonx-x.x.tar.gz
 (中略)
 ~>% cd wonx
 
@@ -99,6 +99,85 @@ smac のタイトル画面が表示されます．
 キーは反応するまで長めに押してください．
 p を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
 ONのままだと画面クリアとかに異常に時間がかかるからです．
+
+最後に，WonderWitch 用の端末エミュレータ "WWTerm" をコンパイル・実行
+してみます．
+
+~/wonx>% make wwterm
+(中略)
+~/wonx>% cd wwterm
+~/wonx/smac>% ./terminal
+
+■ 10分WonX
+
+次に，なにかあなたが作った WonderWitch 用のプログラムを WonX 使って
+コンパイル・リンクして，X Window System 上で動作するような実行形式を
+作ってみましょう．
+
+まず，WonX を展開して，make してください．libwonx.a ができあがります．
+
+~>% tar xvzf wonx-x.x.tar.gz
+(中略)
+~>% cd wonx
+~/wonx>% make
+(中略)
+~/wonx>% ls libwonx.a
+libwonx.a
+~/wonx>% 
+
+次に，libwonx.a と，wonx_include ディレクトリと，sys2wonx.pl を
+あなたの作ったプログラムのディレクトリ(ここでは例として，yoursample とします)
+にコピーします．
+
+~/wonx>% cp -R libwonx.a wonx_include sys2wonx.pl ../yoursample
+~/wonx>% cd ../yoursample
+~/yoursample>% 
+
+あなたの作ったプログラムのすべてのファイルを，MS-DOS テキスト形式から
+UNIX のテキスト形式に変換します．(つまり，改行コードを \r\n から \n に
+変換して，漢字コードを SJIS から EUC に変換します)
+
+~/yoursample>% cat makefile | qkc -I -O -e -u > makefile.new
+~/yoursample>% mv makefile.new makefile
+~/yoursample>% cat sample.c | qkc -I -O -e -u > sample.c.new
+~/yoursample>% mv sample.c.new sample.c
+...(以下すべてのファイルについて，同様に繰り返し．中略)...
+
+*.C というファイル名のファイルがあったら，*.c に変更します．
+(*.C だと C++ のプログラムだと思われてしまうので)
+
+~/yoursample>% mv SAMPLE2.C sample2.c
+
+makefile を以下のように修正する．
+・コンパイラには gcc を使用する．
+・オブジェクトファイルを *.obj から *.o に変更．
+・コンパイルフラグに -I. -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt を追加．
+・mkfent などによる *.fx ファイルの作成などがあったら，コメントアウトする．
+
+~/yoursample>% emacs makefile
+
+おそらく，makefile の修正が２番目に面倒です．(一番面倒なのは，WonX がうまく
+適用できなかったときのソースの修正です)
+添付の makefile_for_smac や makefile_for_wwterm を参考にして，makefile を
+修正してください．
+
+次に，sys2wonx.pl をかけて，プログラム中の #include <sys/disp.h> のようなのを，
+#include "wonx_include/disp.h" に変更する．
+(注意! sys2wonx.pl は，ファイルの本体を書き換えてしまうので，変更されると
+ 困るようなファイルは必ずバックアップしてください．
+ #include <sys/disp.h> のような部分が無いファイルの場合だと，読み込んで
+ そのまま出力するので，ファイルの内容自体は変わらないと思いますが，
+ 日付は変わってしまいます)
+
+~/yoursample>% ./sys2wonx.pl *.[ch]
+
+最後に，make をします．
+
+~/yoursample>% make
+
+うまくいけば，一撃でコンパイルが通って，実行できます．
+
+~/yoursample>% ./sample
 
 ■ WonX 概要
 
@@ -156,7 +235,7 @@ WonX のコンパイルは，以下の手順で行います．
 
 1. WonX を展開する．
 
-~>% tar xvzf wonx.tar.gz
+~>% tar xvzf wonx-x.x.tar.gz
 ~>% cd wonx
 ~/wonx>% 
 
@@ -286,7 +365,7 @@ smac を起動すると，ウインドウが開きます．また，ターミナルには，
 /* 画面のクリア */
 for (y = 0; y < 32; y++)
   for (x = 0; x < 32; x++) {
-    screen_fill_char(0, x, y, 1, 1, 0x0000); /* ここで毎回再描画される */
+    screen_fill_char(0, x, y, 1, 1, 0); /* ここで毎回再描画される */
   }
 }
 
@@ -329,8 +408,8 @@ WonX は，メッセージを出力する際に，grep でフィルタリングできるように，
 関数を呼び出しても，何も起こりません．(空の関数になっている)
 
 ・サウンド
-・カーソル表示
-・その他いっぱい
+・プロセス
+・インダイレクトライブラリ
 
 ■ 注意しなければならないこと
 
@@ -344,8 +423,10 @@ UNIX 上でコンパイル・リンクするためのライブラリであり，ハードウエアを
 かなり回避できると思います．(ビットマップ操作などで，short int にすべき
 ところでは，省略せずにちゃんと short int と明示するとか)
 
-まあ，WonX の目的は論理的なバグを早い段階で無くすことにあるので，このへんは
-そういうものだと割り切って使ってください．
+まあ，WonX の目的は論理的なバグを早い段階で無くすことと，
+論理的バグとハードがらみのバグを切り離して原因を狭めることと，
+坂井が電車の中でも WonderWitch のプログラムを書けるようにすることにあるので，
+このへんはそういうものだと割り切って使ってください．
 WonX を使う限り，なるべく機種依存を無くすように心がけましょう．
 (とくに int のサイズにあまり依存しないようにしましょう)
 
@@ -386,9 +467,9 @@ font_set_colordata()などは，short int 型の配列でキャラクタデータを受け取る
 ので，char * で定義したキャラクタデータを short int * にキャストして
 font_set_colordata()に渡すなどのことをしていると，画像がひっくり返る
 ことが考えられます．
-i386 系の PC-UNIX ならば，おそらく問題は無いでしょう．
+i386 系のいわゆる PC-UNIX ならば，おそらく問題は無いでしょう．
 
-[割り込みの問題]
+[タイマ割り込みの問題]
 
 WonderWitch にはタイマ割り込みがありますが，WonX の動作は非常に遅いため，
 WonderWitch の時間単位をそのまま UNIX に持ってきたら，割り込みが
@@ -399,6 +480,51 @@ WonderWitch よりもかなり大きめにしてあります．
 場合には，割り込みの時間単位を大きくしてください．でないと，ハンドラから
 戻った瞬間にまたハンドラが呼ばれて，全然実行が先に進まない，ということに
 なり得ます．
+
+[キー入力割り込み，シリアル受信割り込みの問題]
+
+(あまりやることはないと思いますが)キー入力割り込みとキー入力検査用関数を
+同一ループ内で併用すると，割り込みのとりこぼしが起きやすくなる可能性が
+あります．
+つまり，以下のようなプログラムを書くときには注意してください．
+
+void far key_handler()
+{
+  /* キー入力の処理がここに入る */
+}
+
+static intvector_t key_intvector;
+static intvector_t key_last_intvector;
+
+main()
+{
+  key_intvector.callback = (void (near *)())FP_OFF(key_handler);
+  key_intvector.cs = _asm_inline("\tmov\tax,cs");
+  key_intvector.ds = _asm_inline("\tmov\tax,ds");
+
+  sys_interrupt_set_hook(SYS_INT_KEY, &key_intvector, &key_last_intvector);
+
+  while (1) {
+    /*
+     * キー入力割り込み待ちの状態なのに，key_press_check() でキー入力状態の
+     * 検査も行う
+     */
+    key = key_press_check();
+    /* なんか適当な処理をこのへんで行ったりする */
+  }
+}
+
+キー入力割り込みを待ちながら，key_press_check() でキーの入力状態を
+別個に検査する，ということをやると，割り込みのとりこぼしが起きる可能性が
+あります．
+(ただし，キー入力割り込みによって呼び出される割り込みハンドラ内で
+ key_press_check() を使用することは問題ありません．(でないと割り込みの
+ 意味が無くなってしまうしね) あくまで，同じループ内で併用すると問題が
+ 発生する可能性がある，ということです)
+
+でも，こんなへんなプログラムあまり書くこと無いだろうし，いいかなと思ってます．
+(これを直そうとすると，とてもたいへんなので)
+このことは，シリアル受信割り込みに関しても，同様です．
 
 [キー入力について]
 
@@ -420,6 +546,8 @@ gcc -g -o smac $(OBJS) -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
 のような行があったとして，これが MS-DOS のテキスト形式のファイルだと，
 -lXt のあとに余分な改行コード(\r)が付加されてしまうため，UNIX 上で make
 しても，「-lXt に相当するライブラリが無い」と怒られてしまいます．
+(実際にはコンパイラは，-lXt\r だと思ってしまって，libXt\r.a というライブラリを
+ 探してしまうのです)
 (しかも，ファイルを emacs や less などで参照しても，改行コードは表示されない
  ため，原因がわかりにくい)
 また，
@@ -458,7 +586,66 @@ SAMPLE.C のような名前のファイルをコンパイルすると，うまくリンクできない
 添付の sout2str.pl を通すことにより，シリアル通信への出力のみ抽出して，
 端末への出力のイメージで表示させることができます．
 
-[ソース中の WonX 依存部分のくくりかた]
+■ 割り込みについて
+
+キー入力割り込みやシリアル受信割り込みなどは，UNIXのアラームシグナルを
+利用して実装しています．(一定時間おきにポーリングしている)
+したがって，以下のようなプログラムもコンパイルして正常に動作させる
+ことができます．
+
+void far key_handler()
+{
+  int key;
+  key = key_press_check();
+  /* キー入力の処理がここに入る */
+}
+
+/* シリアル受信の割り込みハンドラ */
+void far com_handler()
+{
+  int c;
+  c = comm_receive_char();
+  /* シリアル受信の処理がここに入る */
+}
+
+static intvector_t key_intvector;
+static intvector_t key_last_intvector;
+static intvector_t com_intvector;
+static intvector_t com_last_intvector;
+
+main()
+{
+  key_intvector.callback = (void (near *)())FP_OFF(key_handler);
+  com_intvector.callback = (void (near *)())FP_OFF(com_handler);
+  key_intvector.cs = _asm_inline("\tmov\tax,cs");
+  key_intvector.ds = _asm_inline("\tmov\tax,ds");
+  com_intvector.cs = _asm_inline("\tmov\tax,cs");
+  com_intvector.ds = _asm_inline("\tmov\tax,ds");
+
+  sys_interrupt_set_hook(SYS_INT_KEY,
+                         &key_intvector, &key_last_intvector);
+  sys_interrupt_set_hook(SYS_INT_RECEIVEREADY,
+                         &com_intvector, &com_last_intvector);
+
+  while (1) {
+    /* 無限ループ．割り込みが入ったら，そのハンドラに飛ぶ */
+  }
+}
+
+_asm_inline() は常に0を返すダミー関数として定義されています．
+また，FP_OFF(), FP_SEG() は，
+#define FP_OFF(p) (p)
+#define FP_SEG(p) (0)
+のように定義されています．よって，上記のようなプログラムも WonX で
+コンパイルして実行することができます．
+
+このように，while (1) {} で無限ループを回して，割り込みがあったときだけ
+処理するようなプログラムを書いても，正常に動作します．
+しかし，キー入力はポーリングされているときしか感知されないので，
+キー入力割り込みをかけるには，長めにキーを押してやる必要があります．
+(キーは基本的に鈍いので，反応するまで長めに押してください)
+
+■ ソース中の WonX 依存部分のくくりかた
 
 WonderWitch 用のプログラムを開発していく際に，WonX の場合のみ組み込みたくて，
 WonderSwan 上で実行するときには取り除きたいコードがあったとします．
@@ -467,7 +654,7 @@ WonderSwan 上で実行するときには取り除きたいコードがあったとします．
 #define _WONX_
 してあるので，そのような場所は #ifdef _WONX_ でくくってください．
 
-[ダンプデータの取りかた]
+■ ダンプデータの取りかた
 
 ソース中に，
 

@@ -3,7 +3,7 @@
 /*****************************************************************************/
 
 #include "WWScreenP.h"
-#include "etc.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -159,7 +159,7 @@ int WWScreen_SetDrawWidth( WWScreen s, int n) { return (s->draw_width  = n); }
 int WWScreen_SetDrawHeight(WWScreen s, int n) { return (s->draw_height = n); }
 
 /* カラーマップの色(0〜7)を返す(透明色は-1を返す) */
-int WWScreen_GetPixel(WWScreen screen, int x, int y)
+int WWScreen_GetPixel(WWScreen screen, int x, int y, WWCursor cursor)
 {
   int cx, cy, px, py;
   int pixel;
@@ -180,10 +180,21 @@ int WWScreen_GetPixel(WWScreen screen, int x, int y)
   if (WWScreen_GetVertical(  screen, cx, cy)) py = 7 - py;
 
   character = WWScreen_GetCharacter(screen, cx, cy);
+
+  /* カーソル表示の処理 */
   palette = WWScreen_GetPalette(screen, cx, cy);
+  if (cursor != NULL) {
+    if ( WWCursor_IsON(cursor) &&
+	 (cx >= WWCursor_GetX(cursor)) &&
+	 (cx <= WWCursor_GetX(cursor) + WWCursor_GetWidth( cursor) - 1) &&
+	 (cy >= WWCursor_GetY(cursor)) &&
+	 (cy <= WWCursor_GetY(cursor) + WWCursor_GetHeight(cursor) - 1) ) {
+      palette = WWCursor_GetPalette(cursor);
+    }
+  }
 
   pixel = WWCharacter_GetPixel(character, px, py);
-  pixel = WWPalette_GetMappedColor(palette, pixel);
+  pixel = WWPalette_GetMappedColor(palette, pixel); /*透明色は-1が返ってくる*/
 
   return (pixel);
 }

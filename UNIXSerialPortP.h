@@ -1,19 +1,19 @@
-#ifndef _WonXTextP_h_INCLUDED_
-#define _WonXTextP_h_INCLUDED_
+#ifndef _UNIXSerialPortP_h_INCLUDED_
+#define _UNIXSerialPortP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WonXText.h"
+#include "UNIXSerialPort.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WonXText {
-  WWText ww_text;
-} _WonXText;
+typedef struct _UNIXSerialPort {
+  int opened; /* open/close */
+} _UNIXSerialPort;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

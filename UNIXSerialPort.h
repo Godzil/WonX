@@ -1,5 +1,5 @@
-#ifndef _UNIXTimer_h_INCLUDED_
-#define _UNIXTimer_h_INCLUDED_
+#ifndef _UNIXSerialPort_h_INCLUDED_
+#define _UNIXSerialPort_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
@@ -9,8 +9,7 @@
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _UNIXTimer * UNIXTimer;
-typedef int (*UNIXTimerCallBack)(void *);
+typedef struct _UNIXSerialPort * UNIXSerialPort;
 
 /*****************************************************************************/
 /* ヘッダファイルのインクルード                                              */
@@ -24,75 +23,53 @@ typedef int (*UNIXTimerCallBack)(void *);
 /*****************************************************************************/
 
 /*---------------------------------------------------------------------------*/
-/* タイマの ON, OFF                                                          */
+/* ポートの open/close                                                       */
 /*---------------------------------------------------------------------------*/
 
-int UNIXTimer_ON(UNIXTimer unix_timer);
-int UNIXTimer_OFF(UNIXTimer unix_timer);
-int UNIXTimer_IsON(UNIXTimer unix_timer);
-int UNIXTimer_IsOFF(UNIXTimer unix_timer);
+int UNIXSerialPort_Open(UNIXSerialPort unix_serial_port);
+int UNIXSerialPort_Close(UNIXSerialPort unix_serial_port);
+
+int UNIXSerialPort_IsOpened(UNIXSerialPort unix_serial_port);
+int UNIXSerialPort_IsClosed(UNIXSerialPort unix_serial_port);
 
 /*---------------------------------------------------------------------------*/
-/* 一時停止                                                                  */
+/* 受信データがあるかどうか                                                  */
 /*---------------------------------------------------------------------------*/
 
 /*
- * 関数の先頭と末尾を Pause, Unpause でくくるばあいなどは，
- * 関数から関数を呼び出したときに，２重 Pause, Unpause が起きるので
- * 注意すること．(ただし，ポーズはネストできる)
+ * タイムアウト時間をミリ秒単位で指定．
+ * 0 のときは，即時
+ * -1 のときは，無期限待ち
  */
 
-/*
- * ポーズはネストされるので，UNIXTimer_Unpause() を安易に繰り返し呼んだり
- * しないように注意すること．
- */
-
-int UNIXTimer_Pause(UNIXTimer unix_timer);
-int UNIXTimer_Unpause(UNIXTimer unix_timer);
-int UNIXTimer_IsPause(UNIXTimer unix_timer);
+int UNIXSerialPort_IsDataExisting(UNIXSerialPort unix_serial_port,
+				  int timeout);
 
 /*---------------------------------------------------------------------------*/
-/* オートプリセット                                                          */
+/* 受信                                                                      */
 /*---------------------------------------------------------------------------*/
 
-int UNIXTimer_SetAutoPreset(UNIXTimer unix_timer);
-int UNIXTimer_ResetAutoPreset(UNIXTimer unix_timer);
-int UNIXTimer_IsAutoPreset(UNIXTimer unix_timer);
+int UNIXSerialPort_ReceiveCharacter(UNIXSerialPort unix_serial_port,
+				    int timeout);
 
 /*---------------------------------------------------------------------------*/
-/* インターバル                                                              */
+/* 送信                                                                      */
 /*---------------------------------------------------------------------------*/
 
-int UNIXTimer_GetInterval(UNIXTimer unix_timer);
-int UNIXTimer_SetInterval(UNIXTimer unix_timer, int interval);
-
-/*---------------------------------------------------------------------------*/
-/* コールバック関数の呼び出し時のパラメータ                                  */
-/*---------------------------------------------------------------------------*/
-
-void * UNIXTimer_GetParameter(UNIXTimer unix_timer);
-void * UNIXTimer_Setparameter(UNIXTimer unix_timer, void * parameter);
-
-/*---------------------------------------------------------------------------*/
-/* コールバック関数の取得・登録                                              */
-/*---------------------------------------------------------------------------*/
-
-UNIXTimerCallBack UNIXTimer_GetCallBack(UNIXTimer unix_timer);
-UNIXTimerCallBack UNIXTimer_SetCallBack(UNIXTimer unix_timer,
-					UNIXTimerCallBack callback);
+int UNIXSerialPort_SendCharacter(UNIXSerialPort unix_serial_port,
+				 unsigned char c);
 
 /*---------------------------------------------------------------------------*/
 /* オブジェクトの作成                                                        */
 /*---------------------------------------------------------------------------*/
 
-UNIXTimer UNIXTimer_Create(int auto_preset, int interval, void * parameter,
-			   UNIXTimerCallBack callback);
+UNIXSerialPort UNIXSerialPort_Create();
 
 /*---------------------------------------------------------------------------*/
 /* オブジェクトの削除                                                        */
 /*---------------------------------------------------------------------------*/
 
-UNIXTimer UNIXTimer_Destroy(UNIXTimer unix_timer);
+UNIXSerialPort UNIXSerialPort_Destroy(UNIXSerialPort unix_serial_port);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

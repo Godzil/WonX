@@ -5,13 +5,6 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WWColorMap.h"
-#include "WWPalette.h"
-#include "WWCharacter.h"
-#include "WWSprite.h"
-#include "WWScreen.h"
-#include "WWLCDPanel.h"
-
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
@@ -19,7 +12,20 @@
 typedef struct _WWDisplay * WWDisplay;
 
 /*****************************************************************************/
-/* メンバ関数の定義                                                          */
+/* ヘッダファイルのインクルード                                              */
+/*****************************************************************************/
+
+#include "WWColorMap.h"
+#include "WWPalette.h"
+#include "WWCharacter.h"
+#include "WWSprite.h"
+#include "WWScreen.h"
+#include "WWLCDPanel.h"
+#include "WWText.h"
+#include "WWCursor.h"
+
+/*****************************************************************************/
+/* メンバ関数の宣言                                                          */
 /*****************************************************************************/
 
 /*===========================================================================*/
@@ -32,6 +38,9 @@ WWCharacter WWDisplay_GetCharacter(WWDisplay d, int n);
 WWSprite WWDisplay_GetSprite(WWDisplay d, int n);
 WWScreen WWDisplay_GetScreen(WWDisplay d, int n);
 WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d);
+WWText WWDisplay_GetText(WWDisplay d);
+WWCursor WWDisplay_GetCursor(WWDisplay d);
+
 int WWDisplay_GetSpriteEnable(WWDisplay d);
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d);
 
@@ -58,6 +67,8 @@ WWCharacter WWDisplay_SetCharacter(WWDisplay d, int n, WWCharacter c);
 WWSprite WWDisplay_SetSprite(WWDisplay d, int n, WWSprite s);
 WWScreen WWDisplay_SetScreen(WWDisplay d, int n, WWScreen s);
 WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p);
+WWText WWDisplay_SetText(WWDisplay d, WWText p);
+WWCursor WWDisplay_SetCursor(WWDisplay d, WWCursor p);
 
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f);
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f);

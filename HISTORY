@@ -1,3 +1,50 @@
+2000/12/28(木)
+
+wonx-1.1 公開
+
+_asm_*() のダミー関数を追加．
+FP_OFF(), FP_SEG() を，WonderWitch での割り込み設定時のコールバック関数の
+設定方法にあわせて，適切に変更．(wwterm に合わせた)
+
+UNIXTimer.c:UNIXTimer_Unpause() で，
+((unix_timer->pause == 1) && (unix_timer->interrupt_in_pause == 0))
+だったときに unix_timer->pause--; されないバグを修正．
+(ポーズ中に割り込みがかからなかった場合に，アンポーズされていなかった)
+
+シリアル受信割り込み，キーボード割り込み追加．(wwterm に対応，動作確認済)
+UNIXSerialPort クラス追加．
+
+これにより，WonderWitch での，
+  com_intvector.callback = (void (near *)())FP_OFF(com_handler);
+  com_intvector.cs = _asm_inline("\tmov\tax,cs");
+  com_intvector.ds = _asm_inline("\tmov\tax,ds");
+  sys_interrupt_set_hook(SYS_INT_RECEIVEREADY,
+                         &com_intvector, &com_last_intvector);
+のような割り込みの設定が正しく実行されるようになった．
+
+ワーニング用に，WonX_Warning() 追加．
+WonX_Error() を WonX.c に移動．
+
+comm_send_string(), text_put_string(), text_put_substring() 実行時の
+出力メッセージを修正．
+
+カーソル表示機能を実装．(WWCursor クラス追加)(点滅はしない．表示のみ)
+カーソル表示をする際に，WWDisplay_DrawLCDPanel() 内部でテキスト情報が
+読める必要があるので，WonXText クラスを廃止して，WWText クラスを
+WWDisplay クラスのメンバに移動した．
+
+palette_get_color() 内で，WWPalette_GetMappedColors() の実行時に透明色が
+-1として返されることを考慮していなかったために，palette_get_color() の
+戻り値がおかしな値になっていたバグを修正．
+
+キャラクタカラーパレット，LCDカラーパレットの初期値を，WonderWitch での
+初期値と一致させた．
+
+サンプルとして，wwterm-b05 を追加．(Makefile に wwterm ターゲットを追加)
+
+
+
+
 2000/11/23(木)
 
 wonx-1.0 公開

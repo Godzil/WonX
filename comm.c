@@ -14,6 +14,9 @@
 
 #include "wonx_configure.h"
 #include "WonX.h"
+#include "WonXSerialPort.h"
+#include "WWSerialPort.h"
+#include "UNIXSerialPort.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -38,7 +41,9 @@
 
 void comm_open(void)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -48,12 +53,17 @@ void comm_open(void)
   printf("call : comm_open() : \n");
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_open", "Serial port has already opened.");
+  if (WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Warning("comm_open", "WW serial port has already opened.");
+  WWSerialPort_Open(ww_serial_port);
 
-  WWSerialPort_ON(ww_serial_port);
+  if (UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Warning("comm_open", "UNIX serial port has already opened.");
+  UNIXSerialPort_Open(unix_serial_port);
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 
@@ -68,7 +78,9 @@ void comm_open(void)
 
 void comm_close(void)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -78,12 +90,17 @@ void comm_close(void)
   printf("call : comm_close() : \n");
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_close", "Serial port is not opened.");
+  if (!WWSerialPort_IsClosed(ww_serial_port))
+    WonX_Warning("comm_close", "WW serial port is not opened.");
+  WWSerialPort_Close(ww_serial_port);
 
-  WWSerialPort_OFF(ww_serial_port);
+  if (!UNIXSerialPort_IsClosed(unix_serial_port))
+    WonX_Warning("comm_close", "UNIX serial port is not opened.");
+  UNIXSerialPort_Close(unix_serial_port);
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 
@@ -98,75 +115,55 @@ void comm_close(void)
 
 static void comm_output(unsigned char c)
 {
-  if      (c == '\n') printf("\\n");
-  else if (c == '\r') printf("\\r");
-  else if (c == '\t') printf("\\t");
-  else if (isprint(c)) fputc(c, stdout);
-  else printf("^%02x", (int)c);
-  fflush(stdout);
+  WonXSerialPort wonx_serial_port;
+  UNIXSerialPort unix_serial_port;
+
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
+  UNIXSerialPort_SendCharacter(unix_serial_port, c);
+
   return;
 }
 
 static int comm_input(int timeout)
 {
-  int tmp;
+  WonXSerialPort wonx_serial_port;
+  UNIXSerialPort unix_serial_port;
   int c;
-  fd_set bitmap;
-  struct timeval t;
-  struct timeval * t_p;
 
-  /*
-   * 0 のときは，即時
-   * -1 のときは，無期限待ち
-   */
-  if (timeout == -1) {
-    t_p = NULL;
-  } else {
-    tmp = WONX_SERIAL_PORT_TIMETICKS * timeout;
-    t.tv_sec  =  tmp / 1000;
-    t.tv_usec = (tmp % 1000) * 1000;
-    t_p = &t;
-  }
-
-  FD_ZERO(&bitmap);
-  FD_SET(fileno(stdin), &bitmap);
-
-  /*
-   * FreeBSD3.4 で実験したところ，
-   * アラームシグナルを使用する場合，select()でのブロック中に
-   * アラームシグナルが発生すると，その直後にselect()もタイムアウト
-   * してしまうので，注意．
-   * (select() がタイムアウトした後にアラームシグナルが発生する場合は，
-   *  正常に動作した)
-   * 論理上は問題が無いが，期待した時間だけ待ってくれないという現象が
-   * 起きる可能性がある．
-   */
-  select(fileno(stdin) + 1, &bitmap, NULL, NULL, t_p);
-
-  c = FD_ISSET(fileno(stdin), &bitmap) ? fgetc(stdin) : -1;
-  c = (c == '\n') ? '\r' : c;
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
+  c = UNIXSerialPort_ReceiveCharacter(unix_serial_port,
+				      WONX_SERIAL_PORT_TIMETICKS * timeout);
 
   return (c);
 }
 
 int comm_send_char(unsigned char c)
 {
-  int ret;
-
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
+  int ret;
 
   if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : comm_send_char() : character = 0x%02x\n", (int)c);
+  printf("call : comm_send_char() : character = \'");
+  wonx_print_character(stdout, c);
+  printf("\'\n");
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_send_char", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_send_char", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_send_char", "UNIX serial port is not opened.");
 
   printf("output to serial port : ");
   comm_output(c);
@@ -187,7 +184,9 @@ int comm_send_char(unsigned char c)
 
 int comm_receive_char(void)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
   int c;
   int ret;
 
@@ -199,10 +198,14 @@ int comm_receive_char(void)
   printf("call : comm_receive_char() : \n");
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_receive_char", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_receive_char", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_receive_char", "UNIX serial port is not opened.");
 
   c = comm_input(WWSerialPort_GetReceiveTimeout(ww_serial_port));
 
@@ -222,7 +225,9 @@ int comm_receive_char(void)
 
 int comm_receive_with_timeout(int timeout)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
   int c;
   int ret;
 
@@ -234,10 +239,14 @@ int comm_receive_with_timeout(int timeout)
   printf("call : comm_receive_with_timeout() : timeout = %d\n", timeout);
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_receive_with_timeout", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_receive_with_timeout", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_receive_with_timeout", "UNIX serial port is not opened.");
 
   c = comm_input(timeout);
 
@@ -257,8 +266,11 @@ int comm_receive_with_timeout(int timeout)
 
 int comm_send_string(char * string)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
   int ret;
+  char * p;
   int i;
 
   if (!WonX_IsCreated()) WonX_Create();
@@ -266,13 +278,19 @@ int comm_send_string(char * string)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : comm_send_string() : string = %s\n", string);
+  printf("call : comm_send_string() : string = \"");
+  for (p = string; *p != '\0'; p++) wonx_print_character(stdout, *p);
+  printf("\"\n");
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_send_string", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_send_string", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_send_string", "UNIX serial port is not opened.");
 
   printf("output to serial port : ");
   for (i = 0; string[i]; i++) {
@@ -295,7 +313,9 @@ int comm_send_string(char * string)
 
 int comm_send_block(void * buffer, int size)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
   int ret;
   int i;
 
@@ -307,10 +327,14 @@ int comm_send_block(void * buffer, int size)
   printf("call : comm_send_block() : buffer = %p, size = %d\n", buffer, size);
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_send_block", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_send_block", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_send_block", "UNIX serial port is not opened.");
 
   printf("output to serial port : ");
   for (i = 0; i < size; i++) {
@@ -333,7 +357,9 @@ int comm_send_block(void * buffer, int size)
 
 int comm_receive_block(void * buffer, int size)
 {
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
   int ret;
   int c;
   int i;
@@ -347,10 +373,14 @@ int comm_receive_block(void * buffer, int size)
 	 buffer, size);
   fflush(stdout);
 
-  ww_serial_port = WonXSerialPort_GetWWSerialPort(WonX_GetWonXSerialPort());
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
-  if (!WWSerialPort_IsON(ww_serial_port))
-    WonX_Error("comm_receive_block", "Serial port is not opened.");
+  if (!WWSerialPort_IsOpened(ww_serial_port))
+    WonX_Error("comm_receive_block", "WW serial port is not opened.");
+  if (!UNIXSerialPort_IsOpened(unix_serial_port))
+    WonX_Error("comm_receive_block", "UNIX serial port is not opened.");
 
   ret = 0;
   for (i = 0; i < size; i++) {

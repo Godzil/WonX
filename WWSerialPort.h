@@ -5,14 +5,6 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "wonx_include/comm.h"
-
-#define WW_SERIAL_PORT_BAUDRATE_9600  0
-#define WW_SERIAL_PORT_BAUDRATE_38400 1
-
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
@@ -20,13 +12,29 @@
 typedef struct _WWSerialPort * WWSerialPort;
 
 /*****************************************************************************/
+/* ヘッダファイルのインクルード                                              */
+/*****************************************************************************/
+
+#include <stdio.h>
+#include <stdlib.h>
+
+#include "wonx_include/comm.h"
+
+/*****************************************************************************/
+/* 定数の定義                                                                */
+/*****************************************************************************/
+
+#define WW_SERIAL_PORT_BAUDRATE_9600  0
+#define WW_SERIAL_PORT_BAUDRATE_38400 1
+
+/*****************************************************************************/
 /* メンバ関数の宣言                                                          */
 /*****************************************************************************/
 
-int WWSerialPort_ON(   WWSerialPort s);
-int WWSerialPort_OFF(  WWSerialPort s);
-int WWSerialPort_IsON( WWSerialPort s);
-int WWSerialPort_IsOFF(WWSerialPort s);
+int WWSerialPort_Open(    WWSerialPort s);
+int WWSerialPort_Close(   WWSerialPort s);
+int WWSerialPort_IsOpened(WWSerialPort s);
+int WWSerialPort_IsClosed(WWSerialPort s);
 
 int WWSerialPort_GetBaudrate(WWSerialPort s);
 int WWSerialPort_SetBaudrate(WWSerialPort s, int baudrate);

@@ -3,16 +3,16 @@
 /*****************************************************************************/
 
 #include "WWSerialPortP.h"
-#include "etc.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
-int WWSerialPort_ON(   WWSerialPort s) { return (s->port_on =  1); }
-int WWSerialPort_OFF(  WWSerialPort s) { return (s->port_on =  0); }
-int WWSerialPort_IsON( WWSerialPort s) { return (s->port_on != 0); }
-int WWSerialPort_IsOFF(WWSerialPort s) { return (s->port_on == 0); }
+int WWSerialPort_Open(    WWSerialPort s) { return (s->opened =  1); }
+int WWSerialPort_Close(   WWSerialPort s) { return (s->opened =  0); }
+int WWSerialPort_IsOpened(WWSerialPort s) { return (s->opened != 0); }
+int WWSerialPort_IsClosed(WWSerialPort s) { return (s->opened == 0); }
 
 int WWSerialPort_GetBaudrate(WWSerialPort s) { return (s->baudrate); }
 int WWSerialPort_SetBaudrate(WWSerialPort s, int baudrate)
@@ -53,7 +53,7 @@ WWSerialPort WWSerialPort_Create()
   if (ww_serial_port == NULL)
     WonX_Error("WWSerialPort_Create", "Cannot allocate memory.");
 
-  WWSerialPort_OFF(ww_serial_port);
+  WWSerialPort_Close(ww_serial_port);
   WWSerialPort_SetBaudrate38400(ww_serial_port);
   WWSerialPort_SetSendTimeout(ww_serial_port, 100);
   WWSerialPort_SetReceiveTimeout(ww_serial_port, 100);

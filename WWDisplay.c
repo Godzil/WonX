@@ -2,8 +2,11 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include "wonx_include/disp.h"
+#include "wonx_include/text.h"
+
 #include "WWDisplayP.h"
-#include "etc.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -20,6 +23,8 @@ WWCharacter WWDisplay_GetCharacter(WWDisplay d, int n)
 WWSprite WWDisplay_GetSprite(WWDisplay d, int n) { return (d->sprite[n]); }
 WWScreen WWDisplay_GetScreen(WWDisplay d, int n) { return (d->screen[n]); }
 WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d) { return (d->lcd_panel); }
+WWText WWDisplay_GetText(WWDisplay d) { return (d->text); }
+WWCursor WWDisplay_GetCursor(WWDisplay d) { return (d->cursor); }
 
 int WWDisplay_GetSpriteEnable(WWDisplay d) { return (d->sprite_enable); }
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d)
@@ -58,6 +63,10 @@ WWScreen WWDisplay_SetScreen(WWDisplay d, int n, WWScreen s)
 { return (d->screen[n] = s); }
 WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p)
 { return (d->lcd_panel = p); }
+WWText WWDisplay_SetText(WWDisplay d, WWText p)
+{ return (d->text = p); }
+WWCursor WWDisplay_SetCursor(WWDisplay d, WWCursor p)
+{ return (d->cursor = p); }
 
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f)
 { return (d->sprite_enable = f); }
@@ -94,16 +103,29 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
 {
   WWDisplay display;
   int i;
+  static int default_lcd_colors[] = {
+    0x00, 0x02, 0x04, 0x06, 0x08, 0x0a, 0x0c, 0x0f
+  };
+  static struct palette_colors {
+    int colors[4];
+  } default_palette_colors[] = {
+    {{0, 3, 5, 7}}, {{2, 3, 5, 7}}, {{0, 0, 0, 7}}, {{2, 0, 0, 7}},
+    {{0, 0, 3, 7}}, {{0, 7, 7, 7}}, {{0, 7, 7, 7}}, {{0, 0, 2, 7}},
+    {{2, 5, 7, 7}}, {{7, 7, 7, 7}}, {{7, 6, 5, 7}}, {{3, 7, 5, 7}},
+    {{0, 0, 4, 7}}, {{0, 0, 0, 7}}, {{0, 7, 7, 5}}, {{0, 7, 3, 7}}
+  };
 
   display = (WWDisplay)malloc(sizeof(_WWDisplay));
   if (display == NULL)
     WonX_Error("WWDisplay_Create", "Cannot allocate memory.");
 
-  WWDisplay_SetColorMap(display, WWColorMap_Create(NULL));
+  WWDisplay_SetColorMap(display, WWColorMap_Create(default_lcd_colors));
 
   for (i = 0; i < 16; i++) {
     WWDisplay_SetPalette(display, i,
-			 WWPalette_Create(i, NULL, ((i / 4) % 2) ? 1 : 0));
+			 WWPalette_Create(i,
+					  default_palette_colors[i].colors,
+					  ((i / 4) % 2) ? 1 : 0));
   }
 
   for (i = 0; i < 512; i++) {
@@ -128,6 +150,23 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
 
   WWDisplay_SetLCDPanel(display, WWLCDPanel_Create(lcd_panel_width,
 						   lcd_panel_height));
+
+
+
+  /* デフォルトのテキスト表示用パレットは0 */
+  WWDisplay_SetText(display,
+		    WWText_Create(WWDisplay_GetScreen(display, SCREEN2),
+				  0, 0,
+				  TEXT_SCREEN_WIDTH, TEXT_SCREEN_HEIGHT,
+				  WWDisplay_GetPalette(display, 0)));
+
+  /*
+   * WWDisplay_GetPalette() を呼び出すので，パレットを設定してから
+   * カーソルの設定を行うこと．
+   * デフォルトのカーソルパレットは１
+   */
+  WWDisplay_SetCursor(display,
+		      WWCursor_Create(WWDisplay_GetPalette(display, 1)));
 
   WWDisplay_SetSpriteEnable(display, 0);
   WWDisplay_SetSpriteWindowEnable(display, 0);
@@ -188,6 +227,14 @@ WWDisplay WWDisplay_Destroy(WWDisplay display)
     WWDisplay_SetLCDPanel(display,
 			  WWLCDPanel_Destroy(WWDisplay_GetLCDPanel(display)));
 
+  if (WWDisplay_GetText(display) != NULL)
+    WWDisplay_SetText(display,
+		      WWText_Destroy(WWDisplay_GetText(display)));
+
+  if (WWDisplay_GetCursor(display) != NULL)
+    WWDisplay_SetCursor(display,
+			WWCursor_Destroy(WWDisplay_GetCursor(display)));
+
   free(display);
 
   return (NULL);
@@ -197,7 +244,8 @@ WWDisplay WWDisplay_Destroy(WWDisplay display)
 /* LCDパネルの描画                                                           */
 /*===========================================================================*/
 
-static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
+static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen,
+				WWCursor cursor)
 {
   WWLCDPanel lcd_panel;
   int lcd_panel_width;
@@ -267,7 +315,8 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
       px = x + WWScreen_GetRollX(screen);
 
-      pixel = WWScreen_GetPixel(screen, px, py);
+      /* 透明色の場合には，-1が返ってくる */
+      pixel = WWScreen_GetPixel(screen, px, py, cursor);
 
       /* 透明色の場合 */
       if (pixel == -1) continue;
@@ -300,7 +349,7 @@ static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
 
   for (y = 0; y < 8; y++) {
     for (x = 0; x < 8; x++) {
-      pixel = WWSprite_GetPixel(sprite, x, y);
+      pixel = WWSprite_GetPixel(sprite, x, y); /* 透明色は-1が返ってくる */
 
       /* 透明色の場合 */
       if (pixel == -1) continue;
@@ -337,7 +386,9 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   int lcd_panel_height;
   WWColorMap color_map;
   int border;
+  WWScreen screen;
   WWSprite sprite;
+  WWCursor cursor;
 
   lcd_panel = WWDisplay_GetLCDPanel(display);
   lcd_panel_width  = WWLCDPanel_GetWidth( lcd_panel);
@@ -354,7 +405,12 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   /* スクリーン１描画 */
-  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 0));
+  screen = WWDisplay_GetScreen(display, 0);
+  if (WWText_GetScreen(WWDisplay_GetText(display)) == screen)
+    cursor = WWDisplay_GetCursor(display);
+  else
+    cursor = NULL;
+  WWDisplay_DrawScreen(display, screen, cursor);
 
   /* スプライト描画(スクリーン２より優先でないもの) */
   /* 重なった場合は，番号の若いものが手前に表示される */
@@ -369,7 +425,12 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   /* スクリーン２描画 */
-  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 1));
+  screen = WWDisplay_GetScreen(display, 1);
+  if (WWText_GetScreen(WWDisplay_GetText(display)) == screen)
+    cursor = WWDisplay_GetCursor(display);
+  else
+    cursor = NULL;
+  WWDisplay_DrawScreen(display, screen, cursor);
 
   /* スプライト描画(スクリーン２より優先なもの) */
   /* 重なった場合は，番号の若いものが手前に表示される */

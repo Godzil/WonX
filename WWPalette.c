@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWPaletteP.h"
+#include "WonX.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -91,7 +92,7 @@ int WWPalette_PrintData(WWPalette p, FILE * f)
 
   fprintf(f, "palette[%d] :\tnumber = %d\n", n, WWPalette_GetNumber(p));
   fprintf(f, "palette[%d] :\ttransparent = %s\n",
-	  n, true_false(WWPalette_GetTransparent(p)));
+	  n, wonx_true_false(WWPalette_GetTransparent(p)));
 
   for (i = 0; i < 4; i++) {
     fprintf(f, "palette[%d] :\tcolor[%d] = %d\n",

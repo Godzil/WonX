@@ -13,7 +13,6 @@
 
 typedef struct _WonX {
   WonXDisplay wonx_display;
-  WonXText wonx_text;
   WonXSystem wonx_system;
   WonXSerialPort wonx_serial_port;
 } _WonX;

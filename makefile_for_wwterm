@@ -1,0 +1,36 @@
+VERSION = WWTerm-b05
+PKGNAME = wwterm-b05
+
+#OBJS = terminal.obj termlib.obj lib.obj keyboard.obj keymap.obj com.obj screen.obj escape.obj esclib.obj
+#OBJS_FULL = D:\\terminal.obj D:\\termlib.obj D:\\lib.obj D:\\keyboard.obj D:\\keymap.obj D:\\com.obj D:\\screen.obj D:\\escape.obj D:\\esclib.obj
+OBJS = terminal.o termlib.o lib.o keyboard.o keymap.o com.o screen.o escape.o esclib.o
+
+#.SUFFIXES: .c .obj
+.SUFFIXES: .c .o
+
+#terminal.fx :	terminal.bin
+#	doscmd mkfent16 D:\\terminal.cf
+
+#terminal.bin :	$(OBJS)
+#	echo $(OBJS_FULL) > objs
+#	doscmd lcc86 -O -o D:\\terminal.bin @D:\\objs
+
+terminal :	$(OBJS)
+	$(CC) -O -o terminal $(OBJS) -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
+
+#.c.obj :        $*.c
+#	doscmd lcc86 -c D:\\$*.c -O -I.
+
+.c.o :        $*.c
+	$(CC) -c $*.c -O -I.
+
+clean :
+#	rm -f terminal.fx terminal.bin *.obj $(PKGNAME).zip
+	rm -f terminal *.o $(PKGNAME).zip
+
+package :	terminal.bin terminal.fx
+	mkdir -p $(PKGNAME)
+	rm -fR $(PKGNAME)/*
+	cp COPYING COPYRIGHT OMAKE.jpn makefile \
+		*.h *.c *.bin *.cf *.fx $(PKGNAME)
+	zip -r $(PKGNAME) $(PKGNAME)

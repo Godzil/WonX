@@ -53,6 +53,4 @@ int sys_swap(int core);
 void sys_set_resume(unsigned int flags);
 unsigned int sys_get_resume(void);
 
-void bios_exit();
-
 #endif

@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWSpriteP.h"
+#include "WonX.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -37,6 +38,7 @@ int WWSprite_SetPosition(WWSprite sprite, int x, int y)
   return (0);
 }
 
+/* スプライトのピクセル値を返す．(透明色は-1を返す) */
 int WWSprite_GetPixel(WWSprite sprite, int x, int y)
 {
   WWPalette p;
@@ -50,7 +52,7 @@ int WWSprite_GetPixel(WWSprite sprite, int x, int y)
   if (WWSprite_GetVertical(  sprite)) y = 7 - y;
 
   pixel = WWCharacter_GetPixel(c, x, y);
-  pixel = WWPalette_GetMappedColor(p, pixel);
+  pixel = WWPalette_GetMappedColor(p, pixel); /* 透明色は -1 を返す */
 
   return (pixel);
 }
@@ -96,13 +98,13 @@ int WWSprite_PrintData(WWSprite s, FILE * f)
 
   fprintf(f, "sprite[%d] :\tnumber     = %d\n", n, WWSprite_GetNumber(s));
   fprintf(f, "sprite[%d] :\thorizontal = %s\n",
-	  n, true_false(WWSprite_GetHorizontal(s)));
+	  n, wonx_true_false(WWSprite_GetHorizontal(s)));
   fprintf(f, "sprite[%d] :\tvertical   = %s\n",
-	  n, true_false(WWSprite_GetVertical(  s)));
+	  n, wonx_true_false(WWSprite_GetVertical(  s)));
   fprintf(f, "sprite[%d] :\tpriority   = %s\n",
-	  n, true_false(WWSprite_GetPriority(   s)));
+	  n, wonx_true_false(WWSprite_GetPriority(   s)));
   fprintf(f, "sprite[%d] :\tclipping   = %s\n",
-	  n, true_false(WWSprite_GetClipping(  s)));
+	  n, wonx_true_false(WWSprite_GetClipping(  s)));
   fprintf(f, "sprite[%d] :\tpalette number   = %d\n",
 	  n, WWPalette_GetNumber(WWSprite_GetPalette(s)));
   fprintf(f, "sprite[%d] :\tcharacter number = %d\n",

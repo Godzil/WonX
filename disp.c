@@ -1082,6 +1082,7 @@ unsigned int palette_get_color(unsigned int palette_num)
   int mapped_colors[4];
   WWPalette palette;
   unsigned short int ret;
+  int i;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -1094,17 +1095,22 @@ unsigned int palette_get_color(unsigned int palette_num)
   palette =
     WWDisplay_GetPalette(WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay()),
 			 palette_num);
+  /* 透明色は -1 で返されるので注意すること */
   WWPalette_GetMappedColors(palette, mapped_colors);
 
+  /* 透明色は -1 で表されるので，0にする */
+  for (i = 0; i < 4; i++)
+    if (mapped_colors[i] == -1) mapped_colors[i] = 0;
+
   ret = 0;
-  ret |= mapped_colors[0] & 0x07;
+  ret |=  mapped_colors[0] & 0x07;
   ret |= (mapped_colors[1] & 0x07) <<  4;
   ret |= (mapped_colors[2] & 0x07) <<  8;
   ret |= (mapped_colors[3] & 0x07) << 12;
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 
-  printf("call : palette_get_color() : return value = %u\n", (int)ret);
+  printf("call : palette_get_color() : return value = 0x%04x\n", (int)ret);
   fflush(stdout);
 
   /* タイマをもとに戻す */
@@ -1172,10 +1178,10 @@ unsigned long int lcd_get_color(void)
   ret |= ((unsigned long int)lcd_colors[1] & 0x0f) <<  4;
   ret |= ((unsigned long int)lcd_colors[2] & 0x0f) <<  8;
   ret |= ((unsigned long int)lcd_colors[3] & 0x0f) << 12;
-  ret |=  (unsigned long int)lcd_colors[0] & 0x0f;
-  ret |= ((unsigned long int)lcd_colors[1] & 0x0f) <<  4;
-  ret |= ((unsigned long int)lcd_colors[2] & 0x0f) <<  8;
-  ret |= ((unsigned long int)lcd_colors[3] & 0x0f) << 12;
+  ret |= ((unsigned long int)lcd_colors[4] & 0x0f) << 16;
+  ret |= ((unsigned long int)lcd_colors[5] & 0x0f) << 20;
+  ret |= ((unsigned long int)lcd_colors[6] & 0x0f) << 24;
+  ret |= ((unsigned long int)lcd_colors[7] & 0x0f) << 28;
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 

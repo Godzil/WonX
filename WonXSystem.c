@@ -5,7 +5,7 @@
 #include "wonx_configure.h"
 
 #include "WonXSystemP.h"
-#include "etc.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -47,8 +47,23 @@ static int WonXTimer_Callback(WonXSystem wonx_system)
 {
   WWTimer ww_timer;
   WWInterrupt ww_interrupt;
+  WonXDisplay wonx_display;
+  XDisplay x_display;
+  WonXSerialPort wonx_serial_port;
+  WWSerialPort ww_serial_port;
+  UNIXSerialPort unix_serial_port;
+
+  unsigned int old_key;
+  unsigned int new_key;
 
   ww_interrupt = WonXSystem_GetWWInterrupt(wonx_system);
+
+  wonx_display = WonX_GetWonXDisplay();
+  x_display = WonXDisplay_GetXDisplay(wonx_display);
+
+  wonx_serial_port = WonX_GetWonXSerialPort();
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
+  unix_serial_port = WonXSerialPort_GetUNIXSerialPort(wonx_serial_port);
 
   ww_timer = WonXSystem_GetWWVBlankTimer(wonx_system);
   if (WWTimer_IsON(ww_timer)) {
@@ -66,6 +81,39 @@ static int WonXTimer_Callback(WonXSystem wonx_system)
   if (WWTimer_IsON(ww_timer)) {
     if (WWTimer_Count(ww_timer))
       WWInterrupt_ExecuteHBlankCountUpCallback(ww_interrupt);
+  }
+
+  /* キー入力割り込み */
+  /*
+   * XDisplay_Sync() が他のところから呼ばれた場合に割り込みをとり
+   * こぼしてしまうので，XDisplay クラスのほうで割り込みの処理をするか，
+   * フラグを立てるように改良する必要が有るかも．
+   * (別の場所で頻繁に XDisplay_Sync() が呼ばれていると，キー割り込みが
+   *  発生しなくなってしまう)
+   * とりあえずは簡易的にこのような実装にしておいて問題無いだろう．
+   */
+  old_key = XDisplay_GetKeyPress(x_display);
+  XDisplay_Sync(x_display);
+  new_key = XDisplay_GetKeyPress(x_display);
+  /* 新しいキーが押された場合 */
+  /*
+   * WonderWitch で実験したところ，キーを離した場合には割り込みは
+   * かからないようだったので，押されたときのみコールバック関数を呼び出す．
+   */
+  if (new_key & (~old_key)) {
+    WWInterrupt_ExecuteKeyCallback(ww_interrupt);
+  }
+
+  /* シリアル受信割り込み */
+  /*
+   * 上と同じ理由で割り込みをとりこぼす可能性が有るので，UNIXSerialPort の
+   * ほうで割り込みの処理をするか，フラグを立てるように改良する必要が有るかも．
+   * とりあえずは簡易的にこのような実装にしておいて問題無いだろう．
+   */
+  if (WWSerialPort_IsOpened(ww_serial_port) &&
+      UNIXSerialPort_IsOpened(unix_serial_port)) {
+    if (UNIXSerialPort_IsDataExisting(unix_serial_port, 0))
+      WWInterrupt_ExecuteReceiveReadyCallback(ww_interrupt);
   }
 
   return (0);

@@ -13,7 +13,7 @@
 
 typedef struct _WWSerialPort {
 
-  int port_on; /* ポートの状態 */
+  int opened;   /* ポートの状態(open/close) */
   int baudrate; /* ボーレート */
 
   /*
