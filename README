@@ -1,0 +1,225 @@
+Wonx - WonderWitch on X.
+
+■ αバージョン配布に当たって
+
+Wonx はまだ不完全なαバージョンです．実装されていない機能や，
+不完全な機能，おかしな動作をする部分などがいっぱいあります．
+バグ情報やアドバイスがあれば，作者の坂井弘亮まで，どんどんメールください．
+アドレスは，
+sakai@seki.ee.kagu.sut.ac.jp
+hsakai@pfu.co.jp
+です．
+また，リリース版ができるまでは，アップデートは頻繁に行っていきます．
+http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
+で，随時公開していきます．
+
+現在は坂井が一人で製作していますが，ひとりでは細かい点の整合性
+(初期化しなかった場合の動作の違いなど．WonderWitch と Wonx では
+ 微妙に異なっていると思う)を追いきれないのが現状です．
+とくにマニュアルに書いてない部分に関しては，WonderWitch ではどのように
+動作するのか，ひとりではチェックしきれません．
+情報をお待ち(ていうか期待)しています(そのためのα版配布です)．
+いっしょに少しずつ，完全なものに仕上げていきましょう．
+
+広く情報を募るために，早い段階でα版として公開します．ご意見，ご要望なども
+歓迎します．どしどしお寄せください．
+(ただし，返事を書くとは限らないし，要望を反映するとも限りませんので
+ その点はご容赦ください)
+
+■ はじめに
+
+Wonx は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
+ための，ライブラリです．以下の特徴があります．
+
+・C言語レベルで互換機能を持っているので，WonderWitch 用のプログラムを
+  UNIX上でそのままコンパイルできる．(-lwonx でコンパイルする)
+・UNIX上でデバッガを使用してデバッグできるようになる．(強力!)
+・キャラクタデータやパレットデータのダンプ機能をつける予定．
+・不正な引数の値や，パレットやキャラクタを初期化しないで使用するなどを
+  厳しくチェックし，エラーを出力する(ようにする)．厳しくエラーチェックする．
+・使用できない機能(関数は用意してあるが，まだ実装してなかったり，
+  実装が困難だったりして，中身が空のもの)はたくさんある．
+  徐々に追加していくつもり．
+・ゲームの画面写真が簡単に撮れる．(デジカメで撮ったり，画像取り込み用の
+  プログラムを使ったりする必要が無くなる) これはわりとべんり．
+・エミュレータでなくライブラリであり，ソースコード公開しているので，
+  自由にカスタマイズが可能．
+・描画速度は遅いが，デバッグ目的のためなので，速度を速くすることは
+  あまり考えていない．(それよりも上記のデバッグ性を優先する)
+・WonderWitch 用のプログラムを，X上で楽しむためのものではない．
+  あくまでデバッグ目的のもの．(そういうポリシーで開発を進める)
+
+■ 足りないもの
+
+以下のものにはまだ対応してません．したがって，例えばサウンド関連の
+関数を呼び出しても，何も起こりません．(空の関数になっている)
+
+・文字表示関連 (ターミナルにそのまま出力する)
+  とくに，文字だけでタイトル画面を書いてるゲームの場合などは，
+  なにも表示されないことになってしまうので注意してください．
+  (正常に動作していても，画面が真っ白で固まっているように見えてしまう)
+・画面周りの細かいところ(ウインドウ機能など)
+・サウンド
+・シリアルポート
+・割り込み処理関連
+  割り込みを使用している場合は注意してください．そのままではまともに
+  動かないでしょう．
+  そのうちシグナル使ってなんとかサポートしたいと思います．
+
+■ Wonx概要
+
+Wonx は，WonderWitch の display_control() とか display_status() といった
+関数(システムコール)と互換の関数を持っています．
+これらの関数は，X上にウインドウを開いて，そこで WonderWitch と互換の動作を
+するように書いてあります．
+
+Wonx を make すると，libwonx.a というライブラリができます．
+で，WonderWitch 用のプログラムを，UNIX 上で -lwonx してコンパイルしてやれば，
+WonderWitch の display_control() とかのかわりに，Wonx の display_control() が
+リンクされ，X 上で動作するようになる，という仕組みです．
+
+■ インストール
+
+インストールするには，以下のことを行う必要があります．
+
+・Wonx のコンパイルには，WonderWitch 付属のヘッダファイル(sys/disp.h とか)が
+  必要なので，それらをコピーします．
+・Wonx をコンパイルします．→ libwonx.a ができあがります．
+・ヘッダファイル(sys/disp.h とか)と libwonx.a を，適切なディレクトリに
+  置きます．
+  (アプリケーションのコンパイルには，WonderWitch 付属のヘッダファイルが必要)
+
+インストールは，以下の手順で行います．
+
+1. Wonx を展開する．
+
+~>% tar xvzf wonx.tar.gz
+~>% cd wonx
+~/wonx>% 
+
+2. WonderWitch 付属のヘッダファイルをコピーする．
+
+~/wonx>% mkdir sys
+~/wonx>% cp ~/WWitch/include/bank.h sys
+~/wonx>% cp ~/WWitch/include/comm.h sys
+~/wonx>% cp ~/WWitch/include/disp.h sys
+~/wonx>% cp ~/WWitch/include/key.h sys
+~/wonx>% cp ~/WWitch/include/sound.h sys
+~/wonx>% cp ~/WWitch/include/system.h sys
+~/wonx>% cp ~/WWitch/include/text.h sys
+~/wonx>% cp ~/WWitch/include/timer.h sys
+~/wonx>% cp ~/WWitch/include/types.h sys
+
+3. 以下の内容のファイル(sys/service.h)を作成する．
+
+~/wonx>% emacs sys/service.h
+
+==== ここから ====
+#ifndef _service_h_INCLUDED_
+#define _service_h_INCLUDED_
+
+#define far  /* None */
+#define near /* None */
+
+#endif
+==== ここまで ====
+
+sys/service.h は，disp.h などの中から，
+#include <sys/service.h>
+のようにしてインクルードされますが，コンパイル時には -I. でコンパイル
+されるので，ばあいによっては，sys/sys/service.h にする必要があるかも
+しれません．(未確認)
+
+4. Wonx を make する．
+
+~/wonx>% make
+gcc -c WWCharacter.c -O -I. -I/usr/X11R6/include
+gcc -c WWColorMap.c -O -I. -I/usr/X11R6/include
+...(中略)...
+gcc -c wonx.c -O -I. -I/usr/X11R6/include
+ar ruc libwonx.a WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WonxDisplay.o XDisplay.o disp.o text.o key.o system.o timer.o etc.o wonx.o
+~/wonx>% ls lib*
+libwonx.a
+~/wonx>% 
+
+ここまでで，ライブラリとヘッダファイルの作成は終りです．
+
+■ WonderWitch 用アプリケーションのコンパイル
+
+拙作の SpeedMac をコンパイルしてみます．
+
+1. 展開する．
+
+~/wonx>% cd
+~>% unzip xvzf smac-b02.zip
+...(中略)...
+~>% cd smac-b02
+~/smac-b02>% 
+
+2. ヘッダファイルと libwonx.a をコピーする．
+
+~/smac-b02>% mkdir sys
+~/smac-b02>% cp ~/wonx/sys/* ./sys
+~/smac-b02>% cp ~/wonx/libwonx.a .
+~/smac-b02>% 
+
+3. Makefile を修正する．
+
+~/smac-b02>% emacs Makefile
+
+以下のように修正します．
+
+・gcc でコンパイルをするように修正する．このときに，コンパイルオプションに，
+  -I. -I/usr/X11R6/include -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
+  を追加する．
+  (必要なら，-g も追加する)
+・mkfent によるファイルのコンバートなどがあったら，削除する．
+
+4. make する．
+
+~/smac-b02>% make
+gcc -c chara.c -g -I.
+gcc -c game.c -g -I.
+...(中略)...
+gcc -c main.c -g -I.
+gcc -g -o smac chara.o game.o man.o mansub.o mansub2.o map.o mapsub.o menu.o monster.o picture.o player.o smac.o stage.o dsp.o etc.o main.o -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
+~/smac-b02>% ls smac
+smac
+~/smac-b02>% 
+
+5. smac を起動する．
+
+~/smac-b02>% ./smac
+
+■ 操作
+
+smac を起動すると，ウインドウが開きます．また，ターミナルには，
+以下のデバッグ用の情報が表示されます．
+
+・WonderWitch の互換関数が呼ばれると，引数と戻り値を表示します．
+
+またここでは，以下の操作が行えます．
+
+・カーソルキーが，WonderSwan のX1〜X4ボタンに対応している．
+・i,j,k,l キーが，WonderSwan のY1〜Y4ボタンに対応している．
+・スペースバーと左シフトキーが，A,Bボタンに対応している．
+・sキーが，STARTボタンに対応している．
+・p を押すと，表示/非表示モードを切替える．
+  (非表示だと画面への描画を行わないが高速)
+
+標準ではなにか関数が呼ばれるたびに画面の再描画を行うため，非常に低速です．
+このような場合は，非表示モードにしてください．
+
+■ 作者
+
+Wonx は，坂井弘亮が通勤電車の中で Libretto で書いた作品です．
+GPLで配布します．
+
+坂井弘亮の連絡先のメールアドレスは，
+sakai@seki.ee.kagu.sut.ac.jp
+hsakai@pfu.co.jp
+です．また，本ソフトウエアの最新版を，
+http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
+で配布しています．
+
+■ このファイルはここまで
