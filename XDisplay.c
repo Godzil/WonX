@@ -15,6 +15,12 @@
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
+Display * XDisplay_GetDisplay(XDisplay d) { return (d->display); }
+Colormap XDisplay_GetColormap(XDisplay d) { return (d->colormap); }
+
+XColorGCDatabase XDisplay_GetColorGCDatabase(XDisplay x_display)
+{ return (x_display->color_gc_database); }
+
 unsigned int XDisplay_GetKeyPress(XDisplay d) { return (d->key_press); }
 int XDisplay_GetLCDDraw(XDisplay d) { return (d->lcd_draw); }
 
@@ -280,6 +286,16 @@ XDisplay XDisplay_Create(int width, int height)
     XSetFunction(x_display->display, x_display->color_gc[i], GXcopy);
   }
 
+  /* GCのデータベース初期化 */
+  x_display->color_gc_database =
+    XColorGCDatabase_Create(x_display,
+			    0,       /* studying_flag */
+			    1,       /* cache_flag */
+			    3,       /* cache_size */
+			    256,     /* hash_number */
+			    "black", /* background_color */
+			    16       /* gradation */);
+
   /* フォントの確保 */
   x_display->font = XLoadFont(x_display->display, "8x16");
   x_display->font_gc = XCreateGC(x_display->display,
@@ -382,89 +398,181 @@ int XDisplay_Sync(XDisplay x_display)
 /* 描画                                                                      */
 /*---------------------------------------------------------------------------*/
 
-int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
+int XDisplay_DrawLCDWindow(XDisplay x_display, WWDisplay ww_display,
+			   WWLCDPanel ww_lcd_panel)
 {
   int x, y;
   int px, py, ph;
   int num;
   int n[16];
+  XRectangle rectangle;
   XRectangle * rectangles[16];
   int pixel;
   int ww_lcd_width, ww_lcd_height;
-
-  /* 隣接しているピクセルはまとめて描画するので，ピクセル数の最大値は */
-  /* 最悪の場合(縞々模様のとき)で，width * height / 2 になる．        */
-  num =
-    WWLCDPanel_GetHeight(ww_lcd_panel) * WWLCDPanel_GetWidth(ww_lcd_panel) / 2;
-
-  /*
-   * この malloc() は，実際にはメモリはほとんど使用されていないので，
-   * そのうちなんとかする必要がある
-   */
-  for (pixel = 0; pixel < 16; pixel++) {
-    n[pixel] = 0;
-    rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
-  }
-  if (rectangles == NULL)
-    WonX_Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
+  int red, green, blue;
+  XColorGCDatabase database;
+  XColorGC x_color_gc;
+  GC gc;
 
   ww_lcd_width  = WWLCDPanel_GetWidth( ww_lcd_panel);
   ww_lcd_height = WWLCDPanel_GetHeight(ww_lcd_panel);
 
-  /* ここの処理はホットスポットになるので，のちのちにチューニングすること */
+  switch (WWDisplay_GetColorMode(ww_display)) {
 
-  for (y = 0; y < ww_lcd_height; y++) {
-    py = (y * x_display->height) / ww_lcd_height;
-    ph = (y+1) * x_display->height / ww_lcd_height- py;
-    for (x = 0; x < ww_lcd_width; x++) {
-      if (!WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) {
-	continue;
-      }
-      pixel = WWLCDPanel_GetPixel(ww_lcd_panel, x, y);
-      px = (x * x_display->width ) / ww_lcd_width;
-      rectangles[pixel][n[pixel]].x = px;
-      rectangles[pixel][n[pixel]].y = py;
-      rectangles[pixel][n[pixel]].width  =
-	(x+1) * x_display->width  / ww_lcd_width - px;
-      rectangles[pixel][n[pixel]].height = ph;
+  case COLOR_MODE_GRAYSCALE:
 
-      /* 隣接してる同色のピクセルは，極力いっしょに描画する */
-      x++;
-      while ( (x < ww_lcd_width) &&
-	      (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) &&
-	      (WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) ) {
-	rectangles[pixel][n[pixel]].width =
-	  (x+1) * x_display->width / ww_lcd_width - px;
+    /* 隣接しているピクセルはまとめて描画するので，ピクセル数の最大値は */
+    /* 最悪の場合(縞々模様のとき)で，width * height / 2 になる．        */
+    num =
+      WWLCDPanel_GetHeight(ww_lcd_panel) *
+      WWLCDPanel_GetWidth(ww_lcd_panel) / 2;
+
+    /*
+     * この malloc() は，実際にはメモリはほとんど使用されていないので，
+     * そのうちなんとかする必要がある
+     */
+    for (pixel = 0; pixel < 16; pixel++) {
+      n[pixel] = 0;
+      rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
+    }
+    if (rectangles == NULL)
+      WonX_Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
+
+    /* ここの処理はホットスポットになるので，のちのちにチューニングすること */
+
+    for (y = 0; y < ww_lcd_height; y++) {
+      py = (y * x_display->height) / ww_lcd_height;
+      ph = (y+1) * x_display->height / ww_lcd_height- py;
+      for (x = 0; x < ww_lcd_width; x++) {
+	if (!WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) {
+	  continue;
+	}
+	pixel = WWLCDPanel_GetPixel(ww_lcd_panel, x, y);
+	px = (x * x_display->width ) / ww_lcd_width;
+	rectangles[pixel][n[pixel]].x = px;
+	rectangles[pixel][n[pixel]].y = py;
+	rectangles[pixel][n[pixel]].width  =
+	  (x+1) * x_display->width  / ww_lcd_width - px;
+	rectangles[pixel][n[pixel]].height = ph;
+
+	/* 隣接してる同色のピクセルは，極力いっしょに描画する */
 	x++;
+	while ( (x < ww_lcd_width) &&
+		(pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) &&
+		(WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) ) {
+	  rectangles[pixel][n[pixel]].width =
+	    (x+1) * x_display->width / ww_lcd_width - px;
+	  x++;
+	}
+	x--;
+
+	n[pixel]++;
       }
-      x--;
-
-      n[pixel]++;
     }
-  }
 
-  for (pixel = 0; pixel < 16; pixel++) {
-    if (n[pixel] > 0) {
-      XFillRectangles(x_display->display,
-		      x_display->lcd_pixmap,
-		      x_display->color_gc[pixel],
-		      rectangles[pixel], n[pixel]);
+    for (pixel = 0; pixel < 16; pixel++) {
+      if (n[pixel] > 0) {
+	XFillRectangles(x_display->display,
+			x_display->lcd_pixmap,
+			x_display->color_gc[pixel],
+			rectangles[pixel], n[pixel]);
+      }
     }
+
+    for (pixel = 0; pixel < 16; pixel++) {
+      free(rectangles[pixel]);
+    }
+
+    break;
+
+  case COLOR_MODE_4COLOR:
+  case COLOR_MODE_16COLOR:
+  case COLOR_MODE_16PACKED:
+
+    database = XDisplay_GetColorGCDatabase(x_display);
+
+    for (y = 0; y < ww_lcd_height; y++) {
+      py = (y * x_display->height) / ww_lcd_height;
+      ph = (y+1) * x_display->height / ww_lcd_height- py;
+      for (x = 0; x < ww_lcd_width; x++) {
+	if (!WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) {
+	  continue;
+	}
+	pixel = WWLCDPanel_GetPixel(ww_lcd_panel, x, y);
+	px = (x * x_display->width ) / ww_lcd_width;
+	rectangle.x = px;
+	rectangle.y = py;
+	rectangle.width  = (x+1) * x_display->width  / ww_lcd_width - px;
+	rectangle.height = ph;
+
+	/* 隣接してる同色のピクセルは，極力いっしょに描画する */
+	x++;
+	while ( (x < ww_lcd_width) &&
+		(pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) &&
+		(WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) ) {
+	  rectangle.width =
+	    (x+1) * x_display->width / ww_lcd_width - px;
+	  x++;
+	}
+	x--;
+
+	red   = (pixel >> 8) & 0xf;
+	green = (pixel >> 4) & 0xf;
+	blue  = (pixel >> 0) & 0xf;
+
+	red   = (red   == 15) ? 65535 : red   * 4096;
+	green = (green == 15) ? 65535 : green * 4096;
+	blue  = (blue  == 15) ? 65535 : blue  * 4096;
+
+	x_color_gc = XColorGC_CreateFromRGB(database, red, green, blue);
+	gc = XColorGC_GetGC(x_color_gc);
+
+	XFillRectangle(x_display->display,
+		       x_display->lcd_pixmap,
+		       gc,
+		       rectangle.x,
+		       rectangle.y,
+		       rectangle.width,
+		       rectangle.height);
+      }
+    }
+
+    break;
+
+  default:
+    WonX_Error("XDisplay_DrawLCDWindow", "Unknown color mode.");
   }
 
   XCopyArea(x_display->display, x_display->lcd_pixmap,
 	    x_display->lcd_window, x_display->copy_gc,
-            0, 0, x_display->width, x_display->height, 0, 0);
+	    0, 0, x_display->width, x_display->height, 0, 0);
 
   WWLCDPanel_ResetAllDraw(ww_lcd_panel);
   WWLCDPanel_ReverseCurrent(ww_lcd_panel);
 
   XDisplay_Sync(x_display);
 
-  for (pixel = 0; pixel < 16; pixel++) {
-    free(rectangles[pixel]);
-  }
+  return (0);
+}
 
+/*---------------------------------------------------------------------------*/
+/* GC の作成                                                                 */
+/*---------------------------------------------------------------------------*/
+
+GC XDisplay_CreateGC(XDisplay x_display)
+{
+  GC gc;
+  gc = XCreateGC(x_display->display, x_display->root_window, 0, 0);
+  return (gc);
+}
+
+/*---------------------------------------------------------------------------*/
+/* GC の解放                                                                 */
+/*---------------------------------------------------------------------------*/
+
+int XDisplay_DestroyGC(XDisplay x_display, GC gc)
+{
+  XFreeGC(x_display->display, gc);
   return (0);
 }
 

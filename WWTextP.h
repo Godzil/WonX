@@ -21,6 +21,17 @@ typedef struct _WWText {
   int base; /* 使用するキャラクタのベース */
 
   WWPalette palette;
+
+  /*
+   * テキストフォントは
+   * f = WWDisplay_GetForegroundColor(ww_display);
+   * b = WWDisplay_GetBackgroundColor(ww_display);
+   * で描画する必要があるため，描画のたびにビットマップをコピーする必要がある．
+   * で，カラー化の際に，そのように修正した．
+   * よって，テキストの初期化時に WWCharacter の配列を作成する必要は
+   * 無くなったので，WWCharacter の配列はいずれ削除すること．
+   * (WWText_PutCharacter() 参照)
+   */
   WWCharacter font[128]; /* フォント */
 
 } _WWText;

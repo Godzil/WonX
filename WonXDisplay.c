@@ -45,7 +45,7 @@ WonXDisplay WonXDisplay_Create(int x_width, int x_height,
   return (wonx_display);
 }
 
-int WonXDisplay_Sync(WonXDisplay wonx_display)
+int WonXDisplay_PrintData(WonXDisplay wonx_display)
 {
   int i;
   XDisplay x_display;
@@ -56,19 +56,24 @@ int WonXDisplay_Sync(WonXDisplay wonx_display)
 
   if (XDisplay_GetColorMapPrint(x_display)) {
     WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
+    fflush(stdout);
     XDisplay_SetColorMapPrint(x_display, 0);
   }
 
   if (XDisplay_GetPalettePrint(x_display)) {
     for (i = 0; i < 16; i++) {
-      WWPalette_PrintData(WWDisplay_GetPalette(ww_display, i), stdout);
+      WWPalette_PrintData(WWDisplay_GetPalette(ww_display, i),
+			  ww_display, stdout);
+      fflush(stdout);
     }
     XDisplay_SetPalettePrint(x_display, 0);
   }
 
   if (XDisplay_GetCharacterPrint(x_display)) {
     for (i = 0; i < 512; i++) {
-      WWCharacter_PrintData(WWDisplay_GetCharacter(ww_display, i), stdout);
+      WWCharacter_PrintData(WWDisplay_GetCharacter(ww_display, i),
+			    ww_display, stdout);
+      fflush(stdout);
     }
     XDisplay_SetCharacterPrint(x_display, 0);
   }
@@ -76,9 +81,21 @@ int WonXDisplay_Sync(WonXDisplay wonx_display)
   if (XDisplay_GetSpritePrint(x_display)) {
     for (i = 0; i < 128; i++) {
       WWSprite_PrintData(WWDisplay_GetSprite(ww_display, i), stdout);
+      fflush(stdout);
     }
     XDisplay_SetSpritePrint(x_display, 0);
   }
+
+  return (0);
+}
+
+int WonXDisplay_Sync(WonXDisplay wonx_display)
+{
+  XDisplay x_display;
+
+  WonXDisplay_PrintData(wonx_display);
+
+  x_display = WonXDisplay_GetXDisplay(wonx_display);
 
   XDisplay_Sync(x_display);
 
@@ -97,7 +114,7 @@ int WonXDisplay_Flush(WonXDisplay wonx_display)
   if (XDisplay_GetLCDDraw(x_display)) {
     WWDisplay_DrawLCDPanel(ww_display);
     ww_lcd_panel = WWDisplay_GetLCDPanel(ww_display);
-    XDisplay_DrawLCDWindow(x_display, ww_lcd_panel);
+    XDisplay_DrawLCDWindow(x_display, ww_display, ww_lcd_panel);
   }
 
   WonXDisplay_Sync(wonx_display);

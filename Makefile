@@ -2,13 +2,13 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = WonX-1.1
-PKGNAME = wonx-1.1
+VERSION = WonX-2.0
+PKGNAME = wonx-2.0
 
 SMAC = smac-b02
 WWTERM = wwterm-b05
 
-OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWCursor.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o WonX.o WonXDisplay.o WonXSystem.o WonXSerialPort.o XDisplay.o UNIXTimer.o UNIXSerialPort.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o service.o etc.o
+OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWCursor.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o WonX.o WonXDisplay.o WonXSystem.o WonXSerialPort.o XDisplay.o XColorGC.o UNIXTimer.o UNIXSerialPort.o Obj.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o libwwc.o service.o etc.o
 
 CC = gcc
 
@@ -25,6 +25,7 @@ libwonx.a :	$(OBJS)
 
 clean :
 		rm -f libwonx.a sample1 sample2 *.o
+		rm -fR $(SMAC) $(WWTERM)
 
 sample1 :	libwonx.a sample1.o
 		$(CC) sample1.o -o sample1 \

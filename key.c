@@ -39,7 +39,7 @@ int key_press_check(void)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_press_check() : "); fflush(stdout);
+  printf("call : key_press_check() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
   XDisplay_Sync(x_display);
@@ -67,7 +67,7 @@ int key_hit_check(void)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_hit_check() : "); fflush(stdout);
+  printf("call : key_hit_check() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
   XDisplay_Sync(x_display);
@@ -95,7 +95,7 @@ int key_wait(void)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_wait() : "); fflush(stdout);
+  printf("call : key_wait() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
 
@@ -127,7 +127,7 @@ void key_set_repeat(int rate, int delay)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_set_repeat() : rate = %d, delay = %d, ", rate, delay);
+  printf("call : key_set_repeat() : rate = %d, delay = %d\n", rate, delay);
   fflush(stdout);
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
@@ -149,7 +149,7 @@ int key_get_repeat(void)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_get_repeat() : "); fflush(stdout);
+  printf("call : key_get_repeat() : \n"); fflush(stdout);
 
   ret = 0;
 
@@ -174,7 +174,7 @@ int key_hit_check_with_repeat(void)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : key_hit_check_with_repeat() : "); fflush(stdout);
+  printf("call : key_hit_check_with_repeat() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
   XDisplay_Sync(x_display);

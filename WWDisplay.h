@@ -41,6 +41,8 @@ WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d);
 WWText WWDisplay_GetText(WWDisplay d);
 WWCursor WWDisplay_GetCursor(WWDisplay d);
 
+unsigned int WWDisplay_GetColorMode(WWDisplay d);
+
 int WWDisplay_GetSpriteEnable(WWDisplay d);
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d);
 
@@ -49,7 +51,8 @@ int WWDisplay_GetSpriteWindowY(WWDisplay d);
 int WWDisplay_GetSpriteWindowWidth(WWDisplay d);
 int WWDisplay_GetSpriteWindowHeight(WWDisplay d);
 
-int WWDisplay_GetBorder(WWDisplay d);
+WWPalette WWDisplay_GetBorderPalette(WWDisplay d);
+int WWDisplay_GetBorderColor(WWDisplay d);
 
 int WWDisplay_GetForegroundColor(WWDisplay d);
 int WWDisplay_GetBackgroundColor(WWDisplay d);
@@ -70,6 +73,8 @@ WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p);
 WWText WWDisplay_SetText(WWDisplay d, WWText p);
 WWCursor WWDisplay_SetCursor(WWDisplay d, WWCursor p);
 
+unsigned int WWDisplay_SetColorMode(WWDisplay d, unsigned int mode);
+
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f);
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f);
 
@@ -78,7 +83,8 @@ int WWDisplay_SetSpriteWindowY(WWDisplay d, int n);
 int WWDisplay_SetSpriteWindowWidth(WWDisplay d, int n);
 int WWDisplay_SetSpriteWindowHeight(WWDisplay d, int n);
 
-int WWDisplay_SetBorder(WWDisplay d, int b);
+WWPalette WWDisplay_SetBorderPalette(WWDisplay d, WWPalette p);
+int WWDisplay_SetBorderColor(WWDisplay d, int b);
 
 int WWDisplay_SetForegroundColor(WWDisplay d, int c);
 int WWDisplay_SetBackgroundColor(WWDisplay d, int c);
@@ -99,6 +105,12 @@ WWDisplay WWDisplay_Destroy(WWDisplay display);
 /*===========================================================================*/
 
 int WWDisplay_DrawLCDPanel(WWDisplay display);
+
+/*===========================================================================*/
+/* 透明色かどうか調べる                                                      */
+/*===========================================================================*/
+
+int WWDisplay_IsTransparent(WWDisplay display, WWPalette palette, int color);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

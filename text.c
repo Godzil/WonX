@@ -505,7 +505,7 @@ void cursor_set_location(int x, int y, int w, int h)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : cursor_set_location() : x = %d, y = %d, w = %d, h = %d",
+  printf("call : cursor_set_location() : x = %d, y = %d, w = %d, h = %d\n",
 	 x, y, w, h);
   fflush(stdout);
 
@@ -585,7 +585,7 @@ void cursor_set_type(int palette_num, int interval)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-  printf("call : cursor_set_type() : palette = %d, interval = %d",
+  printf("call : cursor_set_type() : palette = %d, interval = %d\n",
 	 palette_num, interval);
   fflush(stdout);
 

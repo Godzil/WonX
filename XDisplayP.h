@@ -9,7 +9,6 @@
 
 #include <signal.h>
 
-#include <X11/Xlib.h>
 #include <X11/Intrinsic.h>
 #include <X11/StringDefs.h>
 #include <X11/Shell.h>
@@ -37,7 +36,10 @@ typedef struct _XDisplay {
   Pixmap lcd_pixmap;
 
   GC copy_gc;
-  GC color_gc[16];
+  GC color_gc[16]; /* 白黒表示用のGC */
+
+  /* 4096色表示用のGCのデータベース(XFireworks から流用) */
+  XColorGCDatabase color_gc_database;
 
   /* テキストスクリーンへの文字表示用のフォント */
   Font font;

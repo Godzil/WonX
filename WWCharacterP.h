@@ -14,9 +14,8 @@
 typedef struct _WWCharacter {
   int number;
 
-  /* ビットマップは2ビットでぴとつのピクセルに対応する． */
-  /* 2ビットの値が，palette の色に対応する．             */
-  unsigned char bitmap[16];
+  /* キャラクタのビットマップ */
+  unsigned char bitmap[32];
 } _WWCharacter;
 
 /*****************************************************************************/

@@ -23,6 +23,8 @@ typedef struct _WWDisplay {
   WWCursor cursor;
 
   /* ディスプレイの属性情報 */
+  unsigned int color_mode; /* カラーモード */
+
   int sprite_enable; /* スプライト表示イネーブルフラグ */
   int sprite_window_enable; /* スプライトウインドウ機能イネーブルフラグ */
   int sprite_window_x;      /* スプライトウインドウ用 */
@@ -30,14 +32,16 @@ typedef struct _WWDisplay {
   int sprite_window_width;  /* スプライトウインドウ用 */
   int sprite_window_height; /* スプライトウインドウ用 */
 
-  int border; /* ボーダーカラー．0〜7のカラーマップ番号 */
+  /* ボーダーカラーのパレット．カラーで必要 */
+  WWPalette border_palette;
+  /* ボーダーカラー．白黒の場合には，0〜7のカラーマップ番号 */
+  int border_color;
 
   int foreground_color; /* モノクロフォント展開時の色 */
   int background_color; /* モノクロフォント展開時の色 */
 
   int sprite_start; /* スプライトの描画の指定 */
   int sprite_count; /* スプライトの描画の指定 */
-
 } _WWDisplay;
 
 /*****************************************************************************/

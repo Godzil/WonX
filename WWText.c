@@ -57,7 +57,7 @@ int WWText_SetTextWindow(WWText ww_text, int x, int y,
     for (tx = 0; tx < WWText_GetWidth(ww_text); tx++) {
       if (c >= 512) WonX_Error("WWText_SetTextWindow", "Over character.");
       ww_character = WWDisplay_GetCharacter(ww_display, c);
-      WWCharacter_SetBitmap(ww_character, NULL);
+      WWCharacter_ClearAllPixels(ww_character);
       WWScreen_SetCharacter(WWText_GetScreen(ww_text),
 			    WWText_GetX(ww_text) + tx,
 			    WWText_GetY(ww_text) + ty,
@@ -72,10 +72,13 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
 			WWDisplay ww_display)
 {
   WWCharacter ww_character;
+  int j, k, n;
+  unsigned char pixel;
+  int f, b;
+  unsigned char bitmap[2];
 
   if ((character < 0) || (character > 127)) {
     WonX_Warning("WWText_PutCharacter", "Character number is out of range.");
-    fflush(stdout);
     return (-1);
   }
 
@@ -87,7 +90,6 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
   if ( (x < 0) || (x > WWText_GetWidth( ww_text) - 1) ||
        (y < 0) || (y > WWText_GetHeight(ww_text) - 1) ) {
     WonX_Warning("WWText_PutCharacter", "Position is out of range.");
-    fflush(stdout);
     return (-1);
   }
 
@@ -102,7 +104,36 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
 				       WWText_GetY(ww_text) + y);
 #endif
 
-  WWCharacter_CopyBitmap(ww_character, WWText_GetFont(ww_text, character));
+  /*
+   * テキストフォントは
+   * f = WWDisplay_GetForegroundColor(ww_display);
+   * b = WWDisplay_GetBackgroundColor(ww_display);
+   * で描画する必要があるため，描画のたびにビットマップをコピーする必要がある．
+   * で，カラー化の際に，そのように修正した．
+   * よって，テキストの初期化時に WWCharacter の配列を作成する必要は
+   * 無くなったので，WWCharacter の配列はいずれ削除すること．
+   */
+
+#if 0
+  WWCharacter_CopyAllPixels(ww_character, WWText_GetFont(ww_text, character));
+#else
+  f = WWDisplay_GetForegroundColor(ww_display);
+  b = WWDisplay_GetBackgroundColor(ww_display);
+
+  n = character * 8;
+  for (j = 0; j < 8; j++) {
+    bitmap[0] = 0;
+    bitmap[1] = 0;
+    for (k = 0; k < 8; k++) {
+      pixel = (fonts[n] & (1 << k)) ? f : b;
+      bitmap[0] |= ( pixel       & 1) << k;
+      bitmap[1] |= ((pixel >> 1) & 1) << k;
+    }
+    WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
+    WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
+    n++;
+  }
+#endif
 
   /* 表示時にパレットを設定するのでいいのか？ 不明 */
   WWScreen_SetPalette(WWText_GetScreen(ww_text),
@@ -122,20 +153,46 @@ WWText WWText_Create(WWScreen screen,
 		     WWPalette palette)
 {
   WWText ww_text;
-  int i;
+  WWCharacter ww_character;
+  int i, j, k, n;
+  unsigned char pixel;
+  int f, b;
+  unsigned char bitmap[2];
 
   ww_text = (WWText)malloc(sizeof(_WWText));
   if (ww_text == NULL) WonX_Error("WWText_Create", "Cannot allocate memory.");
 
   WWText_SetScreen(ww_text, screen);
-  WWText_SetX(ww_text, 0);
-  WWText_SetY(ww_text, 0);
+  WWText_SetX(ww_text, x);
+  WWText_SetY(ww_text, y);
   WWText_SetWidth( ww_text, width );
   WWText_SetHeight(ww_text, height);
   WWText_SetPalette(ww_text, palette);
 
+  /* 以下は，
+     f = WWDisplay_GetForegroundColor(ww_display);
+     b = WWDisplay_GetBackgroundColor(ww_display);
+     で取得すべきかもしれない
+     */
+  f = 3;
+  b = 0;
+
+  n = 0;
   for (i = 0; i < 128; i++) {
-    WWText_SetFont(ww_text, i, WWCharacter_Create(i, &(fonts[i * 16])));
+    ww_character = WWCharacter_Create(i);
+    for (j = 0; j < 8; j++) {
+      bitmap[0] = 0;
+      bitmap[1] = 0;
+      for (k = 0; k < 8; k++) {
+	pixel = (fonts[n] & (1 << k)) ? f : b;
+	bitmap[0] |= ( pixel       & 1) << k;
+	bitmap[1] |= ((pixel >> 1) & 1) << k;
+      }
+      WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
+      WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
+      n++;
+    }
+    WWText_SetFont(ww_text, i, ww_character);
   }
 
   return (ww_text);

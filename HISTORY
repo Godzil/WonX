@@ -1,3 +1,42 @@
+2001/1/3(水)
+
+カラー化対応．GCの管理用に，XColorGC クラスを追加．(XFireworks から流用した)
+
+カラー化に対応させて，transparent(透過色)の判定処理を WWPalette クラスから
+WWDisplay クラスに移動した．
+
+WWLCDPanel の pixel を，unsigned short int * に変更．(カラー対応)
+
+テキストフォントの格納フォーマットを変更．(WWTextFonts.c)
+
+テキスト表示で，表示時に WWDisplay_GetForegroundColor(),
+WWDisplay_GetBackgroundColor() を見てコピーするように修正．(WWText.c)
+(WWText クラス中で WWCharacter の配列を確保しているのが不要になったので，
+ いずれ削除すること)
+
+WWDisplay クラスにボーダーカラーのパレット追加．
+
+カラー化に対応させて，その他もろもろの修正を加えた．
+(キャラクタデータの格納方法，テキスト表示，ボーダーカラーの処理など)
+
+display_control(), display_status() で，ボーダーカラーのビットシフトが
+7 になっていたバグを修正．(8 に修正)
+
+while(1){/*none*/} での割り込み待ちループ中にも，F1 などのキー入力を受け付ける
+ように修正．(WonXSystem.c のタイマ割り込みのコールバック関数
+WonXTimer_Callback() に，WonXDisplay_PrintData() を追加)
+
+fcntl_attention.h, filesys.h, indirect.h, oswork.h, process.h を追加．
+(中身はカラ，もしくは適当なファイルをインクルードするだけ)
+
+wonx_configure.h で，
+#ifndef _WONX_winx_configure_h_INCLUDED_
+#define _WONX_wonx_configure_h_INCLUDED_
+になっていたバグを修正．
+
+
+
+
 2000/12/28(木)
 
 wonx-1.1 公開

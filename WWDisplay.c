@@ -4,6 +4,7 @@
 
 #include "wonx_include/disp.h"
 #include "wonx_include/text.h"
+#include "wonx_include/libwwc.h"
 
 #include "WWDisplayP.h"
 #include "WonX.h"
@@ -26,6 +27,8 @@ WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d) { return (d->lcd_panel); }
 WWText WWDisplay_GetText(WWDisplay d) { return (d->text); }
 WWCursor WWDisplay_GetCursor(WWDisplay d) { return (d->cursor); }
 
+unsigned int WWDisplay_GetColorMode(WWDisplay d) { return (d->color_mode); }
+
 int WWDisplay_GetSpriteEnable(WWDisplay d) { return (d->sprite_enable); }
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d)
 { return (d->sprite_window_enable); }
@@ -39,7 +42,10 @@ int WWDisplay_GetSpriteWindowWidth(WWDisplay d)
 int WWDisplay_GetSpriteWindowHeight(WWDisplay d)
 { return (d->sprite_window_height); }
 
-int WWDisplay_GetBorder(WWDisplay d) { return (d->border); }
+WWPalette WWDisplay_GetBorderPalette(WWDisplay d)
+{ return (d->border_palette); }
+int WWDisplay_GetBorderColor(WWDisplay d)
+{ return (d->border_color); }
 
 int WWDisplay_GetForegroundColor(WWDisplay d) { return (d->foreground_color); }
 int WWDisplay_GetBackgroundColor(WWDisplay d) { return (d->background_color); }
@@ -68,6 +74,9 @@ WWText WWDisplay_SetText(WWDisplay d, WWText p)
 WWCursor WWDisplay_SetCursor(WWDisplay d, WWCursor p)
 { return (d->cursor = p); }
 
+unsigned int WWDisplay_SetColorMode(WWDisplay d, unsigned int mode)
+{ return (d->color_mode = mode); }
+
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f)
 { return (d->sprite_enable = f); }
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f)
@@ -82,7 +91,10 @@ int WWDisplay_SetSpriteWindowWidth(WWDisplay d, int n)
 int WWDisplay_SetSpriteWindowHeight(WWDisplay d, int n)
 { return (d->sprite_window_height = n); }
 
-int WWDisplay_SetBorder(WWDisplay d, int b) { return (d->border = b); }
+WWPalette WWDisplay_SetBorderPalette(WWDisplay d, WWPalette p)
+{ return (d->border_palette = p); }
+int WWDisplay_SetBorderColor(WWDisplay d, int b)
+{ return (d->border_color = b); }
 
 int WWDisplay_SetForegroundColor(WWDisplay d, int c)
 { return (d->foreground_color = c); }
@@ -122,14 +134,23 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
   WWDisplay_SetColorMap(display, WWColorMap_Create(default_lcd_colors));
 
   for (i = 0; i < 16; i++) {
+    /*
+     * WonX-2.0 以降では，透明色は WWPalette クラスでは管理しないように
+     * 変更したので，透明色の設定は必要無くなった．
+     */
+#if 1
+    WWDisplay_SetPalette(display, i,
+			 WWPalette_Create(i,default_palette_colors[i].colors));
+#else /* WonX-2.0 以前では，透明色の設定が必要だった．一応コードを残しておく */
     WWDisplay_SetPalette(display, i,
 			 WWPalette_Create(i,
 					  default_palette_colors[i].colors,
 					  ((i / 4) % 2) ? 1 : 0));
+#endif
   }
 
   for (i = 0; i < 512; i++) {
-    WWDisplay_SetCharacter(display, i, WWCharacter_Create(i, NULL));
+    WWDisplay_SetCharacter(display, i, WWCharacter_Create(i));
   }
 
   for (i = 0; i < 128; i++) {
@@ -151,8 +172,6 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
   WWDisplay_SetLCDPanel(display, WWLCDPanel_Create(lcd_panel_width,
 						   lcd_panel_height));
 
-
-
   /* デフォルトのテキスト表示用パレットは0 */
   WWDisplay_SetText(display,
 		    WWText_Create(WWDisplay_GetScreen(display, SCREEN2),
@@ -168,6 +187,9 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
   WWDisplay_SetCursor(display,
 		      WWCursor_Create(WWDisplay_GetPalette(display, 1)));
 
+  /* デフォルトのカラーモードは白黒モード */
+  WWDisplay_SetColorMode(display, COLOR_MODE_GRAYSCALE);
+
   WWDisplay_SetSpriteEnable(display, 0);
   WWDisplay_SetSpriteWindowEnable(display, 0);
 
@@ -176,7 +198,8 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
   WWDisplay_SetSpriteWindowWidth( display, lcd_panel_width);
   WWDisplay_SetSpriteWindowHeight(display, lcd_panel_height);
 
-  WWDisplay_SetBorder(display, 0);
+  WWDisplay_SetBorderPalette(display, WWDisplay_GetPalette(display, 0));
+  WWDisplay_SetBorderColor(display, 0);
 
   WWDisplay_SetForegroundColor(display, 3);
   WWDisplay_SetBackgroundColor(display, 0);
@@ -316,12 +339,24 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen,
       px = x + WWScreen_GetRollX(screen);
 
       /* 透明色の場合には，-1が返ってくる */
-      pixel = WWScreen_GetPixel(screen, px, py, cursor);
+      pixel = WWScreen_GetPixel(screen, px, py, display, cursor);
 
       /* 透明色の場合 */
       if (pixel == -1) continue;
 
-      pixel = WWColorMap_GetLCDColor(WWDisplay_GetColorMap(display), pixel);
+      /* カラー対応 */
+      switch (WWDisplay_GetColorMode(display)) {
+      case COLOR_MODE_GRAYSCALE:
+	pixel = WWColorMap_GetLCDColor(WWDisplay_GetColorMap(display), pixel);
+	break;
+      case COLOR_MODE_4COLOR:
+      case COLOR_MODE_16COLOR:
+      case COLOR_MODE_16PACKED:
+	break;
+      default:
+	WonX_Error("WWDisplay_DrawSprite", "Unknown color mode.");
+      }
+
       WWLCDPanel_SetPixel(lcd_panel, x, y, pixel);
     }
   }
@@ -349,7 +384,9 @@ static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
 
   for (y = 0; y < 8; y++) {
     for (x = 0; x < 8; x++) {
-      pixel = WWSprite_GetPixel(sprite, x, y); /* 透明色は-1が返ってくる */
+
+      /* 透明色は-1が返ってくる */
+      pixel = WWSprite_GetPixel(sprite, x, y, display);
 
       /* 透明色の場合 */
       if (pixel == -1) continue;
@@ -370,7 +407,19 @@ static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
 	}
       }
 
-      pixel = WWColorMap_GetLCDColor(WWDisplay_GetColorMap(display), pixel);
+      /* カラー対応 */
+      switch (WWDisplay_GetColorMode(display)) {
+      case COLOR_MODE_GRAYSCALE:
+	pixel = WWColorMap_GetLCDColor(WWDisplay_GetColorMap(display), pixel);
+	break;
+      case COLOR_MODE_4COLOR:
+      case COLOR_MODE_16COLOR:
+      case COLOR_MODE_16PACKED:
+	break;
+      default:
+	WonX_Error("WWDisplay_DrawSprite", "Unknown color mode.");
+      }
+
       WWLCDPanel_SetPixel(WWDisplay_GetLCDPanel(display), lcd_x, lcd_y, pixel);
     }
   }
@@ -385,7 +434,8 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   int lcd_panel_width;
   int lcd_panel_height;
   WWColorMap color_map;
-  int border;
+  WWPalette border_palette;
+  int border_color;
   WWScreen screen;
   WWSprite sprite;
   WWCursor cursor;
@@ -394,13 +444,38 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   lcd_panel_width  = WWLCDPanel_GetWidth( lcd_panel);
   lcd_panel_height = WWLCDPanel_GetHeight(lcd_panel);
   color_map = WWDisplay_GetColorMap(display);
-  border = WWDisplay_GetBorder(display);
+  border_palette = WWDisplay_GetBorderPalette(display);
+  border_color = WWDisplay_GetBorderColor(display);
+
+  /* カラー対応 */
+  switch (WWDisplay_GetColorMode(display)) {
+  case COLOR_MODE_GRAYSCALE:
+    border_color &= (DCM_BORDER_COLOR >> 8);
+    border_color = WWColorMap_GetLCDColor(color_map, border_color);
+    break;
+  case COLOR_MODE_4COLOR:
+    border_color &= 0x03;
+    border_color =
+      ((unsigned short int)WWPalette_GetRed(  border_palette,border_color)<<8)|
+      ((unsigned short int)WWPalette_GetGreen(border_palette,border_color)<<4)|
+      ((unsigned short int)WWPalette_GetBlue( border_palette,border_color)<<0);
+    break;
+  case COLOR_MODE_16COLOR:
+  case COLOR_MODE_16PACKED:
+    border_color &= 0x0f;
+    border_color =
+      ((unsigned short int)WWPalette_GetRed(  border_palette,border_color)<<8)|
+      ((unsigned short int)WWPalette_GetGreen(border_palette,border_color)<<4)|
+      ((unsigned short int)WWPalette_GetBlue( border_palette,border_color)<<0);
+    break;
+  default:
+    WonX_Error("WWDisplay_DrawLCDPanel", "Unknown color mode.");
+  }
 
   /* ボーダーカラーで埋める */
   for (x = 0; x < lcd_panel_width; x++) {
     for (y = 0; y < lcd_panel_height; y++) {
-      WWLCDPanel_SetPixel(lcd_panel, x, y,
-			  WWColorMap_GetLCDColor(color_map, border));
+      WWLCDPanel_SetPixel(lcd_panel, x, y, border_color);
     }
   }
 
@@ -445,6 +520,38 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   return (0);
+}
+
+/*===========================================================================*/
+/* 透明色かどうか調べる                                                      */
+/*===========================================================================*/
+
+int WWDisplay_IsTransparent(WWDisplay display, WWPalette palette, int color)
+{
+  int mode;
+  int palette_num;
+  int ret;
+
+  if (color != 0) return (0);
+
+  mode = WWDisplay_GetColorMode(display);
+  palette_num = WWPalette_GetNumber(palette);
+
+  ret = 0;
+  switch (mode) {
+  case COLOR_MODE_GRAYSCALE :
+  case COLOR_MODE_4COLOR :
+    ret = ((palette_num / 4) % 2) ? 1 : 0;
+    break;
+  case COLOR_MODE_16COLOR :
+  case COLOR_MODE_16PACKED :
+    ret = 1;
+    break;
+  default :
+    WonX_Error("WWDisplay_IsTransparent", "Unknown color mode.");
+  }
+
+  return (ret);
 }
 
 /*****************************************************************************/

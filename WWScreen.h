@@ -20,6 +20,7 @@ typedef struct _WWScreen * WWScreen;
 #include "WWPalette.h"
 #include "WWCharacter.h"
 #include "WWCursor.h"
+#include "WWDisplay.h"
 
 /*****************************************************************************/
 /* 定数の定義                                                                */
@@ -71,7 +72,8 @@ int WWScreen_SetDrawY(     WWScreen s, int n);
 int WWScreen_SetDrawWidth( WWScreen s, int n);
 int WWScreen_SetDrawHeight(WWScreen s, int n);
 
-int WWScreen_GetPixel(WWScreen screen, int x, int y, WWCursor cursor);
+int WWScreen_GetPixel(WWScreen screen, int x, int y,
+		      WWDisplay display, WWCursor cursor);
 
 WWScreen WWScreen_Create(int number,
 			 int width, int height,

@@ -15,13 +15,22 @@ typedef struct _XDisplay * XDisplay;
 /* ヘッダファイルのインクルード                                              */
 /*****************************************************************************/
 
+#include <X11/Xlib.h>
+
 #include "wonx_include/key.h"
 
+#include "WWDisplay.h"
 #include "WWLCDPanel.h"
+#include "XColorGC.h"
 
 /*****************************************************************************/
 /* メンバ関数の宣言                                                          */
 /*****************************************************************************/
+
+Display * XDisplay_GetDisplay(XDisplay x_display);
+Colormap XDisplay_GetColormap(XDisplay x_display);
+
+XColorGCDatabase XDisplay_GetColorGCDatabase(XDisplay x_display);
 
 unsigned int XDisplay_GetKeyPress(XDisplay x_display);
 int XDisplay_GetLCDDraw(XDisplay x_display);
@@ -62,7 +71,20 @@ int XDisplay_Sync(XDisplay x_display);
 /* 描画                                                                      */
 /*---------------------------------------------------------------------------*/
 
-int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel);
+int XDisplay_DrawLCDWindow(XDisplay x_display, WWDisplay ww_display,
+			   WWLCDPanel ww_lcd_panel);
+
+/*---------------------------------------------------------------------------*/
+/* GC の作成                                                                 */
+/*---------------------------------------------------------------------------*/
+
+GC XDisplay_CreateGC(XDisplay x_display);
+
+/*---------------------------------------------------------------------------*/
+/* GC の解放                                                                 */
+/*---------------------------------------------------------------------------*/
+
+int XDisplay_DestroyGC(XDisplay x_display, GC gc);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

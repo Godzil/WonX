@@ -1,7 +1,12 @@
 /* configure.h for configuration of wonx */
 
-#ifndef _WONX_winx_configure_h_INCLUDED_
+#ifndef _WONX_wonx_configure_h_INCLUDED_
 #define _WONX_wonx_configure_h_INCLUDED_
+
+#include "wonx_include/libwwc.h"
+
+/* デフォルトのアーキテクチャ */
+#define WONX_DEFAULT_ARCH HARDARCH_WSC
 
 /* WonX でのタイマ割り込みの周期(単位はミリ秒) */
 #define WONX_TIMER_INTERVAL 100 /* 0.1 秒 */

@@ -65,7 +65,14 @@ void display_control(unsigned int flags)
     WWScreen_SetMode(WWDisplay_GetScreen(ww_display, SCREEN2),
 		     WW_SCREEN_OUTSIDE_ONLY);
 
-  WWDisplay_SetBorder(ww_display, (flags & DCM_BORDER_COLOR) >> 7);
+  WWDisplay_SetBorderPalette(ww_display,
+			     WWDisplay_GetPalette(ww_display,
+						  (flags & 0xf000) >> 12));
+#if 0
+  WWDisplay_SetBorderColor(ww_display, (flags & DCM_BORDER_COLOR) >> 8);
+#else /* カラー対応で，ボーダーカラーは４ビットに変更された */
+  WWDisplay_SetBorderColor(ww_display, (flags & 0x0f00) >> 8);
+#endif
 
   WonXDisplay_Flush(WonX_GetWonXDisplay());
 
@@ -115,7 +122,8 @@ unsigned int display_status(void)
     default:
   }
 
-  ret |= WWDisplay_GetBorder(ww_display) << 7;
+  ret |= (unsigned short int)WWPalette_GetNumber(WWDisplay_GetBorderPalette(ww_display)) << 12;
+  ret |= (unsigned short int)WWDisplay_GetBorderColor(ww_display) << 8;
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 
@@ -135,10 +143,12 @@ unsigned int display_status(void)
 void font_set_monodata(unsigned int number, unsigned int count,
 		       unsigned char * data)
 {
-  WWCharacter c;
-  int i, x, y, n, p;
-  int f, b;
+  WWCharacter ww_character;
   WWDisplay ww_display;
+  int i, j, k, n;
+  unsigned char pixel;
+  int f, b;
+  unsigned char bitmap[2];
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -146,7 +156,8 @@ void font_set_monodata(unsigned int number, unsigned int count,
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : font_set_monodata() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, (void *)data); fflush(stdout);
+	 (int)number, (int)count, (void *)data);
+  fflush(stdout);
 
   ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
 
@@ -155,12 +166,17 @@ void font_set_monodata(unsigned int number, unsigned int count,
 
   n = 0;
   for (i = 0; i < count; i++) {
-    c = WWDisplay_GetCharacter(ww_display, number + i);
-    for (y = 0; y < 8; y++) {
-      for (x = 0; x < 8; x++) {
-	p = (data[n] & (1 << (7 - x))) ? f : b; /*これでよいのか？*/
-	WWCharacter_SetPixel(c, x, y, p);
+    ww_character = WWDisplay_GetCharacter(ww_display, number + i);
+    for (j = 0; j < 8; j++) {
+      bitmap[0] = 0;
+      bitmap[1] = 0;
+      for (k = 0; k < 8; k++) {
+	pixel = (data[n] & (1 << k)) ? f : b;
+	bitmap[0] |= ( pixel       & 1) << k;
+	bitmap[1] |= ((pixel >> 1) & 1) << k;
       }
+      WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
+      WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
       n++;
     }
   }
@@ -183,8 +199,9 @@ void font_set_monodata(unsigned int number, unsigned int count,
 void font_set_colordata(unsigned int number, unsigned int count,
 			unsigned char * data)
 {
-  WWCharacter c;
-  int i, x, y, n, p;
+  WWCharacter ww_character;
+  WWDisplay ww_display;
+  int i, j, n;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -192,23 +209,16 @@ void font_set_colordata(unsigned int number, unsigned int count,
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : font_set_colordata() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, (void *)data); fflush(stdout);
+	 (int)number, (int)count, (void *)data);
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
 
   n = 0;
-
   for (i = 0; i < count; i++) {
-    c = WWDisplay_GetCharacter(WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay()),
-			       number + i);
-    for (y = 0; y < 8; y++) {
-      for (x = 0; x < 8; x++) {
-
-	/*これでよいのか？*/
-	p = ((data[n] & (1 << (7-x))) ? 2 : 0)
-	  + ((data[n + 1] & (1 << (7-x))) ? 1 : 0);
-
-	WWCharacter_SetPixel(c, x, y, p);
-      }
-      n++;
+    ww_character = WWDisplay_GetCharacter(ww_display, number + i);
+    for (j = 0; j < 16; j++) {
+      WWCharacter_SetBitmap(ww_character, j, data[n]);
       n++;
     }
   }
@@ -232,8 +242,9 @@ void font_get_data(unsigned int number, unsigned int count,
 		   unsigned char * data)
 {
   /* 関数の仕様がわからんので適当に書くぞ */
-  WWCharacter c;
-  int i, x, y, n, p;
+  WWCharacter ww_character;
+  WWDisplay ww_display;
+  int i, j, n;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -241,23 +252,16 @@ void font_get_data(unsigned int number, unsigned int count,
   UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : font_get_data() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, (void *)data); fflush(stdout);
+	 (int)number, (int)count, (void *)data);
+  fflush(stdout);
+
+  ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
 
   n = 0;
-
   for (i = 0; i < count; i++) {
-    c = WWDisplay_GetCharacter(WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay()),
-			       number + i);
-    for (y = 0; y < 8; y++) {
-      data[n  ] = 0;
-      data[n+1] = 0;
-      for (x = 0; x < 8; x++) {
-	p = WWCharacter_GetPixel(c, x, y);
-	/* これでよいのか？ */
-	data[n  ] |= (((unsigned char)p & 0x02) ? 1 : 0) << (7-x);
-	data[n+1] |= (((unsigned char)p & 0x01) ? 1 : 0) << (7-x);
-      }
-      n++;
+    ww_character = WWDisplay_GetCharacter(ww_display, number + i);
+    for (j = 0; j < 16; j++) {
+      data[n] = WWCharacter_GetBitmap(ww_character, j);
       n++;
     }
   }
@@ -1082,7 +1086,6 @@ unsigned int palette_get_color(unsigned int palette_num)
   int mapped_colors[4];
   WWPalette palette;
   unsigned short int ret;
-  int i;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -1095,12 +1098,15 @@ unsigned int palette_get_color(unsigned int palette_num)
   palette =
     WWDisplay_GetPalette(WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay()),
 			 palette_num);
-  /* 透明色は -1 で返されるので注意すること */
+
+  /* WonX-2.0 以前では，透明色は -1 で返されていたので注意が必要だった  */
   WWPalette_GetMappedColors(palette, mapped_colors);
 
+#if 0 /* WonX-2.0 以前では，透明色の処理が必要だった．一応コードを残しておく */
   /* 透明色は -1 で表されるので，0にする */
   for (i = 0; i < 4; i++)
     if (mapped_colors[i] == -1) mapped_colors[i] = 0;
+#endif
 
   ret = 0;
   ret |=  mapped_colors[0] & 0x07;

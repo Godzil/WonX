@@ -39,20 +39,44 @@ int WWSprite_SetPosition(WWSprite sprite, int x, int y)
 }
 
 /* スプライトのピクセル値を返す．(透明色は-1を返す) */
-int WWSprite_GetPixel(WWSprite sprite, int x, int y)
+int WWSprite_GetPixel(WWSprite sprite, int x, int y, WWDisplay display)
 {
-  WWPalette p;
-  WWCharacter c;
+  WWPalette palette;
+  WWCharacter character;
   int pixel;
 
-  p = WWSprite_GetPalette(sprite);
-  c = WWSprite_GetCharacter(sprite);
+  palette = WWSprite_GetPalette(sprite);
+  character = WWSprite_GetCharacter(sprite);
 
   if (WWSprite_GetHorizontal(sprite)) x = 7 - x;
   if (WWSprite_GetVertical(  sprite)) y = 7 - y;
 
-  pixel = WWCharacter_GetPixel(c, x, y);
-  pixel = WWPalette_GetMappedColor(p, pixel); /* 透明色は -1 を返す */
+  pixel = WWCharacter_GetPixel(character, x, y, display);
+
+  /* カラー対応 */
+  switch (WWDisplay_GetColorMode(display)) {
+  case COLOR_MODE_GRAYSCALE:
+    /*
+     * WonX-2.0 以降では，透明色の処理は WWDisplay クラスで行うように
+     * 変更したので，WWPalette_GetMappedColor() が -1 を返すことは無い．
+     */
+    pixel = WWPalette_GetMappedColor(palette, pixel);
+    break;
+  case COLOR_MODE_4COLOR:
+  case COLOR_MODE_16COLOR:
+  case COLOR_MODE_16PACKED:
+    pixel =
+      ((unsigned short int)WWPalette_GetRed(  palette, pixel) << 8) |
+      ((unsigned short int)WWPalette_GetGreen(palette, pixel) << 4) |
+      ((unsigned short int)WWPalette_GetBlue( palette, pixel) << 0);
+    break;
+  default:
+    WonX_Error("WWSprite_GetPixel", "Unknown color mode.");
+  }
+
+  /* 透明色の場合には -1 を返す */
+  if (WWDisplay_IsTransparent(display, palette, pixel))
+    pixel = -1;
 
   return (pixel);
 }

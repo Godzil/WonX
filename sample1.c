@@ -12,7 +12,7 @@ main()
   text_put_string(0,  8, "   linked to program for    ");
   text_put_string(0,  9, "  WonderWitch and behave as ");
   text_put_string(0, 10, "        WonderWitch.        ");
-  text_put_string(0, 12, "  WonX Copyright (c) 2000   ");
+  text_put_string(0, 12, "WonX Copyright (c) 2000-2001");
   text_put_string(0, 13, "       Sakai Hiroaki.       ");
   text_put_string(0, 14, "    All Rights Reserved.    ");
   text_put_string(0, 16, "   Hit space key to exit.   ");

@@ -28,56 +28,59 @@ int WWLCDPanel_ResetAllDraw(WWLCDPanel p) { return (p->all_draw = 0); }
 int WWLCDPanel_SetAllDraw(WWLCDPanel p)   { return (p->all_draw = 1); }
 int WWLCDPanel_IsAllDraw(WWLCDPanel p)   { return (p->all_draw); }
 
-unsigned char * WWLCDPanel_GetPixelMap(WWLCDPanel p)
+unsigned short int * WWLCDPanel_GetPixelMap(WWLCDPanel p)
 {
   return (p->pixel[p->current]);
 }
 
-/* LCDは１ピクセル16色(４ビット必要) */
-static int WWLCDPanel_GetPixelByCurrent(WWLCDPanel lcd_panel, int current,
-					int x, int y)
+/* LCDは１ピクセル4096色(12ビット必要) */
+static unsigned short int WWLCDPanel_GetPixelByCurrent(WWLCDPanel lcd_panel,
+						       int current,
+						       int x, int y)
 {
-  unsigned char pixel;
+  unsigned short int pixel;
 
   if ( (x < 0) || (x > WWLCDPanel_GetWidth( lcd_panel) - 1) ||
        (y < 0) || (y > WWLCDPanel_GetHeight(lcd_panel) - 1) )
     return (-1);
 
   pixel = lcd_panel->pixel[current][y * WWLCDPanel_GetWidth(lcd_panel) + x];
-  pixel &= 0x0f;
   return ((int)pixel);
 }
 
-static int WWLCDPanel_GetOldPixel(WWLCDPanel lcd_panel, int x, int y)
+static unsigned short int WWLCDPanel_GetOldPixel(WWLCDPanel lcd_panel,
+						 int x, int y)
 {
-  return (WWLCDPanel_GetPixelByCurrent(lcd_panel, 1 - lcd_panel->current, x, y));
+  return (WWLCDPanel_GetPixelByCurrent(lcd_panel,
+				       1 - lcd_panel->current, x, y));
 }
 
-int WWLCDPanel_GetPixel(WWLCDPanel lcd_panel, int x, int y)
+unsigned short int WWLCDPanel_GetPixel(WWLCDPanel lcd_panel, int x, int y)
 {
   return (WWLCDPanel_GetPixelByCurrent(lcd_panel, lcd_panel->current, x, y));
 }
 
-int WWLCDPanel_SetPixel(WWLCDPanel lcd_panel, int x, int y, int pixel)
+unsigned short int WWLCDPanel_SetPixel(WWLCDPanel lcd_panel, int x, int y,
+				       unsigned short int pixel)
 {
-  unsigned char p;
+  unsigned short int p;
   int n;
 
   if ( (x < 0) || (x > WWLCDPanel_GetWidth( lcd_panel) - 1) ||
        (y < 0) || (y > WWLCDPanel_GetHeight(lcd_panel) - 1) )
     return (-1);
 
-  p = ((unsigned char)pixel) & 0x0f;
+  p = pixel & 0x0fff;
   n = y * WWLCDPanel_GetWidth(lcd_panel) + x;
   lcd_panel->pixel[lcd_panel->current][n] = p;
 
-  return (pixel);
+  return (p);
 }
 
 int WWLCDPanel_IsPixelChanged(WWLCDPanel lcd_panel, int x, int y)
 {
-  int old_pixel;
-  int current_pixel;
+  unsigned short int old_pixel;
+  unsigned short int current_pixel;
 
   if (WWLCDPanel_IsAllDraw(lcd_panel)) return (1);
   old_pixel = WWLCDPanel_GetOldPixel(lcd_panel, x, y);
@@ -90,6 +93,7 @@ WWLCDPanel WWLCDPanel_Create(int width, int height)
 {
   WWLCDPanel lcd_panel;
   int x, y, i;
+  unsigned short int * p;
 
   lcd_panel = (WWLCDPanel)malloc(sizeof(_WWLCDPanel));
   if (lcd_panel == NULL)
@@ -99,15 +103,16 @@ WWLCDPanel WWLCDPanel_Create(int width, int height)
   WWLCDPanel_SetHeight(lcd_panel, height);
 
   for (i = 0; i < 2; i++) {
-    lcd_panel->pixel[i] =
-      (unsigned char *)malloc(sizeof(unsigned char) *
-			      WWLCDPanel_GetWidth(lcd_panel) *
-			      WWLCDPanel_GetHeight(lcd_panel));
+    p = (unsigned short int *)malloc(sizeof(unsigned short int) *
+				     WWLCDPanel_GetWidth(lcd_panel) *
+				     WWLCDPanel_GetHeight(lcd_panel));
+    if (p == NULL) WonX_Error("WWLCDPanel_Create", "Cannot allocate memory.");
+    lcd_panel->pixel[i] = p;
   }
 
   for (y = 0; y < lcd_panel->height; y++) {
     for (x = 0; x < lcd_panel->width / 2; x++) {
-      WWLCDPanel_SetPixel(lcd_panel, x, y, 0x00);
+      WWLCDPanel_SetPixel(lcd_panel, x, y, 0);
     }
   }
 

@@ -116,6 +116,8 @@ static int WonXTimer_Callback(WonXSystem wonx_system)
       WWInterrupt_ExecuteReceiveReadyCallback(ww_interrupt);
   }
 
+  WonXDisplay_PrintData(wonx_display);
+
   return (0);
 }
 
