@@ -46,6 +46,7 @@ WonxDisplay WonxDisplay_Create(int x_width, int x_height,
 
 int WonxDisplay_Flush(WonxDisplay wonx_display)
 {
+  int i;
   XDisplay x_display;
   WWDisplay ww_display;
   WWLCDPanel ww_lcd_panel;
@@ -57,6 +58,32 @@ int WonxDisplay_Flush(WonxDisplay wonx_display)
     WWDisplay_DrawLCDPanel(ww_display);
     ww_lcd_panel = WWDisplay_GetLCDPanel(ww_display);
     XDisplay_DrawLCDWindow(x_display, ww_lcd_panel);
+  }
+
+  if (XDisplay_GetColorMapPrint(x_display)) {
+    WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
+    XDisplay_SetColorMapPrint(x_display, 0);
+  }
+
+  if (XDisplay_GetPalettePrint(x_display)) {
+    for (i = 0; i < 16; i++) {
+      WWPalette_PrintData(WWDisplay_GetPalette(ww_display, i), stdout);
+    }
+    XDisplay_SetPalettePrint(x_display, 0);
+  }
+
+  if (XDisplay_GetCharacterPrint(x_display)) {
+    for (i = 0; i < 512; i++) {
+      WWCharacter_PrintData(WWDisplay_GetCharacter(ww_display, i), stdout);
+    }
+    XDisplay_SetCharacterPrint(x_display, 0);
+  }
+
+  if (XDisplay_GetSpritePrint(x_display)) {
+    for (i = 0; i < 128; i++) {
+      WWSprite_PrintData(WWDisplay_GetSprite(ww_display, i), stdout);
+    }
+    XDisplay_SetSpritePrint(x_display, 0);
   }
 
   return (0);

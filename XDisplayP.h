@@ -49,6 +49,12 @@ typedef struct _XDisplay {
   /* LCD描画のフラグ */
   int lcd_draw;
 
+  /* ダンプ出力のフラグ */
+  int color_map_print;
+  int palette_print;
+  int character_print;
+  int sprite_print;
+
 } _XDisplay;
 
 /*****************************************************************************/

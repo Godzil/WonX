@@ -63,6 +63,22 @@ int WWColorMap_SetLCDColor(WWColorMap color_map, int color, int lcd_color)
   return (color_map->lcd_color[color] = lcd_color);
 }
 
+int WWColorMap_PrintData(WWColorMap c, FILE * f)
+{
+  int i, n;
+
+  fprintf(f, "\n");
+
+  for (i = 0; i < 8; i++) {
+    fprintf(f, "colormap :\tcolor[%d] = %d\n",
+	    i, WWColorMap_GetLCDColor(c, i));
+  }
+
+  fflush(f);
+
+  return (0);
+}
+
 /*****************************************************************************/
 /* ここまで                                                                  */
 /*****************************************************************************/

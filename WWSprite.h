@@ -45,6 +45,7 @@ WWSprite WWSprite_Create(int number, int x, int y,
 			 int priority, int clipping,
 			 WWPalette palette, WWCharacter character);
 WWSprite WWSprite_Destroy(WWSprite sprite);
+int WWSprite_PrintData(WWSprite s, FILE * f);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

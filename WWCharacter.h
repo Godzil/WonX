@@ -5,6 +5,7 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /*****************************************************************************/
@@ -24,6 +25,7 @@ WWCharacter WWCharacter_Destroy(WWCharacter character);
 int WWCharacter_SetBitmap(WWCharacter character, unsigned char * bitmap);
 int WWCharacter_GetPixel(WWCharacter character, int x, int y);
 int WWCharacter_SetPixel(WWCharacter character, int x, int y, int pixel);
+int WWCharacter_PrintData(WWCharacter character, FILE * f);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

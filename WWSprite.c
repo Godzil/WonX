@@ -84,6 +84,35 @@ WWSprite WWSprite_Destroy(WWSprite sprite)
   return (NULL);
 }
 
+int WWSprite_PrintData(WWSprite s, FILE * f)
+{
+  int n;
+
+  n = WWSprite_GetNumber(s);
+
+  fprintf(f, "\n");
+
+  fprintf(f, "sprite[%d] :\tnumber     = %d\n", n, WWSprite_GetNumber(s));
+  fprintf(f, "sprite[%d] :\thorizontal = %s\n",
+	  n, true_false(WWSprite_GetHorizontal(s)));
+  fprintf(f, "sprite[%d] :\tvertical   = %s\n",
+	  n, true_false(WWSprite_GetVertical(  s)));
+  fprintf(f, "sprite[%d] :\tpriority   = %s\n",
+	  n, true_false(WWSprite_GetPriority(   s)));
+  fprintf(f, "sprite[%d] :\tclipping   = %s\n",
+	  n, true_false(WWSprite_GetClipping(  s)));
+  fprintf(f, "sprite[%d] :\tpalette number   = %d\n",
+	  n, WWPalette_GetNumber(WWSprite_GetPalette(s)));
+  fprintf(f, "sprite[%d] :\tcharacter number = %d\n",
+	  n, WWCharacter_GetNumber(WWSprite_GetCharacter(s)));
+  fprintf(f, "sprite[%d] :\tx = %d\n", n, WWSprite_GetX(s));
+  fprintf(f, "sprite[%d] :\ty = %d\n", n, WWSprite_GetY(s));
+
+  fflush(f);
+
+  return (0);
+}
+
 /*****************************************************************************/
 /* ここまで                                                                  */
 /*****************************************************************************/

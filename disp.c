@@ -19,7 +19,8 @@ void display_control(unsigned int flags)
 {
   WWDisplay ww_display;
 
-  printf("display_control(): flags = %ud, ", flags); fflush(stdout);
+  printf("call : display_control() : flags = 0x%04x, ", (int)flags);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -56,7 +57,7 @@ unsigned int display_status()
   WWDisplay ww_display;
   unsigned short int ret;
 
-  printf("display_status(): "); fflush(stdout);
+  printf("call : display_status() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -90,7 +91,7 @@ unsigned int display_status()
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ul\n", (unsigned int)ret); fflush(stdout);
+  printf("return value = %u\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -102,8 +103,8 @@ void font_set_monodata(unsigned int number, unsigned int count, void * data)
   int f, b;
   unsigned char * d;
 
-  printf("font_set_monodata(): number = %ud, count = %ud, data = %p, ",
-	 number, count, data); fflush(stdout);
+  printf("call : font_set_monodata() : number = %u, count = %u, data = %p, ",
+	 (int)number, (int)count, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -139,8 +140,8 @@ void font_set_colordata(unsigned int number,
   int f, b;
   unsigned char * d;
 
-  printf("font_set_colordata(): number = %ud, count = %ud, data = %p, ",
-	 number, count, data); fflush(stdout);
+  printf("call : font_set_colordata() : number = %u, count = %u, data = %p, ",
+	 (int)number, (int)count, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -179,8 +180,8 @@ void font_get_data(unsigned int number,
   int f, b;
   unsigned char * d;
 
-  printf("font_get_data(): number = %ud, count = %ud, data = %p, ",
-	 number, count, data); fflush(stdout);
+  printf("call : font_get_data() : number = %u, count = %u, data = %p, ",
+	 (int)number, (int)count, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -215,7 +216,8 @@ void font_set_color(unsigned int colors)
 {
   WWDisplay dis;
 
-  printf("font_set_color(): colors = %ud, ", colors); fflush(stdout);
+  printf("call : font_set_color() : colors = 0x%04x, ", (int)colors);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -235,7 +237,7 @@ unsigned int font_get_color(void)
   unsigned short int ret;
   WWDisplay dis;
 
-  printf("font_get_color(): "); fflush(stdout);
+  printf("call : font_get_color() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -246,7 +248,7 @@ unsigned int font_get_color(void)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -263,7 +265,7 @@ void screen_set_char(int screen, int x, int y, int w, int h, void * data)
   WWPalette p;
   WWCharacter c;
 
-  printf("font_set_char(): screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p",
+  printf("call : screen_set_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p",
 	 screen, x, y, w, h, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
@@ -309,7 +311,7 @@ void screen_get_char(int screen, int x, int y, int w, int h, void * data)
   WWPalette p;
   WWCharacter c;
 
-  printf("font_get_char(): screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p",
+  printf("call : screen_get_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p",
 	 screen, x, y, w, h, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
@@ -346,8 +348,9 @@ unsigned int screen_get_char1(int screen, int x, int y)
 {
   unsigned short int ret;
 
-  printf("screen_get_char1(): screen = %d, x = %d, y = %d, ",
-	 screen, x, y); fflush(stdout);
+  printf("call : screen_get_char1() : screen = %d, x = %d, y = %d, ",
+	 screen, x, y);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -355,7 +358,7 @@ unsigned int screen_get_char1(int screen, int x, int y)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -372,8 +375,8 @@ void screen_fill_char(int screen, int x, int y, int w, int h,
   WWPalette p;
   WWCharacter c;
 
-  printf("screen_fill_char(): screen = %d, x = %d, y = %d, w = %d, h = %d, data = %ud",
-	 screen, x, y, w, h, data); fflush(stdout);
+  printf("call : screen_fill_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = 0x%04x, ",
+	 screen, x, y, w, h, (int)data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -411,8 +414,8 @@ void screen_fill_attr(int screen, int x, int y, int w, int h,
   int i, j;
   unsigned short int c;
 
-  printf("screen_fill_attr(): screen = %d, x = %d, y = %d, w = %d, h = %d, data = %ud, mask = %ud, ",
-	 screen, x, y, w, h, data, mask); fflush(stdout);
+  printf("call : screen_fill_attr() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = 0x%04x, mask = 0x%04x, ",
+	 screen, x, y, w, h, (int)data, (int)mask); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -434,8 +437,8 @@ void screen_fill_attr(int screen, int x, int y, int w, int h,
 
 void sprite_set_range(unsigned int sprite_start, unsigned int sprite_count)
 {
-  printf("sprite_set_range(): start = %ud, count = %ud, ",
-	 sprite_start, sprite_count); fflush(stdout);
+  printf("call : sprite_set_range() : start = %u, count = %u, ",
+	 (int)sprite_start, (int)sprite_count); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -458,8 +461,8 @@ void sprite_set_char(unsigned int sprite_num,
   WWPalette p;
   WWCharacter c;
 
-  printf("sprite_set_char(): number = %ud, data = %ud, ",
-	 sprite_num, data); fflush(stdout);
+  printf("call : sprite_set_char() : number = %u, data = 0x%04x, ",
+	 (int)sprite_num, (int)data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -472,7 +475,8 @@ void sprite_set_char(unsigned int sprite_num,
 
   p = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(wonx_display),
 			   (data >> 9) & 0x07);
-  c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(wonx_display), data & 0x1ff);
+  c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(wonx_display),
+			     data & 0x1ff);
 
   WWSprite_SetPalette(s, p);
   WWSprite_SetCharacter(s, c);
@@ -491,7 +495,8 @@ unsigned int sprite_get_char(unsigned int sprite_num)
   WWCharacter c;
   unsigned short int ret;
 
-  printf("sprite_get_char(): number = %ud, ", sprite_num); fflush(stdout);
+  printf("call : sprite_get_char() : number = %u, ", (int)sprite_num);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -513,7 +518,7 @@ unsigned int sprite_get_char(unsigned int sprite_num)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -522,8 +527,8 @@ void sprite_set_location(unsigned int sprite_num, int x, int y)
 {
   WWSprite s;
 
-  printf("sprite_set_location(): number = %ud, x = %d, y = %d, ",
-	 sprite_num, x, y); fflush(stdout);
+  printf("call : sprite_set_location() : number = %u, x = %d, y = %d, ",
+	 (int)sprite_num, x, y); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -542,7 +547,8 @@ unsigned int sprite_get_location(unsigned int sprite_num)
   WWSprite s;
   unsigned short int ret;
 
-  printf("sprite_get_location(): number = %ud, ", sprite_num); fflush(stdout);
+  printf("call : sprite_get_location() : number = %u, ", (int)sprite_num);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -555,7 +561,7 @@ unsigned int sprite_get_location(unsigned int sprite_num)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -565,8 +571,8 @@ void sprite_set_char_location(unsigned int sprite_num,
 {
   if (wonx_display == NULL) Wonx_Create();
 
-  printf("sprite_set_char_location(): number = %ud, data = %ud, x = %d, y = %d, ",
-	 sprite_num, data, x, y); fflush(stdout);
+  printf("call : sprite_set_char_location() : number = %u, data = 0x%04x, x = %d, y = %d, ",
+	 (int)sprite_num, (int)data, x, y); fflush(stdout);
 
   sprite_set_char(sprite_num, data);
   sprite_set_location(sprite_num, x, y);
@@ -582,8 +588,8 @@ unsigned long int sprite_get_char_location(unsigned int sprite_num)
 {
   unsigned long int ret;
 
-  printf("sprite_get_char_location(): number = %ud, ",
-	 sprite_num); fflush(stdout);
+  printf("call : sprite_get_char_location() : number = %u, ", (int)sprite_num);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -594,19 +600,19 @@ unsigned long int sprite_get_char_location(unsigned int sprite_num)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ul\n", ret); fflush(stdout);
+  printf("return value = 0x%08x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
 
-void sprite_set_data(unsigned sprite_num, unsigned int count, void * data)
+void sprite_set_data(unsigned int sprite_num, unsigned int count, void * data)
 {
   int i;
   char * d;
   unsigned long int * n;
 
-  printf("sprite_set_data(): number = %ud, count = %ud, data = %p",
-	 sprite_num, count, data); fflush(stdout);
+  printf("call : sprite_set_data() : number = %u, count = %u, data = %p",
+	 (int)sprite_num, (int)count, data); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -629,7 +635,7 @@ void screen_set_scroll(int screen, int x, int y)
 {
   WWScreen s;
 
-  printf("screen_set_scroll(): scsreen = %d, x = %d, y = %d, ",
+  printf("call : screen_set_scroll() : scsreen = %d, x = %d, y = %d, ",
 	 screen, x, y); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
@@ -650,7 +656,7 @@ unsigned int screen_get_scroll(int screen)
   unsigned short int ret;
   WWScreen s;
 
-  printf("screen_get_scroll(): scsreen = %d, ", screen); fflush(stdout);
+  printf("call : screen_get_scroll() : screen = %d, ", screen); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -662,7 +668,7 @@ unsigned int screen_get_scroll(int screen)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = %u\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -671,7 +677,7 @@ void screen2_set_window(int x, int y, int w, int h)
 {
   WWScreen s;
 
-  printf("screen2_set_window(): x = %d, y = %d, width = %d, height = %d, ",
+  printf("call : screen2_set_window() : x = %d, y = %d, width = %d, height = %d, ",
 	 x, y, w, h); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
@@ -698,7 +704,7 @@ unsigned long int screen2_get_window(void)
 
   if (wonx_display == NULL) Wonx_Create();
 
-  printf("screen2_get_window(): "); fflush(stdout);
+  printf("call : screen2_get_window() : "); fflush(stdout);
 
   s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(wonx_display), SCREEN2);
   
@@ -712,7 +718,7 @@ unsigned long int screen2_get_window(void)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ul\n", ret); fflush(stdout);
+  printf("return value = 0x%08x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -739,8 +745,8 @@ void palette_set_color(unsigned int palette_num,
   int mapped_colors[4];
   WWPalette palette;
 
-  printf("palette_set_color(): number = %ud, colors = %ud", palette_num,
-	 colors); fflush(stdout);
+  printf("call : palette_set_color() : number = %u, colors = 0x%04x, ",
+	 (int)palette_num, (int)colors); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -766,11 +772,13 @@ unsigned int palette_get_color(unsigned int palette_num)
   WWPalette palette;
   unsigned short int ret;
 
-  printf("palette_get_color(): number = %ud, ", palette_num); fflush(stdout);
+  printf("call : palette_get_color() : number = %u, ", (int)palette_num);
+  fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
-  palette = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(wonx_display), palette_num);
+  palette = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(wonx_display),
+				 palette_num);
   WWPalette_GetMappedColors(palette, mapped_colors);
 
   ret = 0;
@@ -781,7 +789,7 @@ unsigned int palette_get_color(unsigned int palette_num)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ud\n", ret); fflush(stdout);
+  printf("return value = %u\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -791,7 +799,8 @@ void lcd_set_color(unsigned int colors0, unsigned int colors1)
   WWColorMap color_map;
   int lcd_colors[8];
 
-  printf("lcd_set_color(): colors0 = %ud, colors1 = %ud, ", colors0, colors1); fflush(stdout);
+  printf("call : lcd_set_color() : colors0 = 0x%04x, colors1 = 0x%04x, ",
+	 (int)colors0, (int)colors1); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -820,7 +829,7 @@ unsigned long int lcd_get_color(void)
   int lcd_colors[8];
   unsigned long int ret;
 
-  printf("lcd_get_color(): "); fflush(stdout);
+  printf("call : lcd_get_color() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -839,7 +848,7 @@ unsigned long int lcd_get_color(void)
 
   WonxDisplay_Flush(wonx_display);
 
-  printf("return value = %ul\n", ret); fflush(stdout);
+  printf("return value = 0x%08x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }

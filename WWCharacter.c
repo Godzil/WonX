@@ -63,8 +63,6 @@ int WWCharacter_SetBitmap(WWCharacter character, unsigned char * bitmap)
   return (0);
 }
 
-#include <stdio.h>
-
 int WWCharacter_GetPixel(WWCharacter character, int x, int y)
 {
   if (character == NULL)
@@ -103,6 +101,30 @@ int WWCharacter_SetPixel(WWCharacter character, int x, int y, int pixel)
   character->bitmap[y * 2 + x / 4] |= p;
 
   return (pixel);
+}
+
+int WWCharacter_PrintData(WWCharacter character, FILE * f)
+{
+  int x, y, n;
+
+  n = WWCharacter_GetNumber(character);
+
+  fprintf(f, "\n");
+
+  fprintf(f, "character[%d] :\tnumber = %d\n",
+	  n, WWCharacter_GetNumber(character));
+
+  for (y = 0; y < 8; y++) {
+    fprintf(f, "character[%d] :\tbitmap : ", n);
+    for (x = 0; x < 8; x++) {
+      fprintf(f, "%d", WWCharacter_GetPixel(character, x, y));
+    }
+    fprintf(f, "\n");
+  }
+
+  fflush(f);
+
+  return (0);
 }
 
 /*****************************************************************************/

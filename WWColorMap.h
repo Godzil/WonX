@@ -5,6 +5,7 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /*****************************************************************************/
@@ -23,6 +24,7 @@ int * WWColorMap_GetLCDColors(WWColorMap color_map, int * lcd_colors);
 int WWColorMap_SetLCDColors(WWColorMap color_map, int * lcd_colors);
 int WWColorMap_GetLCDColor(WWColorMap color_map, int color);
 int WWColorMap_SetLCDColor(WWColorMap color_map, int color, int lcd_color);
+int WWColorMap_PrintData(WWColorMap c, FILE * f);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

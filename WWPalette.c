@@ -79,6 +79,28 @@ int WWPalette_SetMappedColor(WWPalette palette, int color, int mapped_color)
   return (palette->mapped_color[color] = mapped_color);
 }
 
+int WWPalette_PrintData(WWPalette p, FILE * f)
+{
+  int i, n;
+
+  n = WWPalette_GetNumber(p);
+
+  fprintf(f, "\n");
+
+  fprintf(f, "palette[%d] :\tnumber = %d\n", n, WWPalette_GetNumber(p));
+  fprintf(f, "palette[%d] :\ttransparent = %s\n",
+	  n, true_false(WWPalette_GetTransparent(p)));
+
+  for (i = 0; i < 4; i++) {
+    fprintf(f, "palette[%d] :\tcolor[%d] = %d\n",
+	    n, i, WWPalette_GetMappedColor(p, i));
+  }
+
+  fflush(f);
+
+  return (0);
+}
+
 /*****************************************************************************/
 /* ここまで                                                                  */
 /*****************************************************************************/

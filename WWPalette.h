@@ -5,6 +5,7 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 
 /*****************************************************************************/
@@ -27,6 +28,7 @@ int * WWPalette_GetMappedColors(WWPalette palette, int * mapped_colors);
 int WWPalette_SetMappedColors(WWPalette palette, int * mapped_colors);
 int WWPalette_GetMappedColor(WWPalette palette, int color);
 int WWPalette_SetMappedColor(WWPalette palette, int color, int mapped_color);
+int WWPalette_PrintData(WWPalette p, FILE * f);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

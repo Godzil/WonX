@@ -10,10 +10,22 @@
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
-unsigned int XDisplay_GetKeyPress(XDisplay x_display)
-{ return (x_display->key_press); }
-int XDisplay_GetLCDDraw(XDisplay x_display)
-{ return (x_display->lcd_draw); }
+unsigned int XDisplay_GetKeyPress(XDisplay d) { return (d->key_press); }
+int XDisplay_GetLCDDraw(XDisplay d) { return (d->lcd_draw); }
+
+int XDisplay_GetColorMapPrint(XDisplay d) {return (d->color_map_print); }
+int XDisplay_GetPalettePrint(XDisplay d) {return (d->palette_print); }
+int XDisplay_GetCharacterPrint(XDisplay d) {return (d->character_print); }
+int XDisplay_GetSpritePrint(XDisplay d) {return (d->sprite_print); }
+
+int XDisplay_SetColorMapPrint(XDisplay d, int f)
+{ return (d->color_map_print = f); }
+int XDisplay_SetPalettePrint(XDisplay d, int f)
+{ return (d->palette_print = f); }
+int XDisplay_SetCharacterPrint(XDisplay d, int f)
+{ return(d->character_print = f); }
+int XDisplay_SetSpritePrint(XDisplay d, int f)
+{ return (d->sprite_print = f); }
 
 /*****************************************************************************/
 /* 内部で使用する関数などの定義                                              */
@@ -113,17 +125,23 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
     case XK_s       : press = KEY_START;  break;
     case XK_space   : press = KEY_A;      break;
     case XK_Shift_L : press = KEY_B;      break;
+    default         : press = 0;          break;
+    }
 
-      /* Wonx 操作用 */
+    /* Wonx 操作用 */
+    if (event->type == KeyPress) {
 
-      /* 表示モード変更 */
-    case XK_p       :
-      press = 0;
-      if (event->type == KeyPress)
-	x_display->lcd_draw = !(x_display->lcd_draw);
-      break;
+      switch (key_sym) {
 
-    default :         press = 0;          break;
+	/* 表示モード変更 */
+      case XK_p       : x_display->lcd_draw = !(x_display->lcd_draw); break;
+
+	/* データのダンプ操作 */
+      case XK_F1       : x_display->color_map_print = 1; break;
+      case XK_F2       : x_display->palette_print = 1; break;
+      case XK_F3       : x_display->character_print = 1; break;
+      case XK_F4       : x_display->sprite_print = 1; break;
+      }
     }
 
     if (press) {

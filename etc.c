@@ -12,3 +12,15 @@ int Error(char * funcname, char * message)
   fprintf(stderr, "%s(): %s\n", funcname, message);
   exit (1);
 }
+
+/*===========================================================================*/
+/* "true", "false" の文字列を返す                                            */
+/*===========================================================================*/
+
+char * true_false(int b)
+{
+  char * s[] = {"false", "true"};
+  b = b ? 1 : 0;
+  return (s[b]);
+}
+

@@ -193,8 +193,25 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
        (WWScreen_GetMode(screen) == WWSCREEN_OUTSIDE_ONLY) ) {
     sx = WWScreen_GetDrawX(screen);
     sy = WWScreen_GetDrawX(screen);
+
+    /*
+     * マニュアルの screen2_set_window() の説明には「表示領域の横幅と縦幅」と
+     * 書いてあるが，実際には「表示領域の横幅+1と縦幅+1」で動作する
+     * みたい？(未確認)なので，-1 しなくてよい？
+     * もしくは，WonderWitch での実際の動作は，
+     * ex = sx + WWScreen_GetDrawWidth( screen);
+     * でなく
+     * ex = WWScreen_GetDrawWidth( screen);
+     * なのかもしれない．
+     */
+
+#if 0
     ex = sx + WWScreen_GetDrawWidth( screen) - 1;
     ey = sy + WWScreen_GetDrawHeight(screen) - 1;
+#else
+    ex = sx + WWScreen_GetDrawWidth( screen);
+    ey = sy + WWScreen_GetDrawHeight(screen);
+#endif
   }
 
   mode = WWScreen_GetMode(screen);
@@ -283,7 +300,8 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   /* スクリーン１描画 */
-  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 0));
+  if (WWDisplay_GetSpriteEnable(display))
+    WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 0));
 
   /* スプライト描画(スクリーン２より優先でないもの) */
   for (i = 0; i < WWDisplay_GetSpriteCount(display); i++) {
@@ -295,7 +313,8 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   /* スクリーン２描画 */
-  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 1));
+  if (WWDisplay_GetSpriteEnable(display))
+    WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 1));
 
   /* スプライト描画(スクリーン２より優先なもの) */
   for (i = 0; i < WWDisplay_GetSpriteCount(display); i++) {
@@ -305,14 +324,6 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
       WWDisplay_DrawSprite(display, sprite);
     }
   }
-
-  /*
-  for (x = 0; x < lcd_panel_width; x++) {
-    for (y = 0; y < lcd_panel_height; y++) {
-      printf("%d", WWLCDPanel_GetPixel(lcd_panel, x, y));
-    }
-  }
-*/
 
   return (0);
 }

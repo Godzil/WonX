@@ -12,7 +12,7 @@ int key_press_check(void)
   XDisplay x_display;
   int ret;
 
-  printf("key_press_check(): "); fflush(stdout);
+  printf("call : key_press_check() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -21,7 +21,7 @@ int key_press_check(void)
 
   ret = XDisplay_GetKeyPress(x_display);
 
-  printf("return value = %d\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -31,7 +31,7 @@ int key_hit_check(void)
   XDisplay x_display;
   int ret;
 
-  printf("key_hit_check(): "); fflush(stdout);
+  printf("call : key_hit_check() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -40,7 +40,7 @@ int key_hit_check(void)
 
   ret = XDisplay_GetKeyPress(x_display);
 
-  printf("return value = %d\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -50,7 +50,7 @@ int key_wait(void)
   XDisplay x_display;
   int ret;
 
-  printf("key_wait(): "); fflush(stdout);
+  printf("call : key_wait() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -62,14 +62,14 @@ int key_wait(void)
     ret = XDisplay_GetKeyPress(x_display);
   } while (ret == 0);
 
-  printf("return value = %d\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
 
 void key_set_repeat(int rate, int delay)
 {
-  printf("key_set_repeat(): rate = %d, delay = %d, ", rate, delay);
+  printf("call : key_set_repeat() : rate = %d, delay = %d, ", rate, delay);
   fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
@@ -81,13 +81,13 @@ int key_get_repeat(void)
 {
   int ret;
 
-  printf("key_get_repeat(): "); fflush(stdout);
+  printf("call : key_get_repeat() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
   ret = 0;
 
-  printf("return value = %d\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }
@@ -97,7 +97,7 @@ int key_hit_check_with_repeat(void)
   XDisplay x_display;
   int ret;
 
-  printf("key_hit_check_with_repeat(): "); fflush(stdout);
+  printf("call : key_hit_check_with_repeat() : "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
@@ -106,7 +106,7 @@ int key_hit_check_with_repeat(void)
 
   ret = XDisplay_GetKeyPress(x_display);
 
-  printf("return value = %d\n", ret); fflush(stdout);
+  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
 }

@@ -22,6 +22,16 @@ typedef struct _XDisplay * XDisplay;
 unsigned int XDisplay_GetKeyPress(XDisplay x_display);
 int XDisplay_GetLCDDraw(XDisplay x_display);
 
+int XDisplay_GetColorMapPrint(XDisplay d);
+int XDisplay_GetPalettePrint(XDisplay d);
+int XDisplay_GetCharacterPrint(XDisplay d);
+int XDisplay_GetSpritePrint(XDisplay d);
+
+int XDisplay_SetColorMapPrint(XDisplay d, int f);
+int XDisplay_SetPalettePrint(XDisplay d, int f);
+int XDisplay_SetCharacterPrint(XDisplay d, int f);
+int XDisplay_SetSpritePrint(XDisplay d, int f);
+
 /*===========================================================================*/
 /* オブジェクトの生成と消去                                                  */
 /*===========================================================================*/
