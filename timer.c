@@ -1,10 +1,15 @@
+/*****************************************************************************/
+/* ここから                                                                  */
+/*****************************************************************************/
+
 #include <stdlib.h>
 #include <time.h>
 
-#include <sys/timer.h>
+#include "sys/timer.h"
 
 #include "Wonx.h"
 #include "etc.h"
+#include "configure.h"
 
 typedef struct {
   unsigned char year;
@@ -30,6 +35,26 @@ static int get_hour(struct tm * tblock) { return (tblock->tm_hour); }
 static int get_minute(struct tm * tblock) { return (tblock->tm_min); }
 /* int tm_sec; seconds (0 - 60) */
 static int get_second(struct tm * tblock) { return (tblock->tm_sec); }
+
+/*****************************************************************************/
+/* 互換関数の定義                                                            */
+/*****************************************************************************/
+
+/*
+ * Xサーバとの同期の整合性がとれなくなるなどの問題が考えられるので，
+ * 互換関数の内部は UNIXTimer_Pause(), UNIXTimer_Unpause() でくくり，
+ * タイマ割り込みを一時停止して処理を行う．また，unpause するまえに，
+ * かならず sync するようにする．
+ */
+
+/*
+ * タイマの一時停止の２重解除の問題が出てくるので，
+ * 互換関数から互換関数を呼んではいけない．
+ * (一時停止はネストされるが，いちおう)
+ * 似たような処理をする関数の場合は，必ず static な別関数に処理をまとめ，
+ * そっちを呼び出すようにすること．
+ * 引数の表示の問題もあるしね．
+ */
 
 void rtc_set_datetime(int field, unsigned int value)
 {
@@ -147,45 +172,143 @@ void rtc_disable_alarm(void)
 
 void timer_enable(int type, unsigned int auto_preset, unsigned int preset)
 {
+  WWTimer ww_timer;
+
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : timer_enable() : type = %d, auto_preset = %u, preset = %u\n",
 	 type, (int)auto_preset, (int)preset);
   fflush(stdout);
 
-  /* 未サポート */
-  printf("call : timer_enable() : not supported\n");
+  /*
+   * TIMER_HBLANK の場合は，1/(75*144) 秒?
+   * TIMER_VBLANK の場合は，1/75 秒
+   * だが，実際にそんな短い時間にしたら wonx の描画がついていけないので，
+   * だいぶ長めにしてある．
+   */
+
+  switch (type) {
+  case TIMER_VBLANK:
+    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    WWTimer_SetPresetCounter(ww_timer, preset * WONX_VBLANK_INTERVAL);
+    break;
+  case TIMER_HBLANK:
+    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    WWTimer_SetPresetCounter(ww_timer, preset * WONX_HBLANK_INTERVAL);
+    break;
+  default:
+    /*
+     * 無意味だが，gcc -Wall でコンパイルするとワーニングが出るので，
+     * NULL に初期化する．
+     */
+    ww_timer = NULL;
+    Error("timer_enable", "Invalid timer type.");
+  }
+
+  switch (auto_preset) {
+  case TIMER_ONESHOT:    WWTimer_SetAutoPresetOFF(ww_timer); break;
+  case TIMER_AUTOPRESET: WWTimer_SetAutoPresetON( ww_timer); break;
+  default: Error("timer_enable", "Invalid auto preset type.");
+  }
+
+  WWTimer_Reset(ww_timer);
+  WWTimer_ON(ww_timer);
 
   printf("call : timer_enable() : return value = none\n");
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
 
 void timer_disable(int type)
 {
+  WWTimer ww_timer;
+
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : timer_disable() : type = %d\n", type);
   fflush(stdout);
 
-  /* 未サポート */
-  printf("call : timer_disable() : not supported\n");
+  switch (type) {
+  case TIMER_VBLANK:
+    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    break;
+  case TIMER_HBLANK:
+    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    break;
+  default:
+    /*
+     * 無意味だが，gcc -Wall でコンパイルするとワーニングが出るので，
+     * NULL に初期化する．
+     */
+    ww_timer = NULL;
+    Error("timer_disable", "Invalid timer type.");
+  }
+
+  WWTimer_OFF(ww_timer);
 
   printf("call : timer_disable() : return value = none\n");
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
 
 unsigned int timer_get_count(int type)
 {
+  WWTimer ww_timer;
   unsigned int ret = 0;
+
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : timer_get_count() : type = %d\n", type);
   fflush(stdout);
 
-  /* 未サポート */
-  printf("call : timer_get_count() : not supported\n");
+  switch (type) {
+  case TIMER_VBLANK:
+    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    break;
+  case TIMER_HBLANK:
+    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    break;
+  default:
+    /*
+     * 無意味だが，gcc -Wall でコンパイルするとワーニングが出るので，
+     * NULL に初期化する．
+     */
+    ww_timer = NULL;
+    Error("timer_get_count", "Invalid timer type.");
+  }
+
+  ret = WWTimer_GetCounter(ww_timer);
 
   printf("call : timer_get_count() : return value = %u\n", ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
+
+/*****************************************************************************/
+/* ここまで                                                                  */
+/*****************************************************************************/
+
+/*****************************************************************************/
+/* End of File.                                                              */
+/*****************************************************************************/

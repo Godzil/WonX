@@ -1,23 +1,30 @@
-#ifndef _WonxP_h_INCLUDED_
-#define _WonxP_h_INCLUDED_
+#ifndef _WonxSystemP_h_INCLUDED_
+#define _WonxSystemP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "Wonx.h"
+#include "WonxSystem.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _Wonx {
-  WonxDisplay wonx_display;
-  WonxText wonx_text;
-  WonxSystem wonx_system;
-} _Wonx;
+typedef struct _WonxSystem {
 
-typedef struct _Wonx * Wonx;
+  WWInterrupt ww_interrupt;
+
+  /*
+   * ww_timer[0] はVBLANK割り込み用．
+   * ww_timer[1] はVBLANKを利用したタイマカウンタ割り込み用．
+   * ww_timer[2] はHBLANKを利用したタイマカウンタ割り込み用．
+   */
+  WWTimer ww_timer[3];
+
+  UNIXTimer unix_timer;
+
+} _WonxSystem;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

@@ -1,23 +1,24 @@
-#ifndef _WonxP_h_INCLUDED_
-#define _WonxP_h_INCLUDED_
+#ifndef _WWTimerP_h_INCLUDED_
+#define _WWTimerP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "Wonx.h"
+#include "WWTimer.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _Wonx {
-  WonxDisplay wonx_display;
-  WonxText wonx_text;
-  WonxSystem wonx_system;
-} _Wonx;
+typedef struct _WWTimer {
 
-typedef struct _Wonx * Wonx;
+  int timer_on; /* タイマの状態 */
+  int auto_preset; /* オートプリセット */
+  int preset_counter; /* プリセット・カウンタ */
+  int counter; /* カウンタ */
+
+} _WWTimer;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

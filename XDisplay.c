@@ -7,8 +7,9 @@
 #include "etc.h"
 
 #include <stdio.h>
-#include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
+#include <sys/types.h>
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -69,7 +70,20 @@ static void iconify(Widget w, XEvent * event, String * params, Cardinal * num)
 
 static void sleep_3(Widget w, XEvent * event, String * params, Cardinal * num)
 {
+  time_t old_t;
+  time_t t;
+  int i;
+  /* UNIXTimer.c 内部で SIGALRM を使用しているので，sleep() は使用できない */
+#if 0
   sleep(3);
+#else
+  for (i = 0; i < 3; i++) {
+    time(&t);
+    old_t = t;
+    while (t == old_t)
+      time(&t);
+  }
+#endif
 }
 
 static XtActionsRec actions[] = {

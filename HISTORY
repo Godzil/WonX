@@ -1,6 +1,20 @@
-2000/10/8(日)
+wonx-b02
 
-wonx-a08 未公開
+割り込み処理の追加．タイマ割り込みサポート．
+(UNIXTimer, WWInterrupt, WWTimer, WonxSystem 追加)
+割り込みサポートに合わせて，互換関数を UNIXTimer_Pause(), UNIXTimer_Unpause()
+でくくった．
+UNIXTimer, WWTimer, WonxSystem のコールバック関数などは，
+割り込み特有のバグが無いか細かくチェックする必要がある．
+(コールバック関数中で割り込みの設定が変わってしまったり，コールバック関数から
+ コールバック関数が呼ばれたりすることはないかどうかチェックする必要がある)
+
+
+
+
+2000/10/9(月)
+
+wonx-b01 公開
 
 テキスト表示機能の追加．(0〜127のASCII文字のみで，漢字は未対応)
 
@@ -19,7 +33,7 @@ disp.c で重複した処理をしている関数の処理部分をまとめた．
 
 2000/10/5(木)
 
-wonx-a07 未公開
+wonx-a07 公開
 
 WWLCDPanel にビットマップデータを２枚持たせ，一度描画したビットマップは
 描画しないように修正．Xサーバの負荷を減らした．
@@ -36,7 +50,7 @@ wonx-a05 と wonx-a06 の WWDisplay.c (WWDisplay_DrawScreen()) の
 
 2000/10/4(水)
 
-wonx-a06 未公開
+wonx-a06 公開
 
 WWDisplay_DrawScreen() のアルゴリズムを大幅に修正．
 たいして高速にならなかった．X サーバの描画がホットスポットになっていると
@@ -47,7 +61,7 @@ WWDisplay_DrawScreen() のアルゴリズムを大幅に修正．
 
 2000/10/3(火)
 
-wonx-a05 未公開
+wonx-a05 公開
 
 XDisplay_DrawLCDWindow() を修正．無駄な計算をループ外に出した．
 

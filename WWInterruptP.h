@@ -1,23 +1,28 @@
-#ifndef _WonxP_h_INCLUDED_
-#define _WonxP_h_INCLUDED_
+#ifndef _WWInterruptP_h_INCLUDED_
+#define _WWInterruptP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "Wonx.h"
+#include "WWInterrupt.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _Wonx {
-  WonxDisplay wonx_display;
-  WonxText wonx_text;
-  WonxSystem wonx_system;
-} _Wonx;
+typedef struct _WWInterruptVector {
+  int number;
+  WWInterruptCallback callback;
+  int cs;
+  int ds;
+} _WWInterruptVector;
 
-typedef struct _Wonx * Wonx;
+typedef struct _WWInterruptVector * WWInterruptVector;
+
+typedef struct _WWInterrupt {
+  WWInterruptVector vector[8]; /* 割り込みは全部で８種類 */
+} _WWInterrupt;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

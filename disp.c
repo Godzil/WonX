@@ -5,22 +5,41 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <sys/disp.h>
+#include "sys/disp.h"
 
 #include "Wonx.h"
 
 /*****************************************************************************/
-/* メンバ関数の定義                                                          */
+/* 互換関数の定義                                                            */
 /*****************************************************************************/
+
+/*
+ * Xサーバとの同期の整合性がとれなくなるなどの問題が考えられるので，
+ * 互換関数の内部は UNIXTimer_Pause(), UNIXTimer_Unpause() でくくり，
+ * タイマ割り込みを一時停止して処理を行う．また，unpause するまえに，
+ * かならず sync するようにする．
+ */
+
+/*
+ * タイマの一時停止の２重解除の問題が出てくるので，
+ * 互換関数から互換関数を呼んではいけない．
+ * (一時停止はネストされるが，いちおう)
+ * 似たような処理をする関数の場合は，必ず static な別関数に処理をまとめ，
+ * そっちを呼び出すようにすること．
+ * 引数の表示の問題もあるしね．
+ */
 
 void display_control(unsigned int flags)
 {
   WWDisplay ww_display;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : display_control() : flags = 0x%04x\n", (int)flags);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
@@ -47,6 +66,9 @@ void display_control(unsigned int flags)
 
   printf("call : display_control() : return value = none\n"); fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -55,9 +77,12 @@ unsigned int display_status()
   WWDisplay ww_display;
   unsigned short int ret;
 
-  printf("call : display_status() : \n"); fflush(stdout);
-
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  printf("call : display_status() : \n"); fflush(stdout);
 
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
@@ -69,10 +94,10 @@ unsigned int display_status()
   if (WWScreen_GetEnable(WWDisplay_GetScreen(ww_display, SCREEN2)))
     ret |= DCM_SCR2;
 
-  if (WWDisplay_GetSpriteEnable(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay())))
+  if (WWDisplay_GetSpriteEnable(ww_display))
     ret |= DCM_SPR;
 
-  if (WWDisplay_GetSpriteWindowEnable(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay())))
+  if (WWDisplay_GetSpriteWindowEnable(ww_display))
     ret |= DCM_SPR_WIN;
 
   switch (WWScreen_GetMode(WWDisplay_GetScreen(ww_display, SCREEN2))) {
@@ -85,12 +110,15 @@ unsigned int display_status()
     default:
   }
 
-  ret |= WWDisplay_GetBorder(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay())) << 7;
+  ret |= WWDisplay_GetBorder(ww_display) << 7;
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
   printf("call : display_status() : return value = %u\n", (int)ret);
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (ret);
 }
@@ -101,20 +129,25 @@ void font_set_monodata(unsigned int number, unsigned int count, void * data)
   int i, x, y, n, p;
   int f, b;
   unsigned char * d;
+  WWDisplay ww_display;
+
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : font_set_monodata() : number = %u, count = %u, data = %p\n",
 	 (int)number, (int)count, data); fflush(stdout);
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
   n = 0;
   d = (unsigned char *)data; /* ひとつのキャラクタデータは８バイト */
-  f = WWDisplay_GetForegroundColor(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
-  b = WWDisplay_GetBackgroundColor(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
+  f = WWDisplay_GetForegroundColor(ww_display);
+  b = WWDisplay_GetBackgroundColor(ww_display);
 
   for (i = 0; i < count; i++) {
-    c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
-			       number + i);
+    c = WWDisplay_GetCharacter(ww_display, number + i);
     for (y = 0; y < 8; y++) {
       for (x = 0; x < 8; x++) {
 	p = (d[n] & (1 << (7 - x))) ? f : b; /*これでよいのか？*/
@@ -129,6 +162,9 @@ void font_set_monodata(unsigned int number, unsigned int count, void * data)
   printf("call : font_set_monodata() : return value = none\n");
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -139,10 +175,13 @@ void font_set_colordata(unsigned int number,
   int i, x, y, n, p;
   unsigned char * d;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : font_set_colordata() : number = %u, count = %u, data = %p\n",
 	 (int)number, (int)count, data); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   n = 0;
   d = (unsigned char *)data; /* ひとつのキャラクタデータは16バイト */
@@ -154,7 +193,8 @@ void font_set_colordata(unsigned int number,
       for (x = 0; x < 8; x++) {
 
 	/*これでよいのか？*/
-	p = ((d[n] & (1 << (7-x))) ? 2 : 0) + ((d[n + 1] & (1 << (7-x))) ? 1 : 0);
+	p = ((d[n] & (1 << (7-x))) ? 2 : 0)
+	  + ((d[n + 1] & (1 << (7-x))) ? 1 : 0);
 
 	WWCharacter_SetPixel(c, x, y, p);
       }
@@ -168,6 +208,9 @@ void font_set_colordata(unsigned int number,
   printf("call : font_set_colordata() : return value = none\n");
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -179,10 +222,13 @@ void font_get_data(unsigned int number,
   int i, x, y, n, p;
   unsigned char * d;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : font_get_data() : number = %u, count = %u, data = %p\n",
 	 (int)number, (int)count, data); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   n = 0;
   d = (unsigned char *)data; /* ひとつのキャラクタデータは16バイト？ */
@@ -206,7 +252,11 @@ void font_get_data(unsigned int number,
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("call : font_get_data() : return value = none\n"); fflush(stdout);
+  printf("call : font_get_data() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -215,10 +265,13 @@ void font_set_color(unsigned int colors)
 {
   WWDisplay dis;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : font_set_color() : colors = 0x%04x\n", (int)colors);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   dis = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
   WWDisplay_SetForegroundColor(dis, colors & 0x03);
@@ -228,6 +281,9 @@ void font_set_color(unsigned int colors)
 
   printf("call : font_set_color() : return value = none\n"); fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -236,9 +292,12 @@ unsigned int font_get_color(void)
   unsigned short int ret;
   WWDisplay dis;
 
-  printf("call : font_get_color() : \n"); fflush(stdout);
-
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  printf("call : font_get_color() : \n"); fflush(stdout);
 
   dis = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
   ret = 0;
@@ -249,6 +308,9 @@ unsigned int font_get_color(void)
 
   printf("call : font_get_color() : return value = 0x%04x\n", (int)ret);
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (ret);
 }
@@ -290,11 +352,14 @@ void screen_set_char(int screen, int x, int y, int w, int h, void * data)
   int i, j;
   unsigned short int * d;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_set_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p\n",
 	 screen, x, y, w, h, data);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   d = (unsigned short int *)data;
 
@@ -307,7 +372,11 @@ void screen_set_char(int screen, int x, int y, int w, int h, void * data)
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : screen_set_char() : return value = none\n"); fflush(stdout);
+  printf("call : screen_set_char() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -347,11 +416,14 @@ void screen_get_char(int screen, int x, int y, int w, int h, void * data)
   int i, j;
   unsigned short int * d;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_get_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p\n",
 	 screen, x, y, w, h, data);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   d = (unsigned short int *)data;
 
@@ -364,7 +436,11 @@ void screen_get_char(int screen, int x, int y, int w, int h, void * data)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("call : screen_get_char() : return value = none\n"); fflush(stdout);
+  printf("call : screen_get_char() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -373,11 +449,14 @@ unsigned int screen_get_char1(int screen, int x, int y)
 {
   unsigned short int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_get_char1() : screen = %d, x = %d, y = %d\n",
 	 screen, x, y);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   ret = _screen_get_char1(screen, x, y);
 
@@ -385,6 +464,9 @@ unsigned int screen_get_char1(int screen, int x, int y)
 
   printf("call : screen_get_char1() : return value = 0x%04x\n", (int)ret);
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (ret);
 }
@@ -394,11 +476,14 @@ void screen_fill_char(int screen, int x, int y, int w, int h,
 {
   int i, j;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_fill_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = 0x%04x\n",
 	 screen, x, y, w, h, (int)data);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   for (j = 0; j < h; j++) {
     for (i = 0; i < w; i++) {
@@ -410,6 +495,9 @@ void screen_fill_char(int screen, int x, int y, int w, int h,
 
   printf("call : screen_fill_char() : return value = none\n"); fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -419,10 +507,13 @@ void screen_fill_attr(int screen, int x, int y, int w, int h,
   int i, j;
   unsigned short int c;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_fill_attr() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = 0x%04x, mask = 0x%04x\n",
 	 screen, x, y, w, h, (int)data, (int)mask); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   for (j = 0; j < h; j++) {
     for (i = 0; i < w; i++) {
@@ -435,17 +526,24 @@ void screen_fill_attr(int screen, int x, int y, int w, int h,
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : screen_fill_attr() : return value = none\n"); fflush(stdout);
+  printf("call : screen_fill_attr() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
 
 void sprite_set_range(unsigned int sprite_start, unsigned int sprite_count)
 {
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_range() : start = %u, count = %u\n",
 	 (int)sprite_start, (int)sprite_count); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   WWDisplay_SetSpriteStart(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			   sprite_start);
@@ -454,7 +552,11 @@ void sprite_set_range(unsigned int sprite_start, unsigned int sprite_count)
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : sprite_set_range() : return value = none\n"); fflush(stdout);
+  printf("call : sprite_set_range() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -486,16 +588,23 @@ static void _sprite_set_char(unsigned int sprite_num, unsigned int data)
 
 void sprite_set_char(unsigned int sprite_num, unsigned int data)
 {
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_char() : number = %u, data = 0x%04x\n",
 	 (int)sprite_num, (int)data); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   _sprite_set_char(sprite_num, data);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : sprite_set_char() : return value = none\n"); fflush(stdout);
+  printf("call : sprite_set_char() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -529,10 +638,13 @@ unsigned int sprite_get_char(unsigned int sprite_num)
 {
   unsigned short int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_get_char() : number = %u\n", (int)sprite_num);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   ret = _sprite_get_char(sprite_num);
 
@@ -540,6 +652,9 @@ unsigned int sprite_get_char(unsigned int sprite_num)
 
   printf("call : sprite_get_char() : return value = 0x%04x\n", (int)ret);
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (ret);
 }
@@ -557,11 +672,14 @@ static void _sprite_set_location(unsigned int sprite_num, int x, int y)
 
 void sprite_set_location(unsigned int sprite_num, int x, int y)
 {
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_location() : number = %u, x = %d, y = %d\n",
 	 (int)sprite_num, x, y);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   _sprite_set_location(sprite_num, x, y);
 
@@ -569,6 +687,9 @@ void sprite_set_location(unsigned int sprite_num, int x, int y)
 
   printf("call : sprite_set_location() : return value = none\n");
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -590,10 +711,13 @@ unsigned int sprite_get_location(unsigned int sprite_num)
 {
   unsigned short int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_get_location() : number = %u\n", (int)sprite_num);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   ret = _sprite_get_location(sprite_num);
 
@@ -601,6 +725,9 @@ unsigned int sprite_get_location(unsigned int sprite_num)
 
   printf("call : sprite_get_location() : return value = 0x%04x\n", (int)ret);
   fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (ret);
 }
@@ -617,11 +744,14 @@ static void _sprite_set_char_location(unsigned int sprite_num,
 void sprite_set_char_location(unsigned int sprite_num,
 			      unsigned int data, int x, int y)
 {
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_char_location() : number = %u, data = 0x%04x, x = %d, y = %d\n",
 	 (int)sprite_num, (int)data, x, y);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   _sprite_set_char_location(sprite_num, data, x, y);
 
@@ -630,6 +760,9 @@ void sprite_set_char_location(unsigned int sprite_num,
   printf("call : sprite_set_char_location() : return value = none\n");
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -637,10 +770,13 @@ unsigned long int sprite_get_char_location(unsigned int sprite_num)
 {
   unsigned long int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_get_char_location() : number = %u\n", (int)sprite_num);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   ret = 0;
   ret |= ((unsigned long int)_sprite_get_char(sprite_num));
@@ -652,6 +788,9 @@ unsigned long int sprite_get_char_location(unsigned int sprite_num)
 	 (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
@@ -660,11 +799,14 @@ void sprite_set_data(unsigned int sprite_num, unsigned int count, void * data)
   int i;
   unsigned long int * n;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_data() : number = %u, count = %u, data = %p\n",
 	 (int)sprite_num, (int)count, data);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   n = (unsigned long int *)data;
   for (i = 0; i < count; i++) {
@@ -676,7 +818,11 @@ void sprite_set_data(unsigned int sprite_num, unsigned int count, void * data)
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : sprite_set_data() : return value = none\n"); fflush(stdout);
+  printf("call : sprite_set_data() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -685,11 +831,14 @@ void screen_set_scroll(int screen, int x, int y)
 {
   WWScreen s;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen_set_scroll() : screen = %d, x = %d, y = %d\n",
 	 screen, x, y);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			  screen);
@@ -698,7 +847,11 @@ void screen_set_scroll(int screen, int x, int y)
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : screen_set_scroll() : return value = none\n"); fflush(stdout);
+  printf("call : screen_set_scroll() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -708,9 +861,12 @@ unsigned int screen_get_scroll(int screen)
   unsigned short int ret;
   WWScreen s;
 
-  printf("call : screen_get_scroll() : screen = %d\n", screen); fflush(stdout);
-
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  printf("call : screen_get_scroll() : screen = %d\n", screen); fflush(stdout);
 
   s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			  screen);
@@ -724,6 +880,9 @@ unsigned int screen_get_scroll(int screen)
   printf("call : screen_get_scroll() : return value = %u\n", (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
@@ -731,10 +890,13 @@ void screen2_set_window(int x, int y, int w, int h)
 {
   WWScreen s;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : screen2_set_window() : x = %d, y = %d, width = %d, height = %d\n",
 	 x, y, w, h); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			  SCREEN2);
@@ -748,6 +910,9 @@ void screen2_set_window(int x, int y, int w, int h)
   printf("call : screen2_set_window() : return value = none\n");
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -759,6 +924,9 @@ unsigned long int screen2_get_window(void)
   unsigned long int ret;
 
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : screen2_get_window() : \n"); fflush(stdout);
 
@@ -778,6 +946,9 @@ unsigned long int screen2_get_window(void)
   printf("call : screen2_get_window() : return value = 0x%08x\n", (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
@@ -785,11 +956,14 @@ void sprite_set_window(int x, int y, int w, int h)
 {
   WWDisplay d;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_set_window() : x = %d, y = %d, w = %d, h = %d\n",
 	 x, y, w, h);
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   d = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
@@ -803,6 +977,9 @@ void sprite_set_window(int x, int y, int w, int h)
   printf("call : sprite_set_window() : return value = none\n");
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return;
 }
 
@@ -813,10 +990,13 @@ unsigned long int sprite_get_window(void)
   unsigned short int wh;
   unsigned long int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : sprite_get_window() : \n");
   fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   d = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
@@ -833,6 +1013,9 @@ unsigned long int sprite_get_window(void)
   printf("call : sprite_get_window() : return value = 0x%08x\n", (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
@@ -842,23 +1025,32 @@ void palette_set_color(unsigned int palette_num,
   int mapped_colors[4];
   WWPalette palette;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : palette_set_color() : number = %u, colors = 0x%04x\n",
 	 (int)palette_num, (int)colors); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   mapped_colors[0] = colors & 0x07;
   mapped_colors[1] = (colors >>  4) & 0x07;
   mapped_colors[2] = (colors >>  8) & 0x07;
   mapped_colors[3] = (colors >> 12) & 0x07;
 
-  palette = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()), palette_num);
+  palette =
+    WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
+			 palette_num);
 
   WWPalette_SetMappedColors(palette, mapped_colors);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : palette_set_color() : return value = none\n"); fflush(stdout);
+  printf("call : palette_set_color() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -869,13 +1061,17 @@ unsigned int palette_get_color(unsigned int palette_num)
   WWPalette palette;
   unsigned short int ret;
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : palette_get_color() : number = %u\n", (int)palette_num);
   fflush(stdout);
 
-  if (!Wonx_IsCreated()) Wonx_Create();
-
-  palette = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
-				 palette_num);
+  palette =
+    WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
+			 palette_num);
   WWPalette_GetMappedColors(palette, mapped_colors);
 
   ret = 0;
@@ -889,6 +1085,9 @@ unsigned int palette_get_color(unsigned int palette_num)
   printf("call : palette_get_color() : return value = %u\n", (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
@@ -897,10 +1096,13 @@ void lcd_set_color(unsigned int colors0, unsigned int colors1)
   WWColorMap color_map;
   int lcd_colors[8];
 
+  if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   printf("call : lcd_set_color() : colors0 = 0x%04x, colors1 = 0x%04x\n",
 	 (int)colors0, (int)colors1); fflush(stdout);
-
-  if (!Wonx_IsCreated()) Wonx_Create();
 
   lcd_colors[0] =  colors0        & 0x0f;
   lcd_colors[1] = (colors0 >>  4) & 0x0f;
@@ -911,12 +1113,17 @@ void lcd_set_color(unsigned int colors0, unsigned int colors1)
   lcd_colors[6] = (colors1 >>  8) & 0x0f;
   lcd_colors[7] = (colors1 >> 12) & 0x0f;
 
-  color_map = WWDisplay_GetColorMap(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
+  color_map =
+    WWDisplay_GetColorMap(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
   WWColorMap_SetLCDColors(color_map, lcd_colors);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : lcd_set_color() : return value = none\n"); fflush(stdout);
+  printf("call : lcd_set_color() : return value = none\n");
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return;
 }
@@ -927,11 +1134,15 @@ unsigned long int lcd_get_color(void)
   int lcd_colors[8];
   unsigned long int ret;
 
-  printf("call : lcd_get_color() : \n"); fflush(stdout);
-
   if (!Wonx_IsCreated()) Wonx_Create();
 
-  color_map = WWDisplay_GetColorMap(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  printf("call : lcd_get_color() : \n"); fflush(stdout);
+
+  color_map =
+    WWDisplay_GetColorMap(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()));
   WWColorMap_GetLCDColors(color_map, lcd_colors);
 
   ret = 0;
@@ -949,41 +1160,76 @@ unsigned long int lcd_get_color(void)
   printf("call : lcd_get_color() : return value = 0x%08x\n", (int)ret);
   fflush(stdout);
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (ret);
 }
 
 void lcd_set_segments(unsigned segments)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   /* セグメント表示は未サポートか？ */
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  return;
 }
 
 unsigned int lcd_get_segments(void)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   /* セグメント表示は未サポートか？ */
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   return (0);
 }
 
-void lcd_set_sleep(unsigned sleep)
+void lcd_set_sleep(unsigned slp)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   /* ? */
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  return;
 }
 
 unsigned int lcd_get_sleep(void)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
+
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
   /* ? */
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   return (0);
 }
@@ -992,14 +1238,34 @@ void screen_set_vram(int screen, int locationID)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  /* 未サポート */
+
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  return;
 }
 
 void sprite_set_vram(int locationID)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  /* 未サポート */
+
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+
+  return;
 }
 
 /*****************************************************************************/
