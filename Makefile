@@ -2,8 +2,8 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = Wonx-b04
-PKGNAME = wonx-b04
+VERSION = Wonx-b05
+PKGNAME = wonx-b05
 
 SMAC = smac-b02
 

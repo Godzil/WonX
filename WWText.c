@@ -73,8 +73,11 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
 {
   WWCharacter ww_character;
 
-  if ((character < 0) || (character > 127))
-    Wonx_Error("WWText_PutCharacter", "Character number is out of range.");
+  if ((character < 0) || (character > 127)) {
+    printf("warning : WWText_PutCharacter() : Character number is out of range.\n");
+    fflush(stdout);
+    return (-1);
+  }
 
   /*
    * テキスト表示は，text_window_init() で指定したテキストウインドウの
@@ -82,8 +85,11 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
    */
 
   if ( (x < 0) || (x > WWText_GetWidth( ww_text) - 1) ||
-       (y < 0) || (y > WWText_GetHeight(ww_text) - 1) )
-    Wonx_Error("WWText_PutCharacter", "Position is out of range.");
+       (y < 0) || (y > WWText_GetHeight(ww_text) - 1) ) {
+    printf("warning : WWText_PutCharacter() : Position is out of range.\n");
+    fflush(stdout);
+    return (-1);
+  }
 
 #if 0
   n = WWText_GetBase(ww_text) +

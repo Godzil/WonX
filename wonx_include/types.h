@@ -5,6 +5,10 @@
 
 #include <stdlib.h> /* for NULL definition */
 
+#ifndef _WONX_
+#define _WONX_
+#endif
+
 #ifdef TYPEDEF_USHORT
 typedef unsigned short int ushort;
 #endif

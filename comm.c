@@ -144,6 +144,7 @@ static int comm_input(int timeout)
   select(fileno(stdin) + 1, &bitmap, NULL, NULL, t_p);
 
   c = FD_ISSET(fileno(stdin), &bitmap) ? fgetc(stdin) : -1;
+  c = (c == '\n') ? '\r' : c;
 
   return (c);
 }

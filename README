@@ -329,6 +329,7 @@ wonx は，メッセージを出力する際に，grep でフィルタリングできるように，
 関数を呼び出しても，何も起こりません．(空の関数になっている)
 
 ・サウンド
+・カーソル表示
 ・その他いっぱい
 
 ■ 注意しなければならないこと
@@ -340,8 +341,8 @@ UNIX 上でコンパイル・リンクするためのライブラリであり，ハードウエアを
 ならないことがいくつかあります．これらは Wonx の性質上，仕方の無いことです．
 
 以下のことは，意識することと，きれいなプログラムを書くことで，
-かなり回避できると思います．(short int にすべきところでは，省略せずに
-ちゃんと short int と明示するとか)
+かなり回避できると思います．(ビットマップ操作などで，short int にすべき
+ところでは，省略せずにちゃんと short int と明示するとか)
 
 まあ，Wonx の目的は論理的なバグを早い段階で無くすことにあるので，このへんは
 そういうものだと割り切って使ってください．
@@ -405,6 +406,115 @@ WonderWitch よりもかなり大きめにしてあります．
 反応しないことがあります．
 反応しないからといってなんども押すのでなく，１回を長く確実に押すように
 してください．
+
+[MS-DOS 形式ファイルの扱い]
+
+MS-DOS 形式ファイルは，行末の改行コードが UNIX のテキストファイルと
+異なるので，注意してください．*.[ch] ファイルの場合は問題無いのですが，
+makefile は注意してください．
+(UNIX のテキストファイルでは，改行は \n ですが，MS-DOS では \r\n です)
+例えば，makefile 中に，
+
+gcc -g -o smac $(OBJS) -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
+
+のような行があったとして，これが MS-DOS のテキスト形式のファイルだと，
+-lXt のあとに余分な改行コード(\r)が付加されてしまうため，UNIX 上で make
+しても，「-lXt に相当するライブラリが無い」と怒られてしまいます．
+(しかも，ファイルを emacs や less などで参照しても，改行コードは表示されない
+ ため，原因がわかりにくい)
+また，
+
+gcc -g -o smac $(OBJS) -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
+
+のようにしていると，/usr/X11R6/lib を指定したつもりなのに，実際には
+/usr/X11R6/lib\r というディレクトリが指定されたことになってしまい，
+-lX11, -lXt の検索に失敗します．
+
+漢字コードに関しても，同じことがいえます．UNIX での漢字コードは EUC なので，
+ソースコード中に SJIS の漢字が入っていると，うまくコンパイルできなかったり，
+make がうまく動作しなかったり，コンパイルできてもプログラム自体が
+誤動作してしまい，しかも原因に気づきにくくなってしまう可能性があります．
+makefile やソースコードは必ず，
+> cat makefile | qkc -I -O -e -u > makefile.tmp
+> mv makefile.tmp makefile
+などを通して，UNIXのテキストファイルに変換しましょう．
+
+[ファイル名の問題]
+
+MS-DOS ではファイル名はすべて大文字ですが，gcc では *.C のような
+ファイル名のファイルは C++ で書かれていると判断されるため，
+SAMPLE.C のような名前のファイルをコンパイルすると，うまくリンクできない
+ことがあります．
+このような場合は，sample.c にリネームしてコンパイルしてください．
+
+[シリアル通信について]
+
+シリアル通信の受信用関数(comm_receive_char()等)は，fgetc(stdin) から
+入力文字を取得して，\n は \r に変換して返します．これは，一般的な通信回線上の
+端末をエミュレートするためです．
+
+また，comm_send_char() に渡した文字は，標準出力に出力されますが，
+タブや改行コードは，"\t" "\n" のような文字列に変換されて出力されます．
+添付の sout2str.pl を通すことにより，シリアル通信への出力のみ抽出して，
+端末への出力のイメージで表示させることができます．
+
+[ソース中の WONX 依存部分のくくりかた]
+
+WonderWitch 用のプログラムを開発していく際に，WONX の場合のみ組み込みたくて，
+WonderSwan 上で実行するときには取り除きたいコードがあったとします．
+(例えば，デバッグ情報の出力のために printf() を入れる場合など)
+このようなときのために，wonx_include/types.h で
+#define _WONX_
+してあるので，そのような場所は #ifdef _WONX_ でくくってください．
+
+[ダンプデータの取りかた]
+
+ソース中に，
+
+#include "Wonx.h"
+#include "WonxDisplay.h"
+#include "WWDisplay.h"
+#include "WWColorMap.h"
+#include "WWPalette.h"
+#include "WWCharacter.h"
+#include "WWSprite.h"
+
+int i;
+WWDisplay ww_display;
+
+ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
+
+WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
+
+for (i = 0; i < 16; i++)
+  WWPalette_PrintData(WWDisplay_GetPalette(ww_display, i), stdout);
+
+for (i = 0; i < 512; i++)
+  WWCharacter_PrintData(WWDisplay_GetCharacter(ww_display, i), stdout);
+
+for (i = 0; i < 128; i++)
+  WWSprite_PrintData(WWDisplay_GetSprite(ww_display, i), stdout);
+
+のようなコードを挿入することにより，任意の場所でキャラクタやパレットの
+ダンプデータを出力させることができます．
+
+プログラム中に，不安な場所があったら，
+
+#ifdef _WONX_
+ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
+printf("Before setting:\n");
+WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
+#endif
+
+/* ここにスプライトの設定についての不安なコードがある */
+
+#ifdef _WONX_
+printf("After setting:\n");
+WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
+#endif
+
+のようにして不安なコードの前後でダンプデータを取ると，デバッグに
+役立つでしょう．
 
 ■ 作者
 
