@@ -48,7 +48,8 @@ int key_press_check(void)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
+  printf("call : key_press_check() : return value = 0x%04x\n", (int)ret);
+  fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
@@ -75,7 +76,8 @@ int key_hit_check(void)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
+  printf("call : key_hit_check() : return value = 0x%04x\n", (int)ret);
+  fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
@@ -109,7 +111,8 @@ int key_wait(void)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
+  printf("call : key_wait() : return value = 0x%04x\n", (int)ret);
+  fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
@@ -129,7 +132,7 @@ void key_set_repeat(int rate, int delay)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = none\n"); fflush(stdout);
+  printf("call : key_set_repeat() : return value = none\n"); fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
@@ -152,7 +155,8 @@ int key_get_repeat(void)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
+  printf("call : key_get_repeat() : return value = 0x%04x\n", (int)ret);
+  fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
@@ -179,7 +183,9 @@ int key_hit_check_with_repeat(void)
 
   WonxDisplay_Sync(Wonx_GetWonxDisplay());
 
-  printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
+  printf("call : key_hit_check_with_repeat() : return value = 0x%04x\n",
+	 (int)ret);
+  fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));

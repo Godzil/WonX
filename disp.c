@@ -60,10 +60,10 @@ void display_control(unsigned int flags)
 
   if      ((flags & 0x0030) == DCM_SCR2_WIN_INSIDE)
     WWScreen_SetMode(WWDisplay_GetScreen(ww_display, SCREEN2),
-		     WWSCREEN_INSIDE_ONLY);
+		     WW_SCREEN_INSIDE_ONLY);
   else if ((flags & 0x0030) == DCM_SCR2_WIN_OUTSIDE)
     WWScreen_SetMode(WWDisplay_GetScreen(ww_display, SCREEN2),
-		     WWSCREEN_OUTSIDE_ONLY);
+		     WW_SCREEN_OUTSIDE_ONLY);
 
   WWDisplay_SetBorder(ww_display, (flags & DCM_BORDER_COLOR) >> 7);
 
@@ -106,10 +106,10 @@ unsigned int display_status(void)
     ret |= DCM_SPR_WIN;
 
   switch (WWScreen_GetMode(WWDisplay_GetScreen(ww_display, SCREEN2))) {
-    case WWSCREEN_INSIDE_ONLY:
+    case WW_SCREEN_INSIDE_ONLY:
       ret |= DCM_SCR2_WIN_INSIDE;
       break;
-    case WWSCREEN_OUTSIDE_ONLY:
+    case WW_SCREEN_OUTSIDE_ONLY:
       ret |= DCM_SCR2_WIN_OUTSIDE;
       break;
     default:

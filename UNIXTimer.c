@@ -25,9 +25,9 @@ static void UNIXTimer_CallBackFunction(int argument)
   int ret;
 
   /*
-    static なフラグを立てて，コールバック関数からコールバック関数が
-    呼ばれたのを検出するのが必要かも．
-    */
+   * static なフラグを立てて，コールバック関数からコールバック関数が
+   * 呼ばれたのを検出するのが必要かも．
+   */
 
   if (pointed_unix_timer == NULL) return;
   if (!pointed_unix_timer->timer_on) return;
@@ -101,9 +101,29 @@ static void UNIXTimer_CallBackFunction(int argument)
 
 int UNIXTimer_ON(UNIXTimer unix_timer)
 {
+  int t;
+
   unix_timer->timer_on = 1;
   pointed_unix_timer = unix_timer;
-  ualarm(unix_timer->interval, 0);
+
+  /*
+   * SIGALRM を使用するので，sleep() 中にアラームが起きた場合には，
+   * コールバック関数からの復帰後に sleep() の残り時間は継続されない．
+   */
+  signal(SIGALRM, UNIXTimer_CallBackFunction);
+
+#if 0 /* use ualarm() */
+  /* ualarm(); の引数に0を用いてはダメなので */
+  t = unix_timer->interval * 1000;
+  if (t < 1) t = 1;
+  ualarm(t, 0);
+#else /* use alarm() */
+  /* alarm(); の引数に0を用いてはダメなので */
+  t = unix_timer->interval / 1000;
+  if (t < 1) t = 1;
+  alarm(t);
+#endif
+
   return (0);
 }
 
@@ -207,11 +227,7 @@ int UNIXTimer_IsAutoPreset(UNIXTimer unix_timer)
 int UNIXTimer_GetInterval(UNIXTimer unix_timer)
 { return (unix_timer->interval); }
 int UNIXTimer_SetInterval(UNIXTimer unix_timer, int interval)
-{
-  /* ualarm(); の引数に0を用いてはダメなので */
-  if (interval < 1) interval = 1;
-  return (unix_timer->interval = interval);
-}
+{ return (unix_timer->interval = interval); }
 
 /*---------------------------------------------------------------------------*/
 /* コールバック関数の呼び出し時のパラメータ                                  */
@@ -259,12 +275,6 @@ UNIXTimer UNIXTimer_Create(int auto_preset, int interval, void * parameter,
   UNIXTimer_SetInterval(unix_timer, interval);
   UNIXTimer_SetParameter(unix_timer, parameter);
   UNIXTimer_SetCallBack(unix_timer, callback);
-
-  /*
-   * SIGALRM を使用するので，sleep() 中にアラームが起きた場合には，
-   * コールバック関数からの復帰後に sleep() の残り時間は継続されない．
-   */
-  signal(SIGALRM, UNIXTimer_CallBackFunction);
 
   return (unix_timer);
 }

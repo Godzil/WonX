@@ -214,8 +214,8 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
   lcd_panel_width  = WWLCDPanel_GetWidth( lcd_panel);
   lcd_panel_height = WWLCDPanel_GetHeight(lcd_panel);
 
-  if ( (WWScreen_GetMode(screen) == WWSCREEN_INSIDE_ONLY) ||
-       (WWScreen_GetMode(screen) == WWSCREEN_OUTSIDE_ONLY) ) {
+  if ( (WWScreen_GetMode(screen) == WW_SCREEN_INSIDE_ONLY) ||
+       (WWScreen_GetMode(screen) == WW_SCREEN_OUTSIDE_ONLY) ) {
     sx = WWScreen_GetDrawX(screen);
     sy = WWScreen_GetDrawX(screen);
 
@@ -246,7 +246,7 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
   for (y = 0; y < lcd_panel_height; y++) {
 
-    if (mode == WWSCREEN_INSIDE_ONLY) {
+    if (mode == WW_SCREEN_INSIDE_ONLY) {
       if (y > ey) { break; }
       if (y < sy) { y = sy - 1; continue; }
     }
@@ -255,10 +255,10 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
     for (x = 0; x < lcd_panel_width; x++) {
 
-      if (mode == WWSCREEN_INSIDE_ONLY) {
+      if (mode == WW_SCREEN_INSIDE_ONLY) {
 	if (x > ex) { x = lcd_panel_width - 1; continue; }
 	if (x < sx) { x = sx - 1; continue; }
-      } else if (mode == WWSCREEN_OUTSIDE_ONLY) {
+      } else if (mode == WW_SCREEN_OUTSIDE_ONLY) {
 	if ( (x >= sx) && (x <= ex) && (y >= sy) && (y <= ey) ) {
 	  x = ex;
 	  continue;

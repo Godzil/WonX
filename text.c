@@ -93,7 +93,7 @@ void text_window_init(int x, int y, int w, int h, unsigned int base)
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
-  printf("call : text_screen_init() : return value = none\n"); fflush(stdout);
+  printf("call : text_window_init() : return value = none\n"); fflush(stdout);
 
   /* タイマをもとに戻す */
   UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));

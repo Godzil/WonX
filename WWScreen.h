@@ -20,9 +20,9 @@ typedef struct _WWScreen * WWScreen;
 /* 定数の定義                                                                */
 /*****************************************************************************/
 
-#define WWSCREEN_DRAW_ALL     0
-#define WWSCREEN_INSIDE_ONLY  1
-#define WWSCREEN_OUTSIDE_ONLY 2
+#define WW_SCREEN_DRAW_ALL     0
+#define WW_SCREEN_INSIDE_ONLY  1
+#define WW_SCREEN_OUTSIDE_ONLY 2
 
 /*****************************************************************************/
 /* メンバ関数の宣言                                                          */

@@ -32,7 +32,7 @@ typedef struct _UNIXTimer {
   int interrupt_in_pause;
 
   int auto_preset; /* オートプリセット．1 だとオートプリセットを行う */
-  int interval; /* タイマのインターバル．マイクロ秒で指定 */
+  int interval; /* タイマのインターバル．ミリ秒で指定 */
   void * parameter; /* コールバック関数の呼び出し時のパラメータ */
   UNIXTimerCallBack callback; /* コールバック関数 */
 

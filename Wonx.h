@@ -4,6 +4,7 @@
 #include "WonxDisplay.h"
 #include "WonxText.h"
 #include "WonxSystem.h"
+#include "WonxSerialPort.h"
 
 /*****************************************************************************/
 /* ディスプレイの確保                                                        */
@@ -14,5 +15,6 @@ void Wonx_Create(void);
 WonxDisplay Wonx_GetWonxDisplay(void);
 WonxText Wonx_GetWonxText(void);
 WonxSystem Wonx_GetWonxSystem(void);
+WonxSerialPort Wonx_GetWonxSerialPort(void);
 
 #endif

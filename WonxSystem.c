@@ -87,7 +87,6 @@ WonxSystem WonxSystem_Create()
     Wonx_Error("WonxSystem_Create", "Cannot create WonderWitch interrupt.");
   WonxSystem_SetWWInterrupt(wonx_system, ww_interrupt);
 
-  /* VBlank は WONX_VBLANK_INTERVAL * 0.1 秒毎とする */
   ww_timer = WWTimer_Create(1, WONX_VBLANK_INTERVAL);
   if (ww_timer == NULL)
     Wonx_Error("WonxSystem_Create", "Cannot create WonderWitch VBlank timer.");
@@ -113,7 +112,6 @@ WonxSystem WonxSystem_Create()
   WWTimer_OFF(WonxSystem_GetWWVBlankCountUpTimer(wonx_system));
   WWTimer_OFF(WonxSystem_GetWWHBlankCountUpTimer(wonx_system));
 
-  /* タイマのインターバルは，0.1 秒単位とする */
   unix_timer = UNIXTimer_Create(1, WONX_TIMER_INTERVAL, wonx_system,
 				(UNIXTimerCallBack)WonxTimer_Callback);
   if (unix_timer == NULL)

@@ -33,7 +33,7 @@ typedef struct _WWScreen {
   int enable; /* 表示/非表示のフラグ */
 
   int mode; /* 表示モード */
-  /* WWSCREEN_DRAW_ALL, WWSCREEN_INSIDE_ONLY, WWSCREEN_OUTSIDE_ONLY の */
+  /* WW_SCREEN_DRAW_ALL, WW_SCREEN_INSIDE_ONLY, WW_SCREEN_OUTSIDE_ONLY の */
   /* いずれかの値を取る                                                */
 
   /* 表示領域(スクリーン２のウインドウ機能用．スクリーン１では未使用) */

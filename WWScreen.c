@@ -210,7 +210,7 @@ WWScreen WWScreen_Create(int number,
   WWScreen_SetRollY( screen, 0);
 
   WWScreen_SetEnable(screen, 1);
-  WWScreen_SetMode(  screen, WWSCREEN_DRAW_ALL);
+  WWScreen_SetMode(  screen, WW_SCREEN_DRAW_ALL);
 
   WWScreen_SetDrawX( screen, draw_x);
   WWScreen_SetDrawY( screen, draw_y);
