@@ -371,6 +371,10 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
   num =
     WWLCDPanel_GetHeight(ww_lcd_panel) * WWLCDPanel_GetWidth(ww_lcd_panel) / 2;
 
+  /*
+   * この malloc() は，実際にはメモリはほとんど使用されていないので，
+   * そのうちなんとかする必要がある
+   */
   for (pixel = 0; pixel < 16; pixel++) {
     n[pixel] = 0;
     rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
@@ -387,6 +391,9 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
     py = (y * x_display->height) / ww_lcd_height;
     ph = (y+1) * x_display->height / ww_lcd_height- py;
     for (x = 0; x < ww_lcd_width; x++) {
+      if (!WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) {
+	continue;
+      }
       pixel = WWLCDPanel_GetPixel(ww_lcd_panel, x, y);
       px = (x * x_display->width ) / ww_lcd_width;
       rectangles[pixel][n[pixel]].x = px;
@@ -398,7 +405,8 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
       /* 隣接してる同色のピクセルは，極力いっしょに描画する */
       x++;
       while ( (x < ww_lcd_width) &&
-	      (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) ) {
+	      (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) &&
+	      (WWLCDPanel_IsPixelChanged(ww_lcd_panel, x, y)) ) {
 	rectangles[pixel][n[pixel]].width =
 	  (x+1) * x_display->width / ww_lcd_width - px;
 	x++;
@@ -421,6 +429,9 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
   XCopyArea(x_display->display, x_display->lcd_pixmap,
 	    x_display->lcd_window, x_display->copy_gc,
             0, 0, x_display->width, x_display->height, 0, 0);
+
+  WWLCDPanel_ResetAllDraw(ww_lcd_panel);
+  WWLCDPanel_ReverseCurrent(ww_lcd_panel);
 
   XDisplay_Sync(x_display);
 

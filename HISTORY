@@ -1,3 +1,20 @@
+2000/10/5(木)
+
+wonx-a07 公開
+
+WWLCDPanel にビットマップデータを２枚持たせ，一度描画したビットマップは
+描画しないように修正．Xサーバの負荷を減らした．
+(WWLCDPanel関連と，XDisplay.c の XDisplay_DrawLCDWindow() を改良)
+(XDisplay.c の XDisplay_DrawLCDWindow() には，無駄な malloc() があるので，
+ そのうち改良が必要)
+
+wonx-a05 と wonx-a06 の WWDisplay.c (WWDisplay_DrawScreen()) の
+両方を試した結果，wonx-a05 のほうが高速だったので，wonx-a05 のほうを
+使用することにした．
+
+
+
+
 2000/10/4(水)
 
 wonx-a06 公開

@@ -2,8 +2,8 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = Wonx-a06
-PKGNAME = wonx-a06
+VERSION = Wonx-a07
+PKGNAME = wonx-a07
 
 OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WonxDisplay.o XDisplay.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o etc.o wonx.o
 
