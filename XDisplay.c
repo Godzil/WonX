@@ -387,6 +387,16 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
 	  rectangles[n].y = py;
 	  rectangles[n].width  = (x+1) * x_display->width  / ww_lcd_width - px;
 	  rectangles[n].height = (y+1) * x_display->height / ww_lcd_height- py;
+
+	  /* 隣接してる同色のピクセルは，極力いっしょに描画する */
+	  x++;
+	  while ( (x < ww_lcd_width) &&
+		  (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) ) {
+	    rectangles[n].width = (x+1) * x_display->width / ww_lcd_width - px;
+	    x++;
+	  }
+	  x--;
+
 	  n++;
 	}
       }

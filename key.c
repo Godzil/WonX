@@ -21,6 +21,8 @@ int key_press_check(void)
 
   ret = XDisplay_GetKeyPress(x_display);
 
+  WonxDisplay_Sync(wonx_display);
+
   printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
@@ -39,6 +41,8 @@ int key_hit_check(void)
   XDisplay_Sync(x_display);
 
   ret = XDisplay_GetKeyPress(x_display);
+
+  WonxDisplay_Sync(wonx_display);
 
   printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
@@ -62,6 +66,8 @@ int key_wait(void)
     ret = XDisplay_GetKeyPress(x_display);
   } while (ret == 0);
 
+  WonxDisplay_Sync(wonx_display);
+
   printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
   return (ret);
@@ -74,7 +80,11 @@ void key_set_repeat(int rate, int delay)
 
   if (wonx_display == NULL) Wonx_Create();
 
+  WonxDisplay_Sync(wonx_display);
+
   printf("return value = none\n"); fflush(stdout);
+
+  return;
 }
 
 int key_get_repeat(void)
@@ -86,6 +96,8 @@ int key_get_repeat(void)
   if (wonx_display == NULL) Wonx_Create();
 
   ret = 0;
+
+  WonxDisplay_Sync(wonx_display);
 
   printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 
@@ -105,6 +117,8 @@ int key_hit_check_with_repeat(void)
   XDisplay_Sync(x_display);
 
   ret = XDisplay_GetKeyPress(x_display);
+
+  WonxDisplay_Sync(wonx_display);
 
   printf("return value = 0x%04x\n", (int)ret); fflush(stdout);
 

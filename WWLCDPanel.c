@@ -24,8 +24,7 @@ int WWLCDPanel_GetPixel(WWLCDPanel lcd_panel, int x, int y)
        (y < 0) || (y > WWLCDPanel_GetHeight(lcd_panel) - 1) )
     return (-1);
 
-  pixel = lcd_panel->pixel[y * (WWLCDPanel_GetWidth(lcd_panel) / 2) + x / 2];
-  if (x % 2) pixel = pixel >> 4;
+  pixel = lcd_panel->pixel[y * WWLCDPanel_GetWidth(lcd_panel) + x];
   pixel &= 0x0f;
   return ((int)pixel);
 }
@@ -39,14 +38,9 @@ int WWLCDPanel_SetPixel(WWLCDPanel lcd_panel, int x, int y, int pixel)
        (y < 0) || (y > WWLCDPanel_GetHeight(lcd_panel) - 1) )
     return (-1);
 
-  p = 0x0f;
-  if (x % 2) p = p << 4;
-  n = y * (WWLCDPanel_GetWidth(lcd_panel) / 2) + x / 2;
-  lcd_panel->pixel[n] &= ~p;
-
   p = ((unsigned char)pixel) & 0x0f;
-  if (x % 2) p = p << 4;
-  lcd_panel->pixel[n] |= p;
+  n = y * WWLCDPanel_GetWidth(lcd_panel) + x;
+  lcd_panel->pixel[n] = p;
 
   return (pixel);
 }
@@ -63,7 +57,7 @@ WWLCDPanel WWLCDPanel_Create(int width, int height)
   WWLCDPanel_SetHeight(lcd_panel, height);
   lcd_panel->pixel =
     (unsigned char *)malloc(sizeof(unsigned char) *
-			    (WWLCDPanel_GetWidth(lcd_panel) / 2) *
+			    WWLCDPanel_GetWidth(lcd_panel) *
 			    WWLCDPanel_GetHeight(lcd_panel));
 
   for (y = 0; y < lcd_panel->height; y++) {

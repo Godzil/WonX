@@ -44,21 +44,14 @@ WonxDisplay WonxDisplay_Create(int x_width, int x_height,
   return (wonx_display);
 }
 
-int WonxDisplay_Flush(WonxDisplay wonx_display)
+int WonxDisplay_Sync(WonxDisplay wonx_display)
 {
   int i;
   XDisplay x_display;
   WWDisplay ww_display;
-  WWLCDPanel ww_lcd_panel;
 
   x_display = WonxDisplay_GetXDisplay(wonx_display);
   ww_display = WonxDisplay_GetWWDisplay(wonx_display);
-
-  if (XDisplay_GetLCDDraw(x_display)) {
-    WWDisplay_DrawLCDPanel(ww_display);
-    ww_lcd_panel = WWDisplay_GetLCDPanel(ww_display);
-    XDisplay_DrawLCDWindow(x_display, ww_lcd_panel);
-  }
 
   if (XDisplay_GetColorMapPrint(x_display)) {
     WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
@@ -85,6 +78,28 @@ int WonxDisplay_Flush(WonxDisplay wonx_display)
     }
     XDisplay_SetSpritePrint(x_display, 0);
   }
+
+  XDisplay_Sync(x_display);
+
+  return (0);
+}
+
+int WonxDisplay_Flush(WonxDisplay wonx_display)
+{
+  XDisplay x_display;
+  WWDisplay ww_display;
+  WWLCDPanel ww_lcd_panel;
+
+  x_display = WonxDisplay_GetXDisplay(wonx_display);
+  ww_display = WonxDisplay_GetWWDisplay(wonx_display);
+
+  if (XDisplay_GetLCDDraw(x_display)) {
+    WWDisplay_DrawLCDPanel(ww_display);
+    ww_lcd_panel = WWDisplay_GetLCDPanel(ww_display);
+    XDisplay_DrawLCDWindow(x_display, ww_lcd_panel);
+  }
+
+  WonxDisplay_Sync(wonx_display);
 
   return (0);
 }

@@ -24,6 +24,15 @@ int WWDisplay_GetSpriteEnable(WWDisplay d) { return (d->sprite_enable); }
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d)
 { return (d->sprite_window_enable); }
 
+int WWDisplay_GetSpriteWindowX(WWDisplay d)
+{ return (d->sprite_window_x); }
+int WWDisplay_GetSpriteWindowY(WWDisplay d)
+{ return (d->sprite_window_y); }
+int WWDisplay_GetSpriteWindowWidth(WWDisplay d)
+{ return (d->sprite_window_width); }
+int WWDisplay_GetSpriteWindowHeight(WWDisplay d)
+{ return (d->sprite_window_height); }
+
 int WWDisplay_GetBorder(WWDisplay d) { return (d->border); }
 
 int WWDisplay_GetForegroundColor(WWDisplay d) { return (d->foreground_color); }
@@ -53,6 +62,15 @@ int WWDisplay_SetSpriteEnable(WWDisplay d, int f)
 { return (d->sprite_enable = f); }
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f)
 { return (d->sprite_window_enable = f); }
+
+int WWDisplay_SetSpriteWindowX(WWDisplay d, int n)
+{ return (d->sprite_window_x = n); }
+int WWDisplay_SetSpriteWindowY(WWDisplay d, int n)
+{ return (d->sprite_window_y = n); }
+int WWDisplay_SetSpriteWindowWidth(WWDisplay d, int n)
+{ return (d->sprite_window_width = n); }
+int WWDisplay_SetSpriteWindowHeight(WWDisplay d, int n)
+{ return (d->sprite_window_height = n); }
 
 int WWDisplay_SetBorder(WWDisplay d, int b) { return (d->border = b); }
 
@@ -111,6 +129,11 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
 
   WWDisplay_SetSpriteEnable(display, 0);
   WWDisplay_SetSpriteWindowEnable(display, 0);
+
+  WWDisplay_SetSpriteWindowX(     display, 0);
+  WWDisplay_SetSpriteWindowY(     display, 0);
+  WWDisplay_SetSpriteWindowWidth( display, lcd_panel_width);
+  WWDisplay_SetSpriteWindowHeight(display, lcd_panel_height);
 
   WWDisplay_SetBorder(display, 0);
 
@@ -253,8 +276,21 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
 static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
 {
-  int x, y;
-  int pixel;
+  int x, y, lcd_x, lcd_y;
+  int sx, sy, ex, ey;
+  int pixel, outside;
+
+  sx = WWDisplay_GetSpriteWindowX(display) - 1;
+  sy = WWDisplay_GetSpriteWindowY(display) - 1;
+
+  /* 以下は WWDisplay_DrawScreen() に合わせた */
+#if 0
+  ex = sx + WWDisplay_GetSpriteWindowWidth(display) - 1;
+  ey = sy + WWDisplay_GetSpriteWindowHeight(display) - 1;
+#else
+  ex = sx + WWDisplay_GetSpriteWindowWidth(display);
+  ey = sy + WWDisplay_GetSpriteWindowHeight(display);
+#endif
 
   for (y = 0; y < 8; y++) {
     for (x = 0; x < 8; x++) {
@@ -263,11 +299,24 @@ static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
       /* 透明色の場合 */
       if (pixel == -1) continue;
 
+      lcd_x = WWSprite_GetX(sprite) + x;
+      lcd_y = WWSprite_GetY(sprite) + y;
+
+      if (WWDisplay_GetSpriteWindowEnable(display)) {
+	if ( (lcd_x < sx) || (lcd_y < sy) || (lcd_x > ex) || (lcd_y > ey) )
+	  outside = 1;
+	else
+	  outside = 0;
+
+	if (WWSprite_GetClipping(sprite)) { /* ウインドウの外側部分を表示 */
+	  if (!outside) continue;
+	} else {                            /* ウインドウの内側部分を表示 */
+	  if (outside) continue;
+	}
+      }
+
       pixel = WWColorMap_GetLCDColor(WWDisplay_GetColorMap(display), pixel);
-      WWLCDPanel_SetPixel(WWDisplay_GetLCDPanel(display),
-			  WWSprite_GetX(sprite) + x,
-			  WWSprite_GetY(sprite) + y,
-			  pixel);
+      WWLCDPanel_SetPixel(WWDisplay_GetLCDPanel(display), lcd_x, lcd_y, pixel);
     }
   }
 
@@ -300,28 +349,32 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   }
 
   /* スクリーン１描画 */
-  if (WWDisplay_GetSpriteEnable(display))
-    WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 0));
+  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 0));
 
   /* スプライト描画(スクリーン２より優先でないもの) */
-  for (i = 0; i < WWDisplay_GetSpriteCount(display); i++) {
-    sprite = WWDisplay_GetSprite(display,
-				 i + WWDisplay_GetSpriteStart(display));
-    if (!WWSprite_GetPriority(sprite)) {
-      WWDisplay_DrawSprite(display, sprite);
+  /* 重なった場合は，番号の若いものが手前に表示される */
+  if (WWDisplay_GetSpriteEnable(display)) {
+    for (i = WWDisplay_GetSpriteCount(display) - 1; i >= 0; i--) {
+      sprite = WWDisplay_GetSprite(display,
+				   i + WWDisplay_GetSpriteStart(display));
+      if (!WWSprite_GetPriority(sprite)) {
+	WWDisplay_DrawSprite(display, sprite);
+      }
     }
   }
 
   /* スクリーン２描画 */
-  if (WWDisplay_GetSpriteEnable(display))
-    WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 1));
+  WWDisplay_DrawScreen(display, WWDisplay_GetScreen(display, 1));
 
   /* スプライト描画(スクリーン２より優先なもの) */
-  for (i = 0; i < WWDisplay_GetSpriteCount(display); i++) {
-    sprite = WWDisplay_GetSprite(display,
-				 i + WWDisplay_GetSpriteStart(display));
-    if (WWSprite_GetPriority(sprite)) {
-      WWDisplay_DrawSprite(display, sprite);
+  /* 重なった場合は，番号の若いものが手前に表示される */
+  if (WWDisplay_GetSpriteEnable(display)) {
+    for (i = WWDisplay_GetSpriteCount(display) - 1; i >= 0; i--) {
+      sprite = WWDisplay_GetSprite(display,
+				   i + WWDisplay_GetSpriteStart(display));
+      if (WWSprite_GetPriority(sprite)) {
+	WWDisplay_DrawSprite(display, sprite);
+      }
     }
   }
 

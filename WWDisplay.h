@@ -35,6 +35,11 @@ WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d);
 int WWDisplay_GetSpriteEnable(WWDisplay d);
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d);
 
+int WWDisplay_GetSpriteWindowX(WWDisplay d);
+int WWDisplay_GetSpriteWindowY(WWDisplay d);
+int WWDisplay_GetSpriteWindowWidth(WWDisplay d);
+int WWDisplay_GetSpriteWindowHeight(WWDisplay d);
+
 int WWDisplay_GetBorder(WWDisplay d);
 
 int WWDisplay_GetForegroundColor(WWDisplay d);
@@ -56,6 +61,11 @@ WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p);
 
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f);
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f);
+
+int WWDisplay_SetSpriteWindowX(WWDisplay d, int n);
+int WWDisplay_SetSpriteWindowY(WWDisplay d, int n);
+int WWDisplay_SetSpriteWindowWidth(WWDisplay d, int n);
+int WWDisplay_SetSpriteWindowHeight(WWDisplay d, int n);
 
 int WWDisplay_SetBorder(WWDisplay d, int b);
 
