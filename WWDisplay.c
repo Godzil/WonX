@@ -20,14 +20,10 @@ WWSprite WWDisplay_GetSprite(WWDisplay d, int n) { return (d->sprite[n]); }
 WWScreen WWDisplay_GetScreen(WWDisplay d, int n) { return (d->screen[n]); }
 WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d) { return (d->lcd_panel); }
 
-int WWDisplay_GetScreenEnable(WWDisplay d, int n)
-{ return (d->screen_enable[n]); }
 int WWDisplay_GetSpriteEnable(WWDisplay d) { return (d->sprite_enable); }
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d)
 { return (d->sprite_window_enable); }
 
-int WWDisplay_GetScreen2WindowMode(WWDisplay d)
-{ return (d->screen2_window_mode); }
 int WWDisplay_GetBorder(WWDisplay d) { return (d->border); }
 
 int WWDisplay_GetForegroundColor(WWDisplay d) { return (d->foreground_color); }
@@ -53,15 +49,11 @@ WWScreen WWDisplay_SetScreen(WWDisplay d, int n, WWScreen s)
 WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p)
 { return (d->lcd_panel = p); }
 
-int WWDisplay_SetScreenEnable(WWDisplay d, int n, int f)
-{ return (d->screen_enable[n] = f); }
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f)
 { return (d->sprite_enable = f); }
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f)
 { return (d->sprite_window_enable = f); }
 
-int WWDisplay_SetScreen2WindowMode(WWDisplay d, int mode)
-{ return (d->screen2_window_mode = mode); }
 int WWDisplay_SetBorder(WWDisplay d, int b) { return (d->border = b); }
 
 int WWDisplay_SetForegroundColor(WWDisplay d, int c)
@@ -109,18 +101,17 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
     WWDisplay_SetScreen(display, i,
 			WWScreen_Create(i, screen_width, screen_height,
 					WWDisplay_GetPalette(display, 0),
-					WWDisplay_GetCharacter(display, 0)));
+					WWDisplay_GetCharacter(display, 0),
+					0, 0,
+					lcd_panel_width, lcd_panel_height));
   }
 
   WWDisplay_SetLCDPanel(display, WWLCDPanel_Create(lcd_panel_width,
 						   lcd_panel_height));
 
-  WWDisplay_SetScreenEnable(display, 0, 0);
-  WWDisplay_SetScreenEnable(display, 1, 0);
   WWDisplay_SetSpriteEnable(display, 0);
   WWDisplay_SetSpriteWindowEnable(display, 0);
 
-  WWDisplay_SetScreen2WindowMode(display, 0);
   WWDisplay_SetBorder(display, 0);
 
   WWDisplay_SetForegroundColor(display, 3);
@@ -189,15 +180,46 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
   int pixel;
   int x, y, px, py;
+  int sx, sy, ex, ey;
+  int mode;
+
+  if (!WWScreen_GetEnable(screen)) return (0);
 
   lcd_panel = WWDisplay_GetLCDPanel(display);
   lcd_panel_width  = WWLCDPanel_GetWidth( lcd_panel);
   lcd_panel_height = WWLCDPanel_GetHeight(lcd_panel);
 
+  if ( (WWScreen_GetMode(screen) == WWSCREEN_INSIDE_ONLY) ||
+       (WWScreen_GetMode(screen) == WWSCREEN_OUTSIDE_ONLY) ) {
+    sx = WWScreen_GetDrawX(screen);
+    sy = WWScreen_GetDrawX(screen);
+    ex = sx + WWScreen_GetDrawWidth( screen) - 1;
+    ey = sy + WWScreen_GetDrawHeight(screen) - 1;
+  }
+
+  mode = WWScreen_GetMode(screen);
+
+  /* 以下はホットスポットになるので，そのうちループアンローリング */
+  /* したほうがいいかも                                           */
+
   for (y = 0; y < lcd_panel_height; y++) {
     for (x = 0; x < lcd_panel_width; x++) {
       px = x + WWScreen_GetRollX(screen);
       py = y + WWScreen_GetRollY(screen);
+
+      if (mode == WWSCREEN_INSIDE_ONLY) {
+	if (y > ey) {
+	  x = lcd_panel_width - 1; y = lcd_panel_height - 1; continue;
+	}
+	if (y < sy) { x = lcd_panel_width - 1; y = sy - 1; continue; }
+	if (x > ex) { x = lcd_panel_width - 1; continue; }
+	if (x < sx) { x = sx - 1; continue; }
+      } else if (mode == WWSCREEN_OUTSIDE_ONLY) {
+	if ( (x >= sx) && (x <= ex) && (y >= sy) && (y <= ey) ) {
+	  x = ex;
+	  continue;
+	}
+      }
 
       pixel = WWScreen_GetPixel(screen, px, py);
 

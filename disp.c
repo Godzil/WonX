@@ -17,31 +17,32 @@
 
 void display_control(unsigned int flags)
 {
+  WWDisplay ww_display;
+
   printf("display_control(): flags = %ud, ", flags); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
-  WWDisplay_SetScreenEnable(WonxDisplay_GetWWDisplay(wonx_display),
-			    SCREEN1,
-			    (flags & DCM_SCR1) ? 1 : 0);
+  ww_display = WonxDisplay_GetWWDisplay(wonx_display);
 
-  WWDisplay_SetScreenEnable(WonxDisplay_GetWWDisplay(wonx_display),
-			    SCREEN2,
-			    (flags & DCM_SCR2) ? 1 : 0);
+  WWScreen_SetEnable(WWDisplay_GetScreen(ww_display, SCREEN1),
+		     (flags & DCM_SCR1) ? 1 : 0);
 
-  WWDisplay_SetSpriteEnable(WonxDisplay_GetWWDisplay(wonx_display),
-			    (flags & DCM_SPR) ? 1 : 0);
+  WWScreen_SetEnable(WWDisplay_GetScreen(ww_display, SCREEN2),
+		     (flags & DCM_SCR2) ? 1 : 0);
 
-  WWDisplay_SetSpriteWindowEnable(WonxDisplay_GetWWDisplay(wonx_display),
-				  (flags & DCM_SPR_WIN) ? 1 : 0);
+  WWDisplay_SetSpriteEnable(ww_display, (flags & DCM_SPR) ? 1 : 0);
+
+  WWDisplay_SetSpriteWindowEnable(ww_display, (flags & DCM_SPR_WIN) ? 1 : 0);
 
   if      ((flags & 0x0030) == DCM_SCR2_WIN_INSIDE)
-    WWDisplay_SetScreen2WindowMode(WonxDisplay_GetWWDisplay(wonx_display), 2);
+    WWScreen_SetMode(WWDisplay_GetScreen(ww_display, SCREEN2),
+		     WWSCREEN_INSIDE_ONLY);
   else if ((flags & 0x0030) == DCM_SCR2_WIN_OUTSIDE)
-    WWDisplay_SetScreen2WindowMode(WonxDisplay_GetWWDisplay(wonx_display), 3);
+    WWScreen_SetMode(WWDisplay_GetScreen(ww_display, SCREEN2),
+		     WWSCREEN_OUTSIDE_ONLY);
 
-  WWDisplay_SetBorder(WonxDisplay_GetWWDisplay(wonx_display),
-		      (flags & DCM_BORDER_COLOR) >> 7);
+  WWDisplay_SetBorder(ww_display, (flags & DCM_BORDER_COLOR) >> 7);
 
   WonxDisplay_Flush(wonx_display);
 
@@ -52,20 +53,21 @@ void display_control(unsigned int flags)
 
 unsigned int display_status()
 {
+  WWDisplay ww_display;
   unsigned short int ret;
 
   printf("display_status(): "); fflush(stdout);
 
   if (wonx_display == NULL) Wonx_Create();
 
+  ww_display = WonxDisplay_GetWWDisplay(wonx_display);
+
   ret = 0;
 
-  if (WWDisplay_GetScreenEnable(WonxDisplay_GetWWDisplay(wonx_display),
-				SCREEN1))
+  if (WWScreen_GetEnable(WWDisplay_GetScreen(ww_display, SCREEN1)))
     ret |= DCM_SCR1;
 
-  if (WWDisplay_GetScreenEnable(WonxDisplay_GetWWDisplay(wonx_display),
-				SCREEN2))
+  if (WWScreen_GetEnable(WWDisplay_GetScreen(ww_display, SCREEN2)))
     ret |= DCM_SCR2;
 
   if (WWDisplay_GetSpriteEnable(WonxDisplay_GetWWDisplay(wonx_display)))
@@ -74,12 +76,11 @@ unsigned int display_status()
   if (WWDisplay_GetSpriteWindowEnable(WonxDisplay_GetWWDisplay(wonx_display)))
     ret |= DCM_SPR_WIN;
 
-  switch
-    (WWDisplay_GetScreen2WindowMode(WonxDisplay_GetWWDisplay(wonx_display))) {
-    case 2:
+  switch (WWScreen_GetMode(WWDisplay_GetScreen(ww_display, SCREEN2))) {
+    case WWSCREEN_INSIDE_ONLY:
       ret |= DCM_SCR2_WIN_INSIDE;
       break;
-    case 3:
+    case WWSCREEN_OUTSIDE_ONLY:
       ret |= DCM_SCR2_WIN_OUTSIDE;
       break;
     default:
@@ -94,8 +95,7 @@ unsigned int display_status()
   return (ret);
 }
 
-void font_set_monodata(unsigned int number,
-		       unsigned int count, void * data)
+void font_set_monodata(unsigned int number, unsigned int count, void * data)
 {
   WWCharacter c;
   int i, x, y, n, p;
@@ -669,18 +669,52 @@ unsigned int screen_get_scroll(int screen)
 
 void screen2_set_window(int x, int y, int w, int h)
 {
+  WWScreen s;
+
+  printf("screen2_set_window(): x = %d, y = %d, width = %d, height = %d, ",
+	 x, y, w, h); fflush(stdout);
+
   if (wonx_display == NULL) Wonx_Create();
-  /* あとで書くこと */
+
+  s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(wonx_display), SCREEN2);
+  WWScreen_SetDrawX(s, x);
+  WWScreen_SetDrawY(s, y);
+  WWScreen_SetDrawWidth( s, w);
+  WWScreen_SetDrawHeight(s, h);
 
   WonxDisplay_Flush(wonx_display);
+
+  printf("return value = none\n"); fflush(stdout);
+
+  return;
 }
 
 unsigned long int screen2_get_window(void)
 {
+  WWScreen s;
+  unsigned short int xy;
+  unsigned short int wh;
+  unsigned long int ret;
+
   if (wonx_display == NULL) Wonx_Create();
-  /* あとで書くこと */
+
+  printf("screen2_get_window(): "); fflush(stdout);
+
+  s = WWDisplay_GetScreen(WonxDisplay_GetWWDisplay(wonx_display), SCREEN2);
+  
+  xy =
+    ((WWScreen_GetDrawY(s) << 8) & 0xff00) |
+    (WWScreen_GetDrawX(s) & 0x00ff);
+  wh =
+    ((WWScreen_GetDrawHeight(s) << 8) & 0xff00) |
+    (WWScreen_GetDrawWidth(s) & 0x00ff);
+  ret = ((unsigned long int)wh) << 16 | xy;
 
   WonxDisplay_Flush(wonx_display);
+
+  printf("return value = %ul\n", ret); fflush(stdout);
+
+  return (ret);
 }
 
 void sprite_set_window(int x, int y, int w, int h)

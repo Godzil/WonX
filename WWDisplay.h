@@ -32,11 +32,9 @@ WWCharacter WWDisplay_GetCharacter(WWDisplay d, int n);
 WWSprite WWDisplay_GetSprite(WWDisplay d, int n);
 WWScreen WWDisplay_GetScreen(WWDisplay d, int n);
 WWLCDPanel WWDisplay_GetLCDPanel(WWDisplay d);
-int WWDisplay_GetScreenEnable(WWDisplay d, int n);
 int WWDisplay_GetSpriteEnable(WWDisplay d);
 int WWDisplay_GetSpriteWindowEnable(WWDisplay d);
 
-int WWDisplay_GetScreen2WindowMode(WWDisplay d);
 int WWDisplay_GetBorder(WWDisplay d);
 
 int WWDisplay_GetForegroundColor(WWDisplay d);
@@ -56,11 +54,9 @@ WWSprite WWDisplay_SetSprite(WWDisplay d, int n, WWSprite s);
 WWScreen WWDisplay_SetScreen(WWDisplay d, int n, WWScreen s);
 WWLCDPanel WWDisplay_SetLCDPanel(WWDisplay d, WWLCDPanel p);
 
-int WWDisplay_SetScreenEnable(WWDisplay d, int n, int f);
 int WWDisplay_SetSpriteEnable(WWDisplay d, int f);
 int WWDisplay_SetSpriteWindowEnable(WWDisplay d, int f);
 
-int WWDisplay_SetScreen2WindowMode(WWDisplay d, int mode);
 int WWDisplay_SetBorder(WWDisplay d, int b);
 
 int WWDisplay_SetForegroundColor(WWDisplay d, int c);

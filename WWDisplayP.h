@@ -21,13 +21,8 @@ typedef struct _WWDisplay {
   WWLCDPanel lcd_panel;
 
   /* ディスプレイの属性情報 */
-  int screen_enable[2]; /* スクリーン表示イネーブルフラグ */
   int sprite_enable;  /* スプライト表示イネーブルフラグ */
   int sprite_window_enable;  /* スプライトウインドウ機能イネーブルフラグ */
-
-  /* スクリーン２ウインドウモード */
-  /* 0,1... 無効 2...ウインドウの内側を表示 3...ウインドウの外側を表示 */
-  int screen2_window_mode;
 
   int border; /* ボーダーカラー．0〜7のカラーマップ番号 */
 

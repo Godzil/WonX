@@ -27,7 +27,19 @@ typedef struct _WWScreen {
   int height;
   int roll_x;
   int roll_y;
+
   WWScreenCharacter * screen_characters;
+
+  int enable; /* 表示/非表示のフラグ */
+
+  int mode; /* 表示モード */
+  /* WWSCREEN_DRAW_ALL, WWSCREEN_INSIDE_ONLY, WWSCREEN_OUTSIDE_ONLY の */
+  /* いずれかの値を取る                                                */
+
+  /* 表示領域(スクリーン２のウインドウ機能用．スクリーン１では未使用) */
+  int draw_x, draw_y;
+  int draw_width, draw_height;
+
 } _WWScreen;
 
 /*****************************************************************************/

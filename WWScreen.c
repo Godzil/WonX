@@ -73,7 +73,6 @@ static WWScreenCharacter WWScreen_SetScreenCharacter(WWScreen s, int x, int y,
 /* パブリックなもの                                                          */
 /*===========================================================================*/
 
-int WWScreen_GetNumber(WWScreen s) { return (s->number); }
 int WWScreen_GetHorizontal(WWScreen s, int x, int y)
 { return (WWScreen_GetScreenCharacter(s, x, y)->horizontal); }
 int WWScreen_GetVertical(WWScreen s, int x, int y)
@@ -83,7 +82,6 @@ WWPalette WWScreen_GetPalette(WWScreen s, int x, int y)
 WWCharacter WWScreen_GetCharacter(WWScreen s, int x, int y)
 { return (WWScreen_GetScreenCharacter(s, x, y)->character); }
 
-int WWScreen_SetNumber(WWScreen s, int n) { return (s->number = n); }
 int WWScreen_SetHorizontal(WWScreen s, int x, int y, int f)
 { return (WWScreen_GetScreenCharacter(s, x, y)->horizontal = f); }
 int WWScreen_SetVertical(WWScreen s, int x, int y, int f)
@@ -93,15 +91,33 @@ WWPalette WWScreen_SetPalette(WWScreen s, int x, int y, WWPalette palette)
 WWCharacter WWScreen_SetCharacter(WWScreen s, int x, int y, WWCharacter c)
 { return (WWScreen_GetScreenCharacter(s, x, y)->character = c); }
 
+int WWScreen_GetNumber(WWScreen s) { return (s->number); }
 int WWScreen_GetWidth( WWScreen s) { return (s->width ); }
 int WWScreen_GetHeight(WWScreen s) { return (s->height); }
 int WWScreen_GetRollX( WWScreen s) { return (s->roll_x); }
 int WWScreen_GetRollY( WWScreen s) { return (s->roll_y); }
 
+int WWScreen_GetEnable(WWScreen s) { return (s->enable); }
+int WWScreen_GetMode(  WWScreen s) { return (s->mode  ); }
+
+int WWScreen_GetDrawX(     WWScreen s) { return (s->draw_x     ); }
+int WWScreen_GetDrawY(     WWScreen s) { return (s->draw_y     ); }
+int WWScreen_GetDrawWidth( WWScreen s) { return (s->draw_width ); }
+int WWScreen_GetDrawHeight(WWScreen s) { return (s->draw_height); }
+
+int WWScreen_SetNumber(WWScreen s, int n) { return (s->number = n); }
 int WWScreen_SetWidth( WWScreen s, int n) { return (s->width  = n); }
 int WWScreen_SetHeight(WWScreen s, int n) { return (s->height = n); }
 int WWScreen_SetRollX( WWScreen s, int r) { return (s->roll_x = r); }
 int WWScreen_SetRollY( WWScreen s, int r) { return (s->roll_y = r); }
+
+int WWScreen_SetEnable(WWScreen s, int n) { return (s->enable = n); }
+int WWScreen_SetMode(  WWScreen s, int n) { return (s->mode   = n); }
+
+int WWScreen_SetDrawX(     WWScreen s, int n) { return (s->draw_x      = n); }
+int WWScreen_SetDrawY(     WWScreen s, int n) { return (s->draw_y      = n); }
+int WWScreen_SetDrawWidth( WWScreen s, int n) { return (s->draw_width  = n); }
+int WWScreen_SetDrawHeight(WWScreen s, int n) { return (s->draw_height = n); }
 
 /* カラーマップの色(0〜7)を返す(透明色は-1を返す) */
 int WWScreen_GetPixel(WWScreen screen, int x, int y)
@@ -133,9 +149,12 @@ int WWScreen_GetPixel(WWScreen screen, int x, int y)
   return (pixel);
 }
 
-WWScreen WWScreen_Create(int number, int width, int height,
+WWScreen WWScreen_Create(int number,
+			 int width, int height,
 			 WWPalette initial_palette,
-			 WWCharacter initial_character)
+			 WWCharacter initial_character,
+			 int draw_x, int draw_y,
+			 int draw_width, int draw_height)
 {
   WWScreen screen;
   WWScreenCharacter sc;
@@ -149,6 +168,14 @@ WWScreen WWScreen_Create(int number, int width, int height,
   WWScreen_SetHeight(screen, height);
   WWScreen_SetRollX( screen, 0);
   WWScreen_SetRollY( screen, 0);
+
+  WWScreen_SetEnable(screen, 1);
+  WWScreen_SetMode(  screen, WWSCREEN_DRAW_ALL);
+
+  WWScreen_SetDrawX( screen, draw_x);
+  WWScreen_SetDrawY( screen, draw_y);
+  WWScreen_SetDrawWidth( screen, draw_width);
+  WWScreen_SetDrawHeight(screen, draw_height);
 
   screen->screen_characters =
     (WWScreenCharacter *)malloc(sizeof(WWScreenCharacter) *
