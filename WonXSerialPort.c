@@ -2,47 +2,47 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WonxSerialPortP.h"
+#include "WonXSerialPortP.h"
 #include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
-WWSerialPort WonxSerialPort_GetWWSerialPort(WonxSerialPort wonx_serial_port)
+WWSerialPort WonXSerialPort_GetWWSerialPort(WonXSerialPort wonx_serial_port)
 { return (wonx_serial_port->ww_serial_port); }
-WWSerialPort WonxSerialPort_SetWWSerialPort(WonxSerialPort wonx_serial_port,
+WWSerialPort WonXSerialPort_SetWWSerialPort(WonXSerialPort wonx_serial_port,
 					    WWSerialPort ww_serial_port)
 { return (wonx_serial_port->ww_serial_port = ww_serial_port); }
 
-WonxSerialPort WonxSerialPort_Create()
+WonXSerialPort WonXSerialPort_Create()
 {
-  WonxSerialPort wonx_serial_port;
+  WonXSerialPort wonx_serial_port;
   WWSerialPort ww_serial_port;
 
-  wonx_serial_port = (WonxSerialPort)malloc(sizeof(_WonxSerialPort));
+  wonx_serial_port = (WonXSerialPort)malloc(sizeof(_WonXSerialPort));
   if (wonx_serial_port == NULL)
-    Wonx_Error("WonxSerialPort_Create", "Cannot allocate memory.");
+    WonX_Error("WonXSerialPort_Create", "Cannot allocate memory.");
 
   ww_serial_port = WWSerialPort_Create();
   if (ww_serial_port == NULL)
-    Wonx_Error("WonxSerialPort_Create",
+    WonX_Error("WonXSerialPort_Create",
 	       "Cannot create WonderWitch serial port.");
-  WonxSerialPort_SetWWSerialPort(wonx_serial_port, ww_serial_port);
+  WonXSerialPort_SetWWSerialPort(wonx_serial_port, ww_serial_port);
 
   return (wonx_serial_port);
 }
 
-WonxSerialPort WonxSerialPort_Destroy(WonxSerialPort wonx_serial_port)
+WonXSerialPort WonXSerialPort_Destroy(WonXSerialPort wonx_serial_port)
 {
   WWSerialPort ww_serial_port;
 
   if (wonx_serial_port == NULL)
-    Wonx_Error("WonxSerialPort_Destroy", "Object is not created.");
+    WonX_Error("WonXSerialPort_Destroy", "Object is not created.");
 
-  ww_serial_port = WonxSerialPort_GetWWSerialPort(wonx_serial_port);
+  ww_serial_port = WonXSerialPort_GetWWSerialPort(wonx_serial_port);
   if (ww_serial_port)
-    WonxSerialPort_SetWWSerialPort(wonx_serial_port,
+    WonXSerialPort_SetWWSerialPort(wonx_serial_port,
 				   WWSerialPort_Destroy(ww_serial_port));
 
   free(wonx_serial_port);

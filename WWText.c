@@ -55,7 +55,7 @@ int WWText_SetTextWindow(WWText ww_text, int x, int y,
   c = WWText_GetBase(ww_text);
   for (ty = 0; ty < WWText_GetHeight(ww_text); ty++) {
     for (tx = 0; tx < WWText_GetWidth(ww_text); tx++) {
-      if (c >= 512) Wonx_Error("WWText_SetTextWindow", "Over character.");
+      if (c >= 512) WonX_Error("WWText_SetTextWindow", "Over character.");
       ww_character = WWDisplay_GetCharacter(ww_display, c);
       WWCharacter_SetBitmap(ww_character, NULL);
       WWScreen_SetCharacter(WWText_GetScreen(ww_text),
@@ -125,7 +125,7 @@ WWText WWText_Create(WWScreen screen,
   int i;
 
   ww_text = (WWText)malloc(sizeof(_WWText));
-  if (ww_text == NULL) Wonx_Error("WWText_Create", "Cannot allocate memory.");
+  if (ww_text == NULL) WonX_Error("WWText_Create", "Cannot allocate memory.");
 
   WWText_SetScreen(ww_text, screen);
   WWText_SetX(ww_text, 0);
@@ -145,7 +145,7 @@ WWText WWText_Destroy(WWText ww_text)
 {
   int i;
 
-  if (ww_text == NULL) Wonx_Error("WWText_Destroy", "Object is not created.");
+  if (ww_text == NULL) WonX_Error("WWText_Destroy", "Object is not created.");
 
   for (i = 0; i < 128; i++) {
     if (WWText_GetFont(ww_text, i))

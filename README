@@ -1,8 +1,8 @@
-Wonx - WonderWitch on X.
+WonX - WonderWitch on X.
 
 ■ 配布に当たって
 
-Wonx はまだ不完全です．実装されていない機能や，不完全な機能，おかしな
+WonX はまだ不完全です．実装されていない機能や，不完全な機能，おかしな
 動作をする部分などがいっぱいあります．
 バグ情報やアドバイスがあれば，作者の坂井弘亮まで，どんどんメールください．
 アドレスは，
@@ -14,7 +14,7 @@ http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で，随時公開していきます．
 
 現在は坂井が一人で製作していますが，ひとりでは細かい点の整合性
-(初期化しなかった場合の動作の違いなど．WonderWitch と Wonx では
+(初期化しなかった場合の動作の違いなど．WonderWitch と WonX では
  微妙に異なっている)を追いきれないのが現状です．
 とくにマニュアルに書いてない部分に関しては，WonderWitch ではどのように
 動作するのか，ひとりではチェックしきれません．(ていうか面倒)
@@ -27,7 +27,7 @@ http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 
 ■ はじめに
 
-Wonx は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
+WonX は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
 ための，ライブラリです．以下の特徴があります．
 
 ・C言語レベルで互換機能を持っているので，WonderWitch 用のプログラムを
@@ -51,7 +51,7 @@ Wonx は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
   従って，WonderWitch での動作を模倣することよりも，デバッグ情報を
   出力することや改造のしやすさを優先したような実装をする場合がある．
 
-■ 3分wonx
+■ 3分WonX
 
 とりあえず，どんなものか見てみたいことでしょう．そんな人は，
 サンプルプログラムをコンパイル・実行してみましょう．
@@ -100,25 +100,25 @@ smac のタイトル画面が表示されます．
 p を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
 ONのままだと画面クリアとかに異常に時間がかかるからです．
 
-■ Wonx 概要
+■ WonX 概要
 
-Wonx は，WonderWitch の display_control() とか display_status() といった
+WonX は，WonderWitch の display_control() とか display_status() といった
 関数(BIOS に対するシステムコール)と代替の関数を持っています．
 これらの関数は，X上にウインドウを開いて，そこで WonderWitch と互換の動作を
 するように書いてあります．
 
-Wonx を make すると，libwonx.a というライブラリができます．
+WonX を make すると，libwonx.a というライブラリができます．
 で，WonderWitch 用のプログラムを，UNIX 上で -lwonx してコンパイルしてやれば，
-WonderWitch の display_control() とかのかわりに，Wonx の display_control() が
+WonderWitch の display_control() とかのかわりに，WonX の display_control() が
 リンクされ，X 上で動作するようになる，という仕組みです．
 
 ■ ヘッダファイルについて
 
-Wonx は，UNIXシステム上にある libc を使用します．つまり，/usr/include の
+WonX は，UNIXシステム上にある libc を使用します．つまり，/usr/include の
 下を include します．
 また，WonderWitch には，sys/types.h などといったヘッダファイルがあります．
-よって，WonderWitch のヘッダファイル構成をそのまま Wonx に引き継ぐと，
-Wonx のヘッダファイルと UNIX のヘッダファイルがコンフリクトする
+よって，WonderWitch のヘッダファイル構成をそのまま WonX に引き継ぐと，
+WonX のヘッダファイルと UNIX のヘッダファイルがコンフリクトする
 可能性が出てきます．
 (たとえば，WonderWitch の sys/types.h と /usr/include/sys/types が
  コンフリクトする，などです)
@@ -126,7 +126,7 @@ Wonx のヘッダファイルと UNIX のヘッダファイルがコンフリクトする
 コンパイルがうまくとおらないという障害の原因は，ほとんどがこのような，
 「ヘッダファイルのコンフリクトもしくは誤認」に起因しています．
 
-対策として，Wonx では wonx_include というディレクトリの下にヘッダファイルを
+対策として，WonX では wonx_include というディレクトリの下にヘッダファイルを
 格納してあります．(本当は sys というディレクトリにしたかったが，
 上記の対策のため，このようにした)
 WonderWitch 用プログラム中の，
@@ -149,25 +149,25 @@ ulong が２重定義されているとおこられる場合があります．
 調整してください．wonx_include/system_configure.h を修正することにより，
 調整できるようになってます．
 
-■ Wonx のコンパイル
+■ WonX のコンパイル
 
-まず Wonx をコンパイルして，libwonx.a を作成する必要があります．
-Wonx のコンパイルは，以下の手順で行います．
+まず WonX をコンパイルして，libwonx.a を作成する必要があります．
+WonX のコンパイルは，以下の手順で行います．
 
-1. Wonx を展開する．
+1. WonX を展開する．
 
 ~>% tar xvzf wonx.tar.gz
 ~>% cd wonx
 ~/wonx>% 
 
-2. Wonx を make する．
+2. WonX を make する．
 
 ~/wonx>% make
 gcc -c WWCharacter.c -O -I. -I/usr/X11R6/include
 gcc -c WWColorMap.c -O -I. -I/usr/X11R6/include
 ...(中略)...
 gcc -c wonx.c -O -I. -I/usr/X11R6/include
-ar ruc libwonx.a WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WonxDisplay.o XDisplay.o disp.o text.o key.o system.o timer.o etc.o wonx.o
+ar ruc libwonx.a WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WonXDisplay.o XDisplay.o disp.o text.o key.o system.o timer.o etc.o wonx.o
 ~/wonx>% ls lib*
 libwonx.a
 ~/wonx>% 
@@ -176,12 +176,12 @@ libwonx.a
 
 ■ WonderWitch 用アプリケーションのコンパイル
 
-次に，Wonx の利用の例として，拙作の SpeedMac という WonderWitch 用の
+次に，WonX の利用の例として，拙作の SpeedMac という WonderWitch 用の
 ゲームをコンパイルしてみます．
-(SpeedMac はサンプルプログラムとして，Wonx に標準添付してあります)
+(SpeedMac はサンプルプログラムとして，WonX に標準添付してあります)
 SpeedMac は WonderWitch 用のゲームプログラムです．本来は WonderWitch を
 使用してコンパイルし，WonderSwan 上でゲームを楽しむためのものです．
-今回は例として，SpeedMac に Wonx をリンクして，X 上で動作する SpeedMac の
+今回は例として，SpeedMac に WonX をリンクして，X 上で動作する SpeedMac の
 実行形式を作成してみます．
 
 1. 展開する．
@@ -306,7 +306,7 @@ smac という実行形式ができているのなら，
 
 > smac | grep "character\[10\]"
 
-wonx は，メッセージを出力する際に，grep でフィルタリングできるように，
+WonX は，メッセージを出力する際に，grep でフィルタリングできるように，
 かならず出力メッセージの先頭に，統一性のある文字列を追加しています．
 たとえば，関数呼び出し時に表示されるメッセージには，先頭に必ず
 "call" という文字列が追加されてます．よって，grep -v call を通せば，
@@ -334,19 +334,19 @@ wonx は，メッセージを出力する際に，grep でフィルタリングできるように，
 
 ■ 注意しなければならないこと
 
-Wonx は，本来は WonderWitch 用として書かれた(もしくは，書かれる)プログラムを，
+WonX は，本来は WonderWitch 用として書かれた(もしくは，書かれる)プログラムを，
 UNIX 上でコンパイル・リンクするためのライブラリであり，ハードウエアを
 エミュレートするものではありません．
 ですから，WonderWitch と UNIX 上のC言語のギャップのため，気をつけなければ
-ならないことがいくつかあります．これらは Wonx の性質上，仕方の無いことです．
+ならないことがいくつかあります．これらは WonX の性質上，仕方の無いことです．
 
 以下のことは，意識することと，きれいなプログラムを書くことで，
 かなり回避できると思います．(ビットマップ操作などで，short int にすべき
 ところでは，省略せずにちゃんと short int と明示するとか)
 
-まあ，Wonx の目的は論理的なバグを早い段階で無くすことにあるので，このへんは
+まあ，WonX の目的は論理的なバグを早い段階で無くすことにあるので，このへんは
 そういうものだと割り切って使ってください．
-Wonx を使う限り，なるべく機種依存を無くすように心がけましょう．
+WonX を使う限り，なるべく機種依存を無くすように心がけましょう．
 (とくに int のサイズにあまり依存しないようにしましょう)
 
 [コンパイルの問題]
@@ -390,7 +390,7 @@ i386 系の PC-UNIX ならば，おそらく問題は無いでしょう．
 
 [割り込みの問題]
 
-WonderWitch にはタイマ割り込みがありますが，Wonx の動作は非常に遅いため，
+WonderWitch にはタイマ割り込みがありますが，WonX の動作は非常に遅いため，
 WonderWitch の時間単位をそのまま UNIX に持ってきたら，割り込みが
 かかりっぱなしになってしまいます．よってタイマ割り込みの時間単位は，
 WonderWitch よりもかなり大きめにしてあります．
@@ -458,9 +458,9 @@ SAMPLE.C のような名前のファイルをコンパイルすると，うまくリンクできない
 添付の sout2str.pl を通すことにより，シリアル通信への出力のみ抽出して，
 端末への出力のイメージで表示させることができます．
 
-[ソース中の WONX 依存部分のくくりかた]
+[ソース中の WonX 依存部分のくくりかた]
 
-WonderWitch 用のプログラムを開発していく際に，WONX の場合のみ組み込みたくて，
+WonderWitch 用のプログラムを開発していく際に，WonX の場合のみ組み込みたくて，
 WonderSwan 上で実行するときには取り除きたいコードがあったとします．
 (例えば，デバッグ情報の出力のために printf() を入れる場合など)
 このようなときのために，wonx_include/types.h で
@@ -471,8 +471,8 @@ WonderSwan 上で実行するときには取り除きたいコードがあったとします．
 
 ソース中に，
 
-#include "Wonx.h"
-#include "WonxDisplay.h"
+#include "WonX.h"
+#include "WonXDisplay.h"
 #include "WWDisplay.h"
 #include "WWColorMap.h"
 #include "WWPalette.h"
@@ -482,7 +482,7 @@ WonderSwan 上で実行するときには取り除きたいコードがあったとします．
 int i;
 WWDisplay ww_display;
 
-ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
+ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
 
 WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
 
@@ -501,24 +501,24 @@ for (i = 0; i < 128; i++)
 プログラム中に，不安な場所があったら，
 
 #ifdef _WONX_
-ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
+ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
 printf("Before setting:\n");
 WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
-#endif
+#endif /* _WONX_ */
 
 /* ここにスプライトの設定についての不安なコードがある */
 
 #ifdef _WONX_
 printf("After setting:\n");
 WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
-#endif
+#endif /* _WONX_ */
 
 のようにして不安なコードの前後でダンプデータを取ると，デバッグに
 役立つでしょう．
 
 ■ 作者
 
-Wonx は，坂井弘亮がその大部分を往復３時間の通勤電車の中で Libretto で書いた，
+WonX は，坂井弘亮がその大部分を往復３時間の通勤電車の中で Libretto で書いた，
 「電車ソフトウエア」です．GPLで配布します．
 作者については，添付の OMAKE.jpn を参照してください．
 

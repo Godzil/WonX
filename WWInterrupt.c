@@ -45,7 +45,7 @@ static WWInterruptVector WWInterruptVector_Create(int number)
 
   vector = (WWInterruptVector)malloc(sizeof(_WWInterruptVector));
   if (vector == NULL)
-    Wonx_Error("WWInterruptVector_Create", "Cannot allocate memory.");
+    WonX_Error("WWInterruptVector_Create", "Cannot allocate memory.");
 
   WWInterruptVector_SetNumber(vector, number);
   WWInterruptVector_SetCallback(vector, NULL);
@@ -58,7 +58,7 @@ static WWInterruptVector WWInterruptVector_Create(int number)
 static WWInterruptVector WWInterruptVector_Destroy(WWInterruptVector vector)
 {
   if (vector == NULL)
-    Wonx_Error("WWInterruptVector_Destroy", "Object is not created.");
+    WonX_Error("WWInterruptVector_Destroy", "Object is not created.");
   free(vector);
   return (NULL);
 }
@@ -71,7 +71,7 @@ static WWInterruptVector WWInterrupt_GetVector(WWInterrupt interrupt,
 					       int number)
 {
   if ((number < 0) || (number > 7))
-    Wonx_Error("WWInterrupt_SetVector", "Invalid interrupt number.");
+    WonX_Error("WWInterrupt_SetVector", "Invalid interrupt number.");
   return (interrupt->vector[number]);
 }
 
@@ -80,7 +80,7 @@ static WWInterruptVector WWInterrupt_SetVector(WWInterrupt interrupt,
 					       WWInterruptVector vector)
 {
   if ((number < 0) || (number > 7))
-    Wonx_Error("WWInterrupt_SetVector", "Invalid interrupt number.");
+    WonX_Error("WWInterrupt_SetVector", "Invalid interrupt number.");
   return (interrupt->vector[number] = vector);
 }
 
@@ -313,7 +313,7 @@ WWInterrupt WWInterrupt_Create()
 
   interrupt = (WWInterrupt)malloc(sizeof(_WWInterrupt));
   if (interrupt == NULL)
-    Wonx_Error("WWInterrupt_Create", "Cannot allocate memory.");
+    WonX_Error("WWInterrupt_Create", "Cannot allocate memory.");
 
   for (i = 0; i < 8; i++)
     WWInterrupt_SetVector(interrupt, i, WWInterruptVector_Create(i));
@@ -331,7 +331,7 @@ WWInterrupt WWInterrupt_Destroy(WWInterrupt interrupt)
   WWInterruptVector vector;
 
   if (interrupt == NULL)
-    Wonx_Error("WWInterrupt_Destroy", "Object is not created.");
+    WonX_Error("WWInterrupt_Destroy", "Object is not created.");
 
   for (i = 0; i < 8; i++) {
     vector = WWInterrupt_GetVector(interrupt, i);

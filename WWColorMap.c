@@ -15,7 +15,7 @@ WWColorMap WWColorMap_Create(int * lcd_colors)
 
   color_map = (WWColorMap)malloc(sizeof(_WWColorMap));
   if (color_map == NULL)
-    Wonx_Error("WWColorMap_Create", "Cannot allocate memory");
+    WonX_Error("WWColorMap_Create", "Cannot allocate memory");
 
   WWColorMap_SetLCDColors(color_map, lcd_colors);
 

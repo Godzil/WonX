@@ -2,12 +2,12 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = Wonx-b05
-PKGNAME = wonx-b05
+VERSION = WonX-1.0
+PKGNAME = wonx-1.0
 
 SMAC = smac-b02
 
-OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o Wonx.o WonxDisplay.o WonxText.o WonxSystem.o WonxSerialPort.o XDisplay.o UNIXTimer.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o etc.o
+OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o WonX.o WonXDisplay.o WonXText.o WonXSystem.o WonXSerialPort.o XDisplay.o UNIXTimer.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o etc.o
 
 CC = gcc
 
@@ -48,8 +48,8 @@ package :
 		mkdir -p $(PKGNAME)
 		rm -fR $(PKGNAME)/*
 		mkdir -p $(PKGNAME)/wonx_include
-		cp COPYING COPYRIGHT HISTORY README OMAKE.jpn Makefile \
-			makefile_for_smac sys2wonx.pl \
+		cp COPYING COPYRIGHT HISTORY README MANUAL OMAKE.jpn Makefile \
+			makefile_for_smac *.pl \
 			*.h *.c smac*.zip $(PKGNAME)
 		cp wonx_include/*.h $(PKGNAME)/wonx_include
 		tar cvzf $(PKGNAME).tar.gz $(PKGNAME)

@@ -22,7 +22,7 @@ WWPalette WWPalette_Create(int number, int * mapped_colors, int transparent)
 
   palette = (WWPalette)malloc(sizeof(_WWPalette));
   if (palette == NULL)
-    Wonx_Error("WWPalette_Create", "Cannot allocate memory");
+    WonX_Error("WWPalette_Create", "Cannot allocate memory");
 
   WWPalette_SetNumber(palette, number);
   WWPalette_SetTransparent(palette, transparent);

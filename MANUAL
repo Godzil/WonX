@@ -1,0 +1,76 @@
+WonX のプログラム構造についての解説です．
+改造するときの参考にしてください．(ライセンスはGPLなので，改造は自由です)
+
+■ ファイル構成
+
+WonX はオブジェクト指向で書いてあり，クラス単位でファイルを分けてあります．
+ファイル自体は一つのクラスにつき３つずつあります．例えば X のウインドウを
+管理するための XDisplay クラス用には，以下の３つのファイルがあります．
+
+XDisplay.h  ... 外部公開用ヘッダファイル．XDisplay クラスを使用したい
+                ときには，このファイルを include する．
+XDisplayP.h ... 外部に公開しないプライベートなヘッダファイル．
+                一般には include しない．デバッグ時などにメンバを直接
+                参照したいときに include するためのもの．
+XDisplay.c  ... メンバ関数などの本体．
+
+クラスのメンバ変数は XDisplayP.h で定義してあるので，メンバを直接参照することは
+できません．必ずアクセス用のメンバ関数を通して参照します．値の設定も同様です．
+
+この他に，disp.c や text.c などのファイルがあります．これらは，
+WonderWitch の互換関数です．
+
+■ オブジェクトのツリー
+
+オブジェクトは以下のようなツリー構造になっています．
+
+                                             ┌─  WWColorMap
+                                             ├─  WWPalette[16]
+                                             ├─  WWCharacter[512]
+                             ┌─WWDisplay ─┼─  WWSprite[128]
+       ┌─ WonXDisplay  ──┤              ├─  WWScreen[2]
+       │                    └─XDisplay    └─  WWLCDPanel
+       │     
+       │                    ┌─  WWInterrupt
+       ├─ WonXSystem ───┼─  WWTimer[3]
+       │                    └─  UNIXTimer
+WonX ─┤
+       │     
+       ├─ WonXText ──────  WWText
+       │     
+       │     
+       └─ WonXSerialPort ─── WWSerialPort
+
+WW という接頭語がつくクラスは WonderWitch 依存のものです．主に
+WonderSwan の状態情報を格納します．
+X という接頭語がつくクラスは X 依存のもの，UNIX という接頭語がつくクラスは
+UNIX 依存のものです．
+Wonx という接頭語がつくクラスはそれらを統括するものです．
+
+ツリー構造を理解したかったら，各クラスの *P.h ファイルのメンバの定義と，
+*.c ファイルの *_Create() 関数を参照してください．
+
+■ オブジェクトの生成
+
+各クラスには，オブジェクトの生成用に，[クラス名]_Create() という
+関数が用意されています．
+
+WonX_Create() が呼ばれると，内部で WonXDisplay_Create(), WonXSystem_Create(),
+WonXText_Create(), WonXSerialPort_Create() が呼ばれ，子の WonXDisplay,
+WonXSystem, WonXText, WonXSerialPort オブジェクトが生成されます．
+WonXDisplay_Create() が呼ばれると，内部で WWDisplay_Create(),
+XDisplay_Create() が呼ばれ，... というように続いて，すべてのツリーか
+生成されます．
+オブジェクトを解放するときも同様なのですが，WonX_Destroy() が
+呼ばれるタイミングが無いため，あまりちゃんと書いてません．
+
+WonderWitch 用の互換関数では，必ず先頭で，
+if (!WonX_IsCreated()) WonX_Create();
+のようなことをやっています．つまり，互換関数のどれかが最初に呼ばれたときに，
+WonX オブジェクトのツリーが作成されます．
+
+■ メンバ関数
+
+クラスのメンバ関数は，[クラス名]_xxx() という名前になっています．
+
+■ このファイルはここまでです

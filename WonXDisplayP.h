@@ -1,20 +1,20 @@
-#ifndef _WonxDisplayP_h_INCLUDED_
-#define _WonxDisplayP_h_INCLUDED_
+#ifndef _WonXDisplayP_h_INCLUDED_
+#define _WonXDisplayP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WonxDisplay.h"
+#include "WonXDisplay.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WonxDisplay {
+typedef struct _WonXDisplay {
   XDisplay x_display;
   WWDisplay ww_display;
-} _WonxDisplay;
+} _WonXDisplay;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

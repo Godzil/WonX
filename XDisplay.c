@@ -8,7 +8,7 @@
 #include <unistd.h>
 
 #include "XDisplayP.h"
-#include "Wonx.h"
+#include "WonX.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -149,7 +149,7 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
     default         : press = 0;          break;
     }
 
-    /* Wonx 操作用 */
+    /* WonX 操作用 */
     if (event->type == KeyPress) {
 
       switch (key_sym) {
@@ -158,7 +158,7 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
       case XK_p       :
 	x_display->lcd_draw = !(x_display->lcd_draw);
 	if (x_display->lcd_draw)
-	  WonxDisplay_Flush(Wonx_GetWonxDisplay());
+	  WonXDisplay_Flush(WonX_GetWonXDisplay());
 	break;
 
 	/* データのダンプ操作 */
@@ -227,17 +227,17 @@ XDisplay XDisplay_Create(int width, int height)
 
   x_display = (XDisplay)malloc(sizeof(_XDisplay));
   if (x_display == NULL)
-    Wonx_Error("XDisplay_Create", "Cannot allocate memory.");
+    WonX_Error("XDisplay_Create", "Cannot allocate memory.");
 
   x_display->width = width;
   x_display->height = height;
 
   x_display->toplevel = XtAppInitialize(&(x_display->app_context),
-					"Wonx",
+					"WonX",
 					NULL, 0, &argc, argv, NULL, NULL, 0);
 
   XtVaSetValues(x_display->toplevel, XtNinput, True, NULL);
-  XtVaSetValues(x_display->toplevel, XtNtitle, "Wonx", NULL);
+  XtVaSetValues(x_display->toplevel, XtNtitle, "WonX", NULL);
   XtVaSetValues(x_display->toplevel, XtNwidth    , x_display->width , NULL);
   XtVaSetValues(x_display->toplevel, XtNminWidth , x_display->width , NULL);
   XtVaSetValues(x_display->toplevel, XtNmaxWidth , x_display->width , NULL);
@@ -406,7 +406,7 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
     rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
   }
   if (rectangles == NULL)
-    Wonx_Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
+    WonX_Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
 
   ww_lcd_width  = WWLCDPanel_GetWidth( ww_lcd_panel);
   ww_lcd_height = WWLCDPanel_GetHeight(ww_lcd_panel);

@@ -9,7 +9,7 @@
 #include "wonx_include/timer.h"
 
 #include "wonx_configure.h"
-#include "Wonx.h"
+#include "WonX.h"
 #include "etc.h"
 
 /* int tm_year; year - 1900 */
@@ -82,7 +82,7 @@ unsigned int rtc_get_datetime(int type)
   case RTC_HOUR        : ret = get_hour(  tblock); break;
   case RTC_MIN         : ret = get_minute(tblock); break;
   case RTC_SEC         : ret = get_second(tblock); break;
-  default : Wonx_Error("rtc_get_datetime", "Unknown parameter.");
+  default : WonX_Error("rtc_get_datetime", "Unknown parameter.");
   }
 
   printf("call : rtc_get_datetime() : return value = %d\n", (int)ret);
@@ -162,10 +162,10 @@ void timer_enable(int type, unsigned int auto_preset, unsigned int count)
 {
   WWTimer ww_timer;
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
-  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : timer_enable() : type = %d, auto_preset = %u, count = %u\n",
 	 type, (int)auto_preset, (int)count);
@@ -180,11 +180,11 @@ void timer_enable(int type, unsigned int auto_preset, unsigned int count)
 
   switch (type) {
   case TIMER_VBLANK:
-    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWVBlankCountUpTimer(WonX_GetWonXSystem());
     WWTimer_SetPresetCounter(ww_timer, count * WONX_VBLANK_INTERVAL);
     break;
   case TIMER_HBLANK:
-    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWHBlankCountUpTimer(WonX_GetWonXSystem());
     WWTimer_SetPresetCounter(ww_timer, count * WONX_HBLANK_INTERVAL);
     break;
   default:
@@ -193,13 +193,13 @@ void timer_enable(int type, unsigned int auto_preset, unsigned int count)
      * NULL に初期化する．
      */
     ww_timer = NULL;
-    Wonx_Error("timer_enable", "Invalid timer type.");
+    WonX_Error("timer_enable", "Invalid timer type.");
   }
 
   switch (auto_preset) {
   case TIMER_ONESHOT:    WWTimer_SetAutoPresetOFF(ww_timer); break;
   case TIMER_AUTOPRESET: WWTimer_SetAutoPresetON( ww_timer); break;
-  default: Wonx_Error("timer_enable", "Invalid auto preset type.");
+  default: WonX_Error("timer_enable", "Invalid auto preset type.");
   }
 
   WWTimer_Reset(ww_timer);
@@ -209,7 +209,7 @@ void timer_enable(int type, unsigned int auto_preset, unsigned int count)
   fflush(stdout);
 
   /* タイマをもとに戻す */
-  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   return;
 }
@@ -218,20 +218,20 @@ void timer_disable(int type)
 {
   WWTimer ww_timer;
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
-  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : timer_disable() : type = %d\n", type);
   fflush(stdout);
 
   switch (type) {
   case TIMER_VBLANK:
-    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWVBlankCountUpTimer(WonX_GetWonXSystem());
     break;
   case TIMER_HBLANK:
-    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWHBlankCountUpTimer(WonX_GetWonXSystem());
     break;
   default:
     /*
@@ -239,7 +239,7 @@ void timer_disable(int type)
      * NULL に初期化する．
      */
     ww_timer = NULL;
-    Wonx_Error("timer_disable", "Invalid timer type.");
+    WonX_Error("timer_disable", "Invalid timer type.");
   }
 
   WWTimer_OFF(ww_timer);
@@ -248,7 +248,7 @@ void timer_disable(int type)
   fflush(stdout);
 
   /* タイマをもとに戻す */
-  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   return;
 }
@@ -258,20 +258,20 @@ unsigned int timer_get_count(int type)
   WWTimer ww_timer;
   unsigned int ret = 0;
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
-  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : timer_get_count() : type = %d\n", type);
   fflush(stdout);
 
   switch (type) {
   case TIMER_VBLANK:
-    ww_timer = WonxSystem_GetWWVBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWVBlankCountUpTimer(WonX_GetWonXSystem());
     break;
   case TIMER_HBLANK:
-    ww_timer = WonxSystem_GetWWHBlankCountUpTimer(Wonx_GetWonxSystem());
+    ww_timer = WonXSystem_GetWWHBlankCountUpTimer(WonX_GetWonXSystem());
     break;
   default:
     /*
@@ -279,7 +279,7 @@ unsigned int timer_get_count(int type)
      * NULL に初期化する．
      */
     ww_timer = NULL;
-    Wonx_Error("timer_get_count", "Invalid timer type.");
+    WonX_Error("timer_get_count", "Invalid timer type.");
   }
 
   ret = WWTimer_GetCounter(ww_timer);
@@ -288,7 +288,7 @@ unsigned int timer_get_count(int type)
   fflush(stdout);
 
   /* タイマをもとに戻す */
-  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   return (ret);
 }

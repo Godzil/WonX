@@ -51,7 +51,7 @@ WWSerialPort WWSerialPort_Create()
 
   ww_serial_port = (WWSerialPort)malloc(sizeof(_WWSerialPort));
   if (ww_serial_port == NULL)
-    Wonx_Error("WWSerialPort_Create", "Cannot allocate memory.");
+    WonX_Error("WWSerialPort_Create", "Cannot allocate memory.");
 
   WWSerialPort_OFF(ww_serial_port);
   WWSerialPort_SetBaudrate38400(ww_serial_port);
@@ -68,7 +68,7 @@ WWSerialPort WWSerialPort_Create()
 WWSerialPort WWSerialPort_Destroy(WWSerialPort ww_serial_port)
 {
   if (ww_serial_port == NULL)
-    Wonx_Error("WWSerialPort_Destroy", "Object is not created.");
+    WonX_Error("WWSerialPort_Destroy", "Object is not created.");
 
   free(ww_serial_port);
 

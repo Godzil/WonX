@@ -81,7 +81,7 @@ WWTimer WWTimer_Create(int auto_preset, int preset)
 
   ww_timer = (WWTimer)malloc(sizeof(_WWTimer));
   if (ww_timer == NULL)
-    Wonx_Error("WWTimer_Create", "Cannot allocate memory.");
+    WonX_Error("WWTimer_Create", "Cannot allocate memory.");
 
   WWTimer_OFF(ww_timer);
   WWTimer_SetAutoPreset(ww_timer, auto_preset);
@@ -98,7 +98,7 @@ WWTimer WWTimer_Create(int auto_preset, int preset)
 WWTimer WWTimer_Destroy(WWTimer ww_timer)
 {
   if (ww_timer == NULL)
-    Wonx_Error("WWTimer_Destroy", "Object is not created.");
+    WonX_Error("WWTimer_Destroy", "Object is not created.");
 
   free(ww_timer);
 

@@ -7,7 +7,7 @@
 /* エラー処理                                                                */
 /*===========================================================================*/
 
-int Wonx_Error(char * funcname, char * message)
+int WonX_Error(char * funcname, char * message)
 {
   fprintf(stderr, "%s(): %s\n", funcname, message);
   exit (1);

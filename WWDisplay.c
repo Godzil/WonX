@@ -97,7 +97,7 @@ WWDisplay WWDisplay_Create(int lcd_panel_width, int lcd_panel_height,
 
   display = (WWDisplay)malloc(sizeof(_WWDisplay));
   if (display == NULL)
-    Wonx_Error("WWDisplay_Create", "Cannot allocate memory.");
+    WonX_Error("WWDisplay_Create", "Cannot allocate memory.");
 
   WWDisplay_SetColorMap(display, WWColorMap_Create(NULL));
 

@@ -1,26 +1,30 @@
-#ifndef _WonxDisplay_h_INCLUDED_
-#define _WonxDisplay_h_INCLUDED_
+#ifndef _WonXSystemP_h_INCLUDED_
+#define _WonXSystemP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "XDisplay.h"
-#include "WWDisplay.h"
+#include "WonXSystem.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WonxDisplay * WonxDisplay;
+typedef struct _WonXSystem {
 
-XDisplay WonxDisplay_GetXDisplay(WonxDisplay wonx_display);
-WWDisplay WonxDisplay_GetWWDisplay(WonxDisplay wonx_display);
-WonxDisplay WonxDisplay_Create(int x_width, int x_height,
-			       int ww_lcd_panel_width, int ww_lcd_panel_height,
-			       int ww_screen_width, int ww_screen_height);
-int WonxDisplay_Sync(WonxDisplay wonx_display);
-int WonxDisplay_Flush(WonxDisplay wonx_display);
+  WWInterrupt ww_interrupt;
+
+  /*
+   * ww_timer[0] はVBLANK割り込み用．
+   * ww_timer[1] はVBLANKを利用したタイマカウンタ割り込み用．
+   * ww_timer[2] はHBLANKを利用したタイマカウンタ割り込み用．
+   */
+  WWTimer ww_timer[3];
+
+  UNIXTimer unix_timer;
+
+} _WonXSystem;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

@@ -1,5 +1,5 @@
-#ifndef _WonxSystem_h_INCLUDED_
-#define _WonxSystem_h_INCLUDED_
+#ifndef _WonXSystem_h_INCLUDED_
+#define _WonXSystem_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
@@ -13,34 +13,34 @@
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WonxSystem * WonxSystem;
+typedef struct _WonXSystem * WonXSystem;
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
-WWInterrupt WonxSystem_GetWWInterrupt(WonxSystem wonx_system);
-WWInterrupt WonxSystem_SetWWInterrupt(WonxSystem wonx_system,
+WWInterrupt WonXSystem_GetWWInterrupt(WonXSystem wonx_system);
+WWInterrupt WonXSystem_SetWWInterrupt(WonXSystem wonx_system,
 				      WWInterrupt ww_interrupt);
 
-WWTimer WonxSystem_GetWWTimer(WonxSystem wonx_system, int type);
-WWTimer WonxSystem_SetWWTimer(WonxSystem wonx_system, int type, WWTimer t);
+WWTimer WonXSystem_GetWWTimer(WonXSystem wonx_system, int type);
+WWTimer WonXSystem_SetWWTimer(WonXSystem wonx_system, int type, WWTimer t);
 
-WWTimer WonxSystem_GetWWVBlankTimer(WonxSystem wonx_system);
-WWTimer WonxSystem_SetWWVBlankTimer(WonxSystem wonx_system, WWTimer t);
+WWTimer WonXSystem_GetWWVBlankTimer(WonXSystem wonx_system);
+WWTimer WonXSystem_SetWWVBlankTimer(WonXSystem wonx_system, WWTimer t);
 
-WWTimer WonxSystem_GetWWVBlankCountUpTimer(WonxSystem wonx_system);
-WWTimer WonxSystem_SetWWVBlankCountUpTimer(WonxSystem wonx_system, WWTimer t);
+WWTimer WonXSystem_GetWWVBlankCountUpTimer(WonXSystem wonx_system);
+WWTimer WonXSystem_SetWWVBlankCountUpTimer(WonXSystem wonx_system, WWTimer t);
 
-WWTimer WonxSystem_GetWWHBlankCountUpTimer(WonxSystem wonx_system);
-WWTimer WonxSystem_SetWWHBlankCountUpTimer(WonxSystem wonx_system, WWTimer t);
+WWTimer WonXSystem_GetWWHBlankCountUpTimer(WonXSystem wonx_system);
+WWTimer WonXSystem_SetWWHBlankCountUpTimer(WonXSystem wonx_system, WWTimer t);
 
-UNIXTimer WonxSystem_GetUNIXTimer(WonxSystem wonx_system);
-UNIXTimer WonxSystem_SetUNIXTimer(WonxSystem wonx_system,
+UNIXTimer WonXSystem_GetUNIXTimer(WonXSystem wonx_system);
+UNIXTimer WonXSystem_SetUNIXTimer(WonXSystem wonx_system,
 				  UNIXTimer unix_timer);
 
-WonxSystem WonxSystem_Create();
-WonxSystem WonxSystem_Destroy(WonxSystem wonx_system);
+WonXSystem WonXSystem_Create();
+WonXSystem WonXSystem_Destroy(WonXSystem wonx_system);
 
 /*****************************************************************************/
 /* ここまで                                                                  */

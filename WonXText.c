@@ -2,44 +2,44 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WonxTextP.h"
+#include "WonXTextP.h"
 #include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
 /*****************************************************************************/
 
-WWText WonxText_GetWWText(WonxText wonx_text)
+WWText WonXText_GetWWText(WonXText wonx_text)
 { return (wonx_text->ww_text); }
-WWText WonxText_SetWWText(WonxText wonx_text, WWText ww_text)
+WWText WonXText_SetWWText(WonXText wonx_text, WWText ww_text)
 { return (wonx_text->ww_text = ww_text); }
 
-WonxText WonxText_Create(WWScreen screen, int x, int y, int width, int height,
+WonXText WonXText_Create(WWScreen screen, int x, int y, int width, int height,
 			 WWPalette palette)
 {
-  WonxText wonx_text;
+  WonXText wonx_text;
   WWText ww_text;
 
-  wonx_text = (WonxText)malloc(sizeof(_WonxText));
+  wonx_text = (WonXText)malloc(sizeof(_WonXText));
   if (wonx_text == NULL)
-    Wonx_Error("WonxText_Create", "Cannot allocate memory.");
+    WonX_Error("WonXText_Create", "Cannot allocate memory.");
 
   ww_text = WWText_Create(screen, x, y, width, height, palette);
   if (ww_text == NULL)
-    Wonx_Error("WonxText_Create", "Cannot create WonderWitch text.");
-  WonxText_SetWWText(wonx_text, ww_text);
+    WonX_Error("WonXText_Create", "Cannot create WonderWitch text.");
+  WonXText_SetWWText(wonx_text, ww_text);
 
   return (wonx_text);
 }
 
-WonxText WonxText_Destroy(WonxText wonx_text)
+WonXText WonXText_Destroy(WonXText wonx_text)
 {
   if (wonx_text == NULL)
-    Wonx_Error("WonxText_Destroy", "Object is not created.");
+    WonX_Error("WonXText_Destroy", "Object is not created.");
 
-  if (WonxText_GetWWText(wonx_text))
-    WonxText_SetWWText(wonx_text,
-		       WWText_Destroy(WonxText_GetWWText(wonx_text)));
+  if (WonXText_GetWWText(wonx_text))
+    WonXText_SetWWText(wonx_text,
+		       WWText_Destroy(WonXText_GetWWText(wonx_text)));
 
   free(wonx_text);
 

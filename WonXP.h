@@ -1,28 +1,24 @@
-#ifndef _WonxSerialPort_h_INCLUDED_
-#define _WonxSerialPort_h_INCLUDED_
+#ifndef _WonXP_h_INCLUDED_
+#define _WonXP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "WWSerialPort.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WonxSerialPort * WonxSerialPort;
+typedef struct _WonX {
+  WonXDisplay wonx_display;
+  WonXText wonx_text;
+  WonXSystem wonx_system;
+  WonXSerialPort wonx_serial_port;
+} _WonX;
 
-/*****************************************************************************/
-/* メンバ関数の定義                                                          */
-/*****************************************************************************/
-
-WWSerialPort WonxSerialPort_GetWWSerialPort(WonxSerialPort wonx_serial_port);
-WWSerialPort WonxSerialPort_SetWWSerialPort(WonxSerialPort wonx_serial_port,
-					    WWSerialPort ww_serial_port);
-
-WonxSerialPort WonxSerialPort_Create();
-WonxSerialPort WonxSerialPort_Destroy(WonxSerialPort wonx_serial_port);
+typedef struct _WonX * WonX;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

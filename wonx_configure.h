@@ -3,7 +3,7 @@
 #ifndef _WONX_winx_configure_h_INCLUDED_
 #define _WONX_wonx_configure_h_INCLUDED_
 
-/* Wonx でのタイマ割り込みの周期(単位はミリ秒) */
+/* WonX でのタイマ割り込みの周期(単位はミリ秒) */
 #define WONX_TIMER_INTERVAL 100 /* 0.1 秒 */
 
 /* HBLANK, VBLANK 割り込みのデフォルトのインターバル(0.1秒単位) */

@@ -93,7 +93,7 @@ WWLCDPanel WWLCDPanel_Create(int width, int height)
 
   lcd_panel = (WWLCDPanel)malloc(sizeof(_WWLCDPanel));
   if (lcd_panel == NULL)
-    Wonx_Error("WWLCDPanel_Create", "Cannot allocate memory.");
+    WonX_Error("WWLCDPanel_Create", "Cannot allocate memory.");
 
   WWLCDPanel_SetWidth( lcd_panel, width);
   WWLCDPanel_SetHeight(lcd_panel, height);

@@ -11,7 +11,7 @@
 
 int WWCharacter_GetNumber(WWCharacter c)
 {
-  if (c == NULL) Wonx_Error("WWCharacter_GetNumber()", "WWCharacter is NULL.");
+  if (c == NULL) WonX_Error("WWCharacter_GetNumber()", "WWCharacter is NULL.");
 
   return (c->number);
 }
@@ -19,7 +19,7 @@ int WWCharacter_GetNumber(WWCharacter c)
 int WWCharacter_SetNumber(WWCharacter c, int n)
 {
   if ((n < 0) || (n >= 512))
-    Wonx_Error("WWCharacter_SetNumber()", "Invalid range.");
+    WonX_Error("WWCharacter_SetNumber()", "Invalid range.");
 
   return (c->number = n);
 }
@@ -30,7 +30,7 @@ WWCharacter WWCharacter_Create(int number, unsigned char * bitmap)
 
   character = (WWCharacter)malloc(sizeof(_WWCharacter));
   if (character == NULL)
-    Wonx_Error("WWCharacter_Create", "Cannot allocate memory.");
+    WonX_Error("WWCharacter_Create", "Cannot allocate memory.");
 
   WWCharacter_SetNumber(character, number);
   WWCharacter_SetBitmap(character, bitmap);
@@ -41,7 +41,7 @@ WWCharacter WWCharacter_Create(int number, unsigned char * bitmap)
 WWCharacter WWCharacter_Destroy(WWCharacter character)
 {
   if (character == NULL)
-    Wonx_Error("WWCharacter_Destroy()", "WWCharacter is NULL.");
+    WonX_Error("WWCharacter_Destroy()", "WWCharacter is NULL.");
   free(character);
   return (NULL);
 }
@@ -56,7 +56,7 @@ int WWCharacter_SetBitmap(WWCharacter character, unsigned char * bitmap)
   int i;
 
   if (character == NULL)
-    Wonx_Error("WWCharacter_SetBitmap()", "WWCharacter is NULL.");
+    WonX_Error("WWCharacter_SetBitmap()", "WWCharacter is NULL.");
 
   for (i = 0; i < 16; i++) {
     if (bitmap == NULL) {
@@ -72,12 +72,12 @@ int WWCharacter_SetBitmap(WWCharacter character, unsigned char * bitmap)
 int WWCharacter_GetPixel(WWCharacter character, int x, int y)
 {
   if (character == NULL)
-    Wonx_Error("WWCharacter_GetPixel()", "WWCharacter is NULL.");
+    WonX_Error("WWCharacter_GetPixel()", "WWCharacter is NULL.");
 
   if ((x < 0) || (x > 7))
-    Wonx_Error("WWCharacter_GetPixel()", "x is invalid value.");
+    WonX_Error("WWCharacter_GetPixel()", "x is invalid value.");
   if ((y < 0) || (y > 7))
-    Wonx_Error("WWCharacter_GetPixel()", "y is invalid value.");
+    WonX_Error("WWCharacter_GetPixel()", "y is invalid value.");
 
   /* ビットマップは2ビットでぴとつのピクセルに対応する．      */
   /* 2ビットの値が，palette の色に対応する．                  */
@@ -91,14 +91,14 @@ int WWCharacter_SetPixel(WWCharacter character, int x, int y, int pixel)
 {
   unsigned char p;
   if (character == NULL)
-    Wonx_Error("WWCharacter_SetPixel()", "WWCharacter is NULL.");
+    WonX_Error("WWCharacter_SetPixel()", "WWCharacter is NULL.");
 
   if ((x < 0) || (x > 7))
-    Wonx_Error("WWCharacter_SetPixel()", "x is invalid value.");
+    WonX_Error("WWCharacter_SetPixel()", "x is invalid value.");
   if ((y < 0) || (y > 7))
-    Wonx_Error("WWCharacter_SetPixel()", "y is invalid value.");
+    WonX_Error("WWCharacter_SetPixel()", "y is invalid value.");
   if ((pixel < 0) || (pixel > 3))
-    Wonx_Error("WWCharacter_SetPixel()", "Invalid pixel.");
+    WonX_Error("WWCharacter_SetPixel()", "Invalid pixel.");
 
   p = ((unsigned char)pixel) & 0x03;
   p = p << ((x % 4) * 2);

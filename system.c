@@ -7,7 +7,7 @@
 
 #include "wonx_include/system.h"
 
-#include "Wonx.h"
+#include "WonX.h"
 
 /*****************************************************************************/
 /* 互換関数の定義                                                            */
@@ -34,15 +34,15 @@ void sys_interrupt_set_hook(int type, intvector_t * vector,
 {
   WWInterrupt ww_interrupt;
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
-  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : sys_interrupt_set_hook() : type = %d, vector = %p, old_vector = %p\n", type, vector, old_vector);
   fflush(stdout);
 
-  ww_interrupt = WonxSystem_GetWWInterrupt(Wonx_GetWonxSystem());
+  ww_interrupt = WonXSystem_GetWWInterrupt(WonX_GetWonXSystem());
 
   old_vector->callback = WWInterrupt_GetCallback(ww_interrupt, type);
   old_vector->cs = WWInterrupt_GetCS(ww_interrupt, type);
@@ -56,7 +56,7 @@ void sys_interrupt_set_hook(int type, intvector_t * vector,
   fflush(stdout);
 
   /* タイマをもとに戻す */
-  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   return;
 }
@@ -65,15 +65,15 @@ void sys_interrupt_reset_hook(int type, intvector_t * old_vector)
 {
   WWInterrupt ww_interrupt;
 
-  if (!Wonx_IsCreated()) Wonx_Create();
+  if (!WonX_IsCreated()) WonX_Create();
 
   /* タイマを一時停止する */
-  UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   printf("call : sys_interrupt_reset_hook() : type = %d, old_vector = %p\n", type, old_vector);
   fflush(stdout);
 
-  ww_interrupt = WonxSystem_GetWWInterrupt(Wonx_GetWonxSystem());
+  ww_interrupt = WonXSystem_GetWWInterrupt(WonX_GetWonXSystem());
 
   WWInterrupt_SetCallback(ww_interrupt, type, old_vector->callback);
   WWInterrupt_SetCS(ww_interrupt, type, old_vector->cs);
@@ -83,7 +83,7 @@ void sys_interrupt_reset_hook(int type, intvector_t * old_vector)
   fflush(stdout);
 
   /* タイマをもとに戻す */
-  UNIXTimer_Unpause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   return;
 }
