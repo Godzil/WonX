@@ -15,6 +15,11 @@
 #include <X11/Xatom.h>
 #include <X11/keysym.h>
 
+/*
+ * X のフォントを利用する．
+ */
+#define USE_X_FONT
+
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
@@ -41,15 +46,17 @@ typedef struct _XDisplay {
   /* 4096色表示用のGCのデータベース(XFireworks から流用) */
   XColorGCDatabase color_gc_database;
 
+#ifdef USE_X_FONT
   /* テキストスクリーンへの文字表示用のフォント */
   Font font;
   GC font_gc;
+#endif
 
   /* キーの状態 */
   unsigned int key_press;
 
-  /* LCD描画のフラグ */
-  int lcd_draw;
+  /* LCD描画のレベル */
+  int lcd_draw_level;
 
   /* ダンプ出力のフラグ */
   int color_map_print;

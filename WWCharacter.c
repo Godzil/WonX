@@ -139,7 +139,7 @@ WWCharacter WWCharacter_Create(int number)
 WWCharacter WWCharacter_Destroy(WWCharacter character)
 {
   if (character == NULL)
-    WonX_Error("WWCharacter_Destroy", "WWCharacter is NULL.");
+    WonX_Error("WWCharacter_Destroy", "Object is not created.");
   free(character);
   return (NULL);
 }

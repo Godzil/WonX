@@ -198,7 +198,8 @@ WWText WWText_Destroy(WWText ww_text)
 {
   int i;
 
-  if (ww_text == NULL) WonX_Error("WWText_Destroy", "Object is not created.");
+  if (ww_text == NULL)
+    WonX_Error("WWText_Destroy", "Object is not created.");
 
   for (i = 0; i < 128; i++) {
     if (WWText_GetFont(ww_text, i))

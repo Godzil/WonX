@@ -70,6 +70,8 @@ WWSerialPort WWSerialPort_Destroy(WWSerialPort ww_serial_port)
   if (ww_serial_port == NULL)
     WonX_Error("WWSerialPort_Destroy", "Object is not created.");
 
+  WWSerialPort_Close(ww_serial_port);
+
   free(ww_serial_port);
 
   return (NULL);

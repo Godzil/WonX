@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!PATH_TO_PERL
 
 use FileHandle;
 
@@ -17,4 +17,4 @@ while (<STDIN>) {
 	}
 }
 
-# End of program
+exit (0);

@@ -7,7 +7,7 @@
  * fcntl.h は /usr/include/fcntl.h を読み込めばよいので，
  * 本当はこのファイルでは，
  * #include <fcntl.h>
- * するだけにしたいのだが，これだと -Iwonx_include のようにしてコンパイル
+ * するだけにしたいのだが，これだと -Iwonx のようにしてコンパイル
  * している場合に，自分自身を読み込んでしまう可能性があるので，
  * #include </usr/include/fcntl.h>
  * として，自分自身を読み込まないように，/usr/include を明示している．
@@ -28,5 +28,15 @@
 /* 一応両方とも include しておく */
 #include </usr/include/fcntl.h>
 #include </usr/include/sys/fcntl.h>
+
+/*
+ * mmap() が UNIX 標準のものと WonderWitch のものでコンフリクトしてしまうことの
+ * 対策．具体的な内容や理由は README を参照してください．
+ */
+#include </usr/include/stdio.h>
+/* void * mmap(char * filename); */
+void * wonx_mmap(char * filename);
+/* #define wonx_mmap mmap */
+#define mmap wonx_mmap
 
 #endif

@@ -54,7 +54,8 @@ static WWScreenCharacter WWScreenCharacter_Create(int horizontal, int vertical,
 static WWScreenCharacter WWScreenCharacter_Destroy(WWScreenCharacter
 						   screen_character)
 {
-  if (screen_character == NULL) return (NULL);
+  if (screen_character == NULL)
+    WonX_Error("WWScreenCharacter_Destroy", "Object is not created.");
   free(screen_character);
   return (NULL);
 }
@@ -272,7 +273,8 @@ WWScreen WWScreen_Destroy(WWScreen screen)
   int x, y;
   WWScreenCharacter sc;
 
-  if (screen == NULL) return (NULL);
+  if (screen == NULL)
+    WonX_Error("WWScreen_Destroy", "Object is not created.");
 
   for (y = 0; y < screen->height; y++) {
     for (x = 0; x < screen->width; x++) {

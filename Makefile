@@ -2,29 +2,40 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = WonX-2.1
-PKGNAME = wonx-2.1
+VERSION = WonX-2.2
+PKGNAME = wonx-2.2
 
 SMAC = smac-b02
 WWTERM = wwterm-b05
 
-OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWCursor.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o WonX.o WonXDisplay.o WonXSystem.o WonXSerialPort.o XDisplay.o XColorGC.o UNIXTimer.o UNIXSerialPort.o Obj.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o libwwc.o service.o etc.o
+OBJS = WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o WWScreen.o WWSprite.o WWCursor.o WWText.o WWInterrupt.o WWTimer.o WWSerialPort.o WonX.o WonXDisplay.o WonXSystem.o WonXSerialPort.o XDisplay.o XColorGC.o UNIXTimer.o UNIXSerialPort.o Obj.o bank.o comm.o disp.o text.o key.o sound.o system.o timer.o libwwc.o service.o fcntl.o etc.o wonx.o
 
-CC = gcc
+PERLS = filters.pl int2sint.pl sout2str.pl sys2wonx.pl
+#PERL = /usr/bin/perl
+
+CC ?= gcc
+AR ?= ar
+RANLIB ?= ranlib
+CFLAGS += -O
+#CFLAGS += -g
+CFLAGS += -Wall
+
+PREFIX ?= /usr/local
 
 .SUFFIXES: .c .o
+.SUFFIXES: .perl .pl
 
-all :		libwonx.a
+all :		libwonx.a $(PERLS)
 
 libwonx.a :	$(OBJS)
-		ar ruc libwonx.a $(OBJS)
-#		ranlib libwonx.a
+		$(AR) ruc libwonx.a $(OBJS)
+#		$(RANLIB) libwonx.a
 
 .c.o :		$*.c
-		$(CC) -c $*.c -O -Wall -I$(INCLUDEDIR) -I$(XINCLUDEDIR)
+		$(CC) -c $*.c $(CFLAGS) -I$(INCLUDEDIR) -I$(XINCLUDEDIR)
 
 clean :
-		rm -f libwonx.a sample1 sample2 *.o
+		rm -f libwonx.a sample1 sample2 sample3 *.o *.pl
 		rm -fR $(SMAC) $(WWTERM)
 
 sample1 :	libwonx.a sample1.o
@@ -35,38 +46,63 @@ sample2 :	libwonx.a sample2.o
 		$(CC) sample2.o -o sample2 \
 			-L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
 
-smac :		libwonx.a
+sample3 :	libwonx.a sample3.o
+		$(CC) sample3.o -o sample3 \
+			-L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
+
+smac :		libwonx.a $(SMAC)
+		cd $(SMAC) ; $(MAKE)
+
+$(SMAC) :	$(SMAC).zip $(PERLS)
 		unzip $(SMAC).zip
-		cp -R wonx_include $(SMAC)
+		mkdir -p $(SMAC)/wonx
+		cp wonx/*.h $(SMAC)/wonx
 		cp libwonx.a $(SMAC)
 		mv $(SMAC)/makefile $(SMAC)/makefile.orig
 		cp makefile_for_smac $(SMAC)/makefile
-		cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl $(SMAC)
-		# ここで止まったときは，filters.pl, sys2wonx.pl, int2sint.pl の
-		# １行目に適切なperlを指定してください"
+		cp challsrc.sh $(PERLS) $(SMAC)
 		cd $(SMAC) ; ./challsrc.sh *.[ch] makefile
-		cd $(SMAC) ; $(MAKE)
 
-wwterm :	libwonx.a
+wwterm :	libwonx.a $(WWTERM)
+		cd $(WWTERM) ; $(MAKE)
+
+$(WWTERM) :	$(WWTERM).zip $(PERLS)
 		unzip $(WWTERM).zip
-		cp -R wonx_include $(WWTERM)
+		mkdir -p $(WWTERM)/wonx
+		cp wonx/*.h $(WWTERM)/wonx
 		cp libwonx.a $(WWTERM)
 		mv $(WWTERM)/makefile $(WWTERM)/makefile.orig
 		cp makefile_for_wwterm $(WWTERM)/makefile
-		cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl $(WWTERM)
-		# ここで止まったときは，filters.pl, sys2wonx.pl, int2sint.pl の
-		# １行目に適切なperlを指定してください"
+		cp challsrc.sh $(PERLS) $(WWTERM)
 		cd $(WWTERM) ; ./challsrc.sh *.[ch] makefile
-		cd $(WWTERM) ; $(MAKE)
+
+.perl.pl :	$*.perl
+		./findperl.sh $(PERL) | cat - $*.perl > $*.pl
+		chmod +x $*.pl
+
+install :	libwonx.a $(PERLS)
+		mkdir -p $(PREFIX)/include/wonx
+		cp wonx/*.h $(PREFIX)/include/wonx
+		cp libwonx.a $(PREFIX)/lib
+		cp challsrc.sh $(PERLS) $(PREFIX)/bin
+
+uninstall :
+		rm -fR $(PREFIX)/include/wonx
+		rm -f $(PREFIX)/lib/libwonx.a
+		rm -f $(PREFIX)/bin/challsrc.sh
+		rm -f $(PREFIX)/bin/filters.pl
+		rm -f $(PREFIX)/bin/int2sint.pl
+		rm -f $(PREFIX)/bin/sout2str.pl
+		rm -f $(PREFIX)/bin/sys2wonx.pl
 
 package :
 		mkdir -p $(PKGNAME)
 		rm -fR $(PKGNAME)/*
-		mkdir -p $(PKGNAME)/wonx_include
+		mkdir -p $(PKGNAME)/wonx
 		cp COPYING COPYRIGHT HISTORY README MANUAL OMAKE.jpn Makefile \
-			makefile_for_smac makefile_for_wwterm *.sh *.pl \
+			makefile_for_smac makefile_for_wwterm *.sh *.perl \
 			*.h *.c $(SMAC).zip $(WWTERM).zip $(PKGNAME)
-		cp wonx_include/*.h $(PKGNAME)/wonx_include
+		cp wonx/*.h $(PKGNAME)/wonx
 		tar cvzf $(PKGNAME).tar.gz $(PKGNAME)
 
 # End of Makefile.

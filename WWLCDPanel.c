@@ -125,11 +125,16 @@ WWLCDPanel WWLCDPanel_Create(int width, int height)
 WWLCDPanel WWLCDPanel_Destroy(WWLCDPanel lcd_panel)
 {
   int i;
-  if (lcd_panel == NULL) return (NULL);
+
+  if (lcd_panel == NULL)
+    WonX_Error("WWLCDPanel_Destroy", "Object is not created.");
+
   for (i = 0; i < 2; i++) {
     if (lcd_panel->pixel[i]) free(lcd_panel->pixel[i]);
   }
+
   free(lcd_panel);
+
   return (NULL);
 }
 

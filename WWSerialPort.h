@@ -18,7 +18,7 @@ typedef struct _WWSerialPort * WWSerialPort;
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx_include/comm.h"
+#include "wonx/comm.h"
 
 /*****************************************************************************/
 /* 定数の定義                                                                */

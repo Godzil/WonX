@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!PATH_TO_PERL
 
 while ($_ = shift(@ARGV)) {
 	if ($_ eq "-f"   ) { last; }
@@ -8,9 +8,13 @@ while ($_ = shift(@ARGV)) {
 
 while ($filename = shift(@ARGV)) {
 	$command = "cat $filename$filters > $filename.tmp";
-	print "$command\n";
-	system($command);
+	print STDERR "$command\n";
+	$ret = system($command);
+	if ($ret != 0) { die "Command not found. Install perl scripts.\n"; }
 	$command = "mv $filename.tmp $filename";
-	print "$command\n";
-	system($command);
+	print STDERR "$command\n";
+	$ret = system($command);
+	if ($ret != 0) { die "Command not found.\n"; }
 }
+
+exit (0);

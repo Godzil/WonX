@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "wonx_include/timer.h"
+#include "wonx/timer.h"
 
 #include "wonx_configure.h"
 #include "WonX.h"

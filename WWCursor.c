@@ -53,7 +53,8 @@ WWCursor WWCursor_Create(WWPalette palette)
 
 WWCursor WWCursor_Destroy(WWCursor cursor)
 {
-  if (cursor == NULL) return (NULL);
+  if (cursor == NULL)
+    WonX_Error("WWCursor_Destroy", "Object is not created.");
   free(cursor);
   return (NULL);
 }

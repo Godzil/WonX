@@ -5,14 +5,18 @@ WonX - WonderWitch on X.
 ご意見，ご要望など歓迎します．どしどしお寄せください．
 バグ情報やアドバイスがあれば，作者の坂井弘亮まで，どんどんメールください．
 アドレスは，
-sakai@seki.ee.kagu.sut.ac.jp
-hsakai@pfu.co.jp
+hsakai@m8.people.or.jp
 です．
 (ただし，返事を書くとは限らないし，要望を反映するとも限りませんので
  その点はご容赦ください)
 また，坂井の気が向く限り，アップデートは随時行っていきます．
 http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で，随時公開していきます．
+以下はミラーサイトです．
+http://hp.vector.co.jp/authors/VA014157/WonderWitch/index.html
+http://www.people.or.jp/~hsakai/WonderWitch/index.html
+ミラーサイトは，坂井が気が向いたときにアップデートするので，常に最新，
+というわけではありません．あくまでバックアップ用です．
 
 ■ はじめに
 
@@ -48,8 +52,9 @@ WonX では，以下のものを使用しています．
   (WonderWitch用ソースコード → WonX用ソースコードの変換用 perl スクリプトを
    添付しているので，WonderWitch用ソースコードの中に漢字が入っているのならば，
    日本語 perl が望ましい)
-  添付の perl スクリプトは，すべて #!/usr/local/bin/perl になっているので，
-  日本語 perl が別のところにあるばあいには，修正してから使用してください．
+  添付の perl スクリプトは，make 時に自動で先頭に perl へのフルパス
+  (#!/usr/bin/perl など)が付加されるので，日本語 perl が別のところにある
+  ばあいには，修正してから使用してください．
   日本語 perl が無ければ，まあ，ふつうの perl でもたぶん大丈夫でしょう．
 ・qkc
   漢字コード変換，改行コード変換に必要．
@@ -104,16 +109,17 @@ WonX では，以下のものを使用しています．
 ~/wonx/smac>% ./smac
 
 ウインドウが開いて，標準出力にメッセージが出力されます．
-いったん F10 を押して画面描画を OFF にします．しばらくしたら
-(メッセージの内容が変わったら) F10 を押して再び画面表示を ON にすると，
-smac のタイトル画面が表示されます．
-ここでスペースを押して，さらにまた F10 で画面表示を OFF にして，
+いったん F9 を押して画面描画を OFF にします．(何度も押すと表示レベルが
+下がってしまうので，１回だけ長めに押してください)
+しばらくしたら(メッセージの内容が変わったら) F10 を(長めに１回だけ)押して
+再び画面表示を ON にすると，smac のタイトル画面が表示されます．
+ここでスペースを押して，さらにまた F9 で画面表示を OFF にして，
 しばらくしたら(メッセージの内容が変わったら) F10 で画面表示を ON にします．
 どうですか？ SpeedMac のゲーム画面が表示されているでしょうか？
 カーソルキーで移動，スペースキーで射撃です．
 ただし，キー入力はキー入力用関数が呼ばれたときしか有効ではないので，
 キーは反応するまで長めに押してください．
-F10 を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
+F9, F10 を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
 ONのままだと画面クリアとかに異常に時間がかかるからです．
 
 最後に，WonderWitch 用の端末エミュレータ "WWTerm" をコンパイル・実行
@@ -130,7 +136,8 @@ ONのままだと画面クリアとかに異常に時間がかかるからです．
 コンパイル・リンクして，X Window System 上で動作するような実行形式を
 作ってみましょう．
 
-まず，WonX を展開して，make してください．libwonx.a ができあがります．
+まず，WonX を展開して，make してください．libwonx.a と各種 perl スクリプトが
+できあがります．
 
 ~>% tar xvzf wonx-x.x.tar.gz
 (中略)
@@ -141,11 +148,11 @@ ONのままだと画面クリアとかに異常に時間がかかるからです．
 libwonx.a
 ~/wonx>% 
 
-次に，libwonx.a と，wonx_include ディレクトリと，
+次に，libwonx.a と，wonx ディレクトリと，
 challsrc.sh, filters.pl, sys2wonx.pl, int2sint.pl をあなたの作ったプログラムの
 ディレクトリ(ここでは例として，yoursample とします)にコピーします．
 
-~/wonx>% cp -R libwonx.a wonx_include ../yoursample
+~/wonx>% cp -R libwonx.a wonx ../yoursample
 ~/wonx>% cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl ../yoursample
 ~/wonx>% cd ../yoursample
 ~/yoursample>% 
@@ -160,8 +167,9 @@ challsrc.sh, filters.pl, sys2wonx.pl, int2sint.pl をあなたの作ったプログラムの
   (つまり，改行コードを \r\n から \n に変換して，漢字コードを SJIS から
    EUC に変換します)
 ・プログラム中の #include <sys/disp.h> のようなのを，
-  #include "wonx_include/disp.h" に変更する．(sys2wonx.pl を通す)
-・デフォルトの int を，short int に変換する．(int2sint.pl を通す)
+  #include "wonx/disp.h" に変更する．(sys2wonx.pl を通すことで変換してくれる)
+・デフォルトの int を，short int に変換する．
+  (int2sint.pl を通すことで変換してくれる)
 これらのフィルタをまとめて通してくれる filters.pl というスクリプトを
 添付してあるので，以下のようにして，すべてのソースファイルに対して，
 必要なフィルタを通してください．
@@ -172,7 +180,7 @@ challsrc.sh, filters.pl, sys2wonx.pl, int2sint.pl をあなたの作ったプログラムの
 
 ~/yoursample>% ./challsrc.sh *.[ch] [Mm]akefile* MAKEFILE*
 
-(注意! filters.pl や challsrc.sh は，ファイルの本体を書き換えてしまうので，
+(注意! filters.pl や challsrc.sh は，*ファイルの本体を書き換えてしまう*ので，
  変更されると困るようなファイルは必ずバックアップしてください)
 
 makefile を以下のように修正する．
@@ -198,8 +206,8 @@ makefile を以下のように修正する．
 
 ■ WonX 概要
 
-WonX は，WonderWitch の display_control() とか display_status() といった
-関数(BIOS に対するシステムコール)と代替の関数を持っています．
+WonX は，WonderWitch の display_control() とか display_status() といった関数
+(BIOS に対するシステムコール)と代替の関数を持っています．
 これらの関数は，X上にウインドウを開いて，そこで WonderWitch と互換の動作を
 するように書いてあります．
 
@@ -211,39 +219,41 @@ WonderWitch の display_control() とかのかわりに，WonX の display_control() が
 ■ ヘッダファイルについて
 
 WonX は，UNIXシステム上にある libc を使用します．つまり，/usr/include の
-下を include します．
+下を include します．(このため strlen(), fopen() などの標準ライブラリは
+UNIX 付属のものが使用可能)
 また，WonderWitch には，sys/types.h などといったヘッダファイルがあります．
 よって，WonderWitch のヘッダファイル構成をそのまま WonX に引き継ぐと，
 WonX のヘッダファイルと UNIX のヘッダファイルがコンフリクトする
 可能性が出てきます．
-(たとえば，WonderWitch の sys/types.h と /usr/include/sys/types が
+(たとえば，WonderWitch の sys/types.h と UNIX の /usr/include/sys/types.h が
  コンフリクトする，などです)
 これは，WonderWitch用のアプリケーションをコンパイルするときに，要注意です．
 コンパイルがうまくとおらないという障害の原因は，ほとんどがこのような，
 「ヘッダファイルのコンフリクトもしくは誤認」に起因しています．
 
-対策として，WonX では wonx_include というディレクトリの下にヘッダファイルを
+対策として，WonX では wonx というディレクトリの下にヘッダファイルを
 格納してあります．(本当は sys というディレクトリにしたかったが，
 上記の対策のため，このようにした)
 WonderWitch 用プログラム中の，
 #include <sys/types.h>
 のような部分は，すべて，
-#include <wonx_include/types.h>
+#include "wonx/types.h"
 のように修正する必要があります．
 (stdio.h や stdlib.h は，UNIX システム付属のものを使用するので，
  そのままでかまいません)
 (ただし，コンフリクトしないという絶対の自信があるなら，この限りではありません)
 WonderWitch のプログラムの，#include <sys/*.h> は，すべて
-#include <wonx_include/*.h> に修正する必要がある，ということです．
+#include "wonx/*.h" に修正する必要がある，ということです．
 (これをまとめて行うための sys2wonx.pl という perl スクリプトを添付して
  あります．./filters.pl ./sys2wonx.pl -f *.[ch] を実行すると，ごっそりと
  書き換えてくれます)
 
 また，UNIXシステムによっては，/usr/include/sys/types.h で ushort, ulong を
 定義しているものといないものがあります．よって，コンパイル中に
-ulong が２重定義されているとおこられる場合があります．
-このあたりの微調整には，wonx_include 以下のファイルを直接修正して
-調整してください．wonx_include/system_configure.h を修正することにより，
+ulong が２重定義されているとおこられる場合があります．(Linux ではそのように
+なるようである)
+このあたりの微調整には，wonx ディレクトリ以下のファイルを直接修正して
+調整してください．wonx/system_configure.h を修正することにより，
 調整できるようになってます．
 
 ■ WonX のコンパイル
@@ -269,6 +279,15 @@ ar ruc libwonx.a WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o
 libwonx.a
 ~/wonx>% 
 
+このとき，各種 perl スクリプトも同時に作成されます．
+必要があれば make install すると，各種ヘッダファイル，ライブラリ，
+perl スクリプトがインストールされます．(インストールしなくても構いません．
+以降はインストールしなかったものとして説明します)
+
+~/wonx>% su
+Password:
+# make install
+
 ここまでで，ライブラリの作成は終りです．
 
 ■ WonderWitch 用アプリケーションのコンパイル
@@ -290,7 +309,7 @@ SpeedMac は WonderWitch 用のゲームプログラムです．本来は WonderWitch を
 
 2. ヘッダファイルと libwonx.a をコピーする．
 
-~/wonx/smac-b02>% cp -R ../wonx_include .
+~/wonx/smac-b02>% cp -R ../wonx .
 ~/wonx/smac-b02>% cp ../libwonx.a .
 ~/wonx/smac-b02>% 
 
@@ -313,8 +332,8 @@ qkc が無い人は... nkf とかてきとうに使って変換してください．
 #include <sys/disp.h>
 #include <sys/key.h>
 のような部分を，
-#include "wonx_include/disp.h"
-#include "wonx_include/key.h"
+#include "wonx/disp.h"
+#include "wonx/key.h"
 のように修正します．
 
 これをまとめてやるための perl スクリプト (sys2wonx.pl) を添付してあるので，
@@ -401,8 +420,10 @@ smac を起動すると，ウインドウが開きます．また，ターミナルには，
 ・F2 を押すと，パレットのデータをダンプ出力する．
 ・F3 を押すと，キャラクターのデータをダンプ出力する．
 ・F4 を押すと，スプライトのデータをダンプ出力する．
-・F10 を押すと，表示/非表示モードを切替える．
-  (非表示だと画面への描画を行わないが高速)
+・F9 を押すと，画面の表示レベルを下げる．
+・F10 を押すと，画面の表示レベルを上げる．
+  表示レベルはデフォルトで 1 になっており，現在のレベルが 1 以上の場合のみ
+  画面の描画を行う．0 以下の場合には，画面への描画を行わないがそのぶん高速．
 ・F11 で10秒間停止．(画面写真をとるときなどに利用できる)
   (F11は短めに押してください．長めに押すと，復帰しなくなるようです)
 ・q もしくは Ctrl-c もしくは F12 で強制終了．
@@ -419,8 +440,9 @@ for (y = 0; y < 32; y++)
   }
 }
 
-このような場合は，F10 を押して非表示モードにして，ループ処理が終ったら
-再び F10 を押して表示モードに戻してください．
+このような場合は，F9 を押して表示レベルを下げて，ループ処理が終ったら
+再び F10 を押して表示レベルを上げてください．(何度も押すと表示レベルが
+どんどん下がって(もしくは上がって)しまうので，長めに１回だけ押してください)
 
 F1 や F2 を押すと，データをダンプ出力するのですが，標準ではその他にも
 メッセージが大量に出力されているので，ふつうに F1 を押しただけでは，
@@ -450,7 +472,7 @@ WonX は，メッセージを出力する際に，grep でフィルタリングできるように，
 
 > smac > /dev/null
 
-だと，文字列を kterm などに表示しないぶん，高速になります．
+だと，文字列を kterm などに表示しないぶん，(かなり)高速になります．
 
 ■ 足りないもの
 
@@ -486,7 +508,7 @@ WonX を使う限り，なるべく機種依存を無くすように心がけましょう．
 ヘッダファイルのコンフリクトです．とくに，WonderWitch で sys 以下の
 ファイルをインクルードしている場合は注意してください．
 ushort, ulong などは，sys/types.h で定義されているシステムもあるし，
-そうでないシステムもあります．このへんは，wonx_include/system_configure.h で
+そうでないシステムもあります．このへんは，wonx/system_configure.h で
 調整してください．
 (FreeBSD では ushort のみ定義されているが，RedHat Linux では，
  uchort, ulong ともに定義されているので，そのままだとコンパイル中に
@@ -530,7 +552,7 @@ WonderWitch で動作させるときの潜在的なバグ(short int の上下限にまつわる
 バグなど)を発見できることがあるので，なるべくなら int2sint.pl で int を
 ごっそり short int にしてしまうことをおすすめします．
 
-[エンディアンの問題]
+[バイトエンディアンの問題]
 
 WonderWitch の CPU は x86系です．SPARC などで使用する場合には，
 エンディアンに注意する必要があります．
@@ -543,7 +565,9 @@ WonX-2.1 から，キャラクタデータに関しては，極力エンディアンに依存しないように
 修正しました．i386 と SPARC でエンディアンに依存しないことを動作確認
 しています．しかしそれでも，キャラクタデータを unsigned char * で定義して，
 ビットマップ読み込み用の関数にキャラクタデータを渡すときに short int * に
-キャストして渡すような書き方をしていると，依存してしまいます．
+キャストして渡すような書き方をしていると，依存してしまいます．つまり，
+WonX 自体はエンディアンに依存していないが，WonX を利用するプログラムが
+エンディアン依存に書いてあっては，どうしようもないということです．
 
 キャラクタデータのビットマップ読み込み用の関数には，適切な型のデータを
 渡すようにしてください．short int * を渡すべきところに，unsigned char * を
@@ -631,14 +655,14 @@ gcc -g -o smac $(OBJS) -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
 (実際にはコンパイラは，-lXt\r だと思ってしまって，libXt\r.a というライブラリを
  探してしまうのです)
 (しかも，ファイルを emacs や less などで参照しても，改行コードは表示されない
- ため，原因がわかりにくい)
+ ため，原因がとってもわかりにくい)
 また，
 
 gcc -g -o smac $(OBJS) -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
 
 のようにしていると，/usr/X11R6/lib を指定したつもりなのに，実際には
 /usr/X11R6/lib\r というディレクトリが指定されたことになってしまい，
--lX11, -lXt の検索に失敗します．
+-lX11, -lXt の検索に失敗し，やはり make に失敗します．
 
 漢字コードに関しても，同じことがいえます．UNIX での漢字コードは EUC なので，
 ソースコード中に SJIS の漢字が入っていると，うまくコンパイルできなかったり，
@@ -667,6 +691,11 @@ SAMPLE.C のような名前のファイルをコンパイルすると，うまくリンクできない
 タブや改行コードは，"\t" "\n" のような文字列に変換されて出力されます．
 添付の sout2str.pl を通すことにより，シリアル通信への出力のみ抽出して，
 端末への出力のイメージで表示させることができます．
+sout2str.pl は以下のようにして利用します．
+(terminal という WonderWitch 用プログラムを，WonX を利用して UNIX 上で
+ コンパイルして，sout2str.pl を通してシリアルへの出力のイメージを見たい場合)
+
+> ./terminal | ./sout2str.pl
 
 ■ 割り込みについて
 
@@ -732,66 +761,285 @@ _asm_inline() は常に0を返すダミー関数として定義されています．
 WonderWitch 用のプログラムを開発していく際に，WonX の場合のみ組み込みたくて，
 WonderSwan 上で実行するときには取り除きたいコードがあったとします．
 (例えば，デバッグ情報の出力のために printf() を入れる場合など)
-このようなときのために，wonx_include/types.h で
+このようなときのために，wonx/types.h で
 #define _WONX_
 してあるので，そのような場所は #ifdef _WONX_ でくくってください．
 
-■ ダンプデータの取りかた
+■ WonX が提供するサービス関数
 
-ソース中に，
+WonX は以下の関数をデバッグ用のサービス関数として提供しています．
+以下の関数を実行することにより，デバッグ情報を stdout に出力します．
 
-#include "WonX.h"
-#include "WonXDisplay.h"
-#include "WWDisplay.h"
-#include "WWColorMap.h"
-#include "WWPalette.h"
-#include "WWCharacter.h"
-#include "WWSprite.h"
+#include "wonx/wonx.h"
 
-int i;
-WWDisplay ww_display;
+/* カラーマップ情報の出力 */
+void wonx_print_colormap_data(void);
 
-ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
+/* パレット情報の出力 */
+void wonx_print_palette_data(int n);
 
-WWColorMap_PrintData(WWDisplay_GetColorMap(ww_display), stdout);
+/* すべてのパレット情報を出力 */
+void wonx_print_all_palette_data(void);
 
-for (i = 0; i < 16; i++)
-  WWPalette_PrintData(WWDisplay_GetPalette(ww_display, i), stdout);
+/* キャラクタ情報の出力 */
+void wonx_print_character_data(int n);
 
-for (i = 0; i < 512; i++)
-  WWCharacter_PrintData(WWDisplay_GetCharacter(ww_display, i), stdout);
+/* すべてのキャラクタ情報を出力 */
+void wonx_print_all_character_data(void);
 
-for (i = 0; i < 128; i++)
-  WWSprite_PrintData(WWDisplay_GetSprite(ww_display, i), stdout);
+/* スプライト情報の出力 */
+void wonx_print_sprite_data(int n);
 
-のようなコードを挿入することにより，任意の場所でキャラクタやパレットの
-ダンプデータを出力させることができます．
+/* すべてのスプライト情報を出力 */
+void wonx_print_all_sprite_data(void);
 
-プログラム中に，不安な場所があったら，
+たとえばソース中に不安な場所があったら，
 
 #ifdef _WONX_
-ww_display = WonXDisplay_GetWWDisplay(WonX_GetWonXDisplay());
-printf("Before setting:\n");
-WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
-#endif /* _WONX_ */
+#include "wonx/wonx.h"
+#endif
 
-/* ここにスプライトの設定についての不安なコードがある */
+void func(void)
+{
+
+  ...(中略)...
 
 #ifdef _WONX_
-printf("After setting:\n");
-WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
-#endif /* _WONX_ */
+  wonx_print_sprite_data(0);
+#endif
 
-のようにして不安なコードの前後でダンプデータを取ると，デバッグに
-役立つでしょう．
+  /* ここにスプライトの設定についての不安なコードがある */
+
+#ifdef _WONX_
+  wonx_print_sprite_data(0);
+#endif
+
+  ...(以下略)...
+
+のようにして不安なコードの前後でダンプデータを取ると，デバッグに役立つ
+でしょう．#ifdef _WONX_ でくくっておけば，デバッグコードをソース中に残した
+ままで WonderWitch でもコンパイルが可能なので便利です．
+
+また，WonX では画面の描画に時間がかかるのに加えて，画面の描画は画面関連の
+システムコール(パレットの変更なども含む)が呼ばれるたびに行われるため，
+
+for (y = 0; y < TEXT_SCREEN_HEIGHT; y++) {
+  for (x = 0; x < TEXT_SCREEN_WIDTH; x++) {
+    text_put_char(x, y, ' ');
+  }
+}
+
+のようなコードがあると，text_put_char() の呼び出しのたびに画面描画が行われる
+ため，動作が非常に遅くなります．
+
+これの対策として，F9, F10 を押して画面の表示レベルを変化させることで
+画面の表示/非表示を切替えられるようにしてあるのですが，以下のサービス関数を
+利用することで，プログラム中から画面の表示レベルを制御できます．
+表示レベルはデフォルトでは 1 になっており，表示レベルが 1 以上のときのみ
+描画が行われます．
+とくに gdb などを使ってデバッグする場合には，F9, F10 の反応が鈍くなったり
+するおそれがあるため，重宝するでしょう．
+
+#include "wonx/wonx.h"
+
+/* 現在の表示/非表示のレベルの取得．(1以上で表示，0以下で非表示) */
+int wonx_get_lcddraw_level(void);
+
+/* 現在の表示/非表示のレベルの設定 */
+int wonx_set_lcddraw_level(int level);
+
+/* 表示レベルを下げる */
+int wonx_lcddraw_level_down(void);
+
+/* 表示レベルを上げる */
+int wonx_lcddraw_level_up(void);
+
+実際のプログラム中では，以下のようにして利用します．
+
+#ifdef _WONX_
+#include "wonx/wonx.h"
+#endif
+
+void func(void)
+{
+
+  ...(中略)...
+
+#ifdef _WONX_
+  wonx_lcddraw_level_down();
+#endif
+
+  for (y = 0; y < TEXT_SCREEN_HEIGHT; y++) {
+    for (x = 0; x < TEXT_SCREEN_WIDTH; x++) {
+      text_put_char(x, y, ' ');
+    }
+  }
+
+#ifdef _WONX_
+  wonx_lcddraw_level_up();
+#endif
+
+  ...(以下略)...
+
+このように書くことにより，WonX でのコンパイル時には text_put_char() 実行時の
+画面描画を抑止して，高速化することができます．
+(#ifdef _WONX_ でくくるのを忘れないようにしましょう)
+
+■ 画面の表示レベルについて
+
+WonX-2.2 から，画面の表示レベルというものを導入しました．
+(WonX-2.1 までは，F10 による画面描画の ON/OFF の切替えのみだった)
+
+これの理由は，プログラム中から
+(wonx_lcddraw_level_up(), wonx_lcddraw_level_down() などによって)画面の描画を
+制御する際に，ON/OFF しかできないと，関数の中から関数を呼ぶような場合に
+期待通りに動作しないからです．たとえば以下のような場合です．
+
+void sample1(void)
+{
+  wonx_lcddraw_draw_off();
+
+  /* 処理２ */
+
+  wonx_lcddraw_draw_on();
+}
+
+void sample2(void)
+{
+  wonx_lcddraw_draw_off();
+
+  /* 処理１ */
+
+  sample1();
+
+  /* 処理３ */
+
+  wonx_lcddraw_draw_on();
+}
+
+処理１，処理２の位置では画面描画はOFFになっているのですが，処理３の部分では
+期待に反して画面の描画は ON になってしまいます．これではどこの関数で
+ON/OFF しているのかを常に注意しなければならなくなり，OFF にしているつもりでも
+どこかで ON になってしまっていたりと，何のデバッグをしているのがわからなく
+なってしまいます．
+この対策として，表示レベルを定めて，以下のように書けるようにしました．
+
+void sample1(void)
+{
+  wonx_lcddraw_level_down();
+
+  /* 処理２ */
+
+  wonx_lcddraw_level_up();
+}
+
+void sample2(void)
+{
+  wonx_lcddraw_level_down();
+
+  /* 処理１ */
+
+  sample1();
+
+  /* 処理３ */
+
+  wonx_lcddraw_level_up();
+}
+
+これだと処理２のところでは表示レベルは -1，処理１，処理３のところでは
+表示レベルは 0 となるため，期待通りに動作してくれます．
+
+■ mmap() について
+
+WonX の設計思想では「UNIX側にも存在するサービス関数はUNIXにまかせる」
+と考えているため，fopen() などは WonX では用意していません．
+しかし mmap() に関しては，UNIX と WonderWitch で動作がかなり違うのと，
+WonderWitch のプログラム中で実際に mmap() を使用しているものが多いという
+実情があったので，WonX-2.2 で mmap() システムコールの実装を行いました．
+
+ただし実装上の問題があって，UNIX 側では mmap() は，/usr/include/stdio.h で，
+
+void * mmap(void * addr, size_t len, int prot, int flags, int fd, off_t offset);
+
+のように定義されています．(FreeBSD の例)
+これに対して WonderWitch では，include/sys/fcntl.h で，
+
+void * mmap(char * filename);
+
+のような形でに定義されています．(実際にはポインタは far ポインタになっているが)
+UNIX の mmap() と WonderWitch の mmap() では，引数の数も種類も違います．
+このため WonderWitch に合わせて mmap() を実装すると，WonX のコンパイル時や
+WonX をリンクするプログラムのコンパイル時に，関数の引数がコンフリクトして
+エラーとなってしまいます．WonX をリンクするプログラム中では，stdio.h が
+インクルードされる可能性が常に存在するので，移植性の高い方法でこの問題を
+根本的に解決することはできません．
+
+これの苦肉の対策として，WonX では mmap() は wonx_mmap() という名前で定義して，
+fcntl.h では，
+
+#define mmap wonx_mmap
+
+することで対処しています．つまり，mmap() の実体は wonx_mmap() となります．
+具体的には fcntl.[ch] を参照してください．
+このため，fcntl.h をインクルードするのを忘れて mmap() を使用すると，
+UNIX の mmap() (stdio.h の mmap()) が有効になってしまうため，
+「関数の引数が食い違っている」という内容のエラーが出ると思われるので，
+注意してください．
+
+また，この方法だと fcntl.h の後に stdio.h がインクルードされるような場合に，
+stdio.h の中で宣言されている mmap() も wonx_mmap() に書き変わってしまい，
+やはり関数の引数がコンフリクトしてしまいます．対策として，fcntl.h の先頭付近で
+stdio.h のインクルードを行い，fcntl.h の後で stdio.h がインクルードされても，
+２度目のインクルードになって，stdio.h の先頭で，
+#ifndef _STDIO_H_
+#define _STDIO_H_
+などで切られるようになっています．
+
+今後同様な関数を実装するときにも，同じような対処になるでしょう．
+
+うーん，ほんとに苦肉の策だなあ... #define をつかうか，もしくは
+
+void * wonx_mmap(char * filename);
+void * mmap;
+mmap = wonx_mmap;
+
+のようにして代入しなおす，などの方法も検討したのですが，結局これがいちばん
+確実でわかりやすい方法かなあ... と思ってます．もっといいアイディアがあったら
+教えてください．
+
+■ 実行の高速化について
+
+WonX はデバッグ目的のライブラリであるため，あまり高速動作のことを
+考えていません．そのため，遅いです．ですが，以下のことに注意することで，
+かなり速く動作させることもできます．
+
+プログラム中のホットスポットになる部分を，
+wonx_lcddraw_level_down(), wonx_lcddraw_level_up()
+でくくる．これにより，F10 を押して画面描画を OFF にしたのと同じ効果が
+得られます．
+
+実行時には，
+
+> ./smac > /dev/null
+
+のようにして，出力メッセージを /dev/null に捨てる．
+WonX は大量のメッセージを出力しますが，kterm 上などで動作させている場合には，
+このメッセージの処理が大きな負荷になります．このため，メッセージを
+/dev/null に捨ててしまうことで，高速に動作させることができるようになります．
+
+これらのことに気をつければ，かなり高速に動かすことが可能になります．
 
 ■ 添付のツールについて
+
+perl スクリプト(*.pl)は make することにより，*.perl から自動生成されます．
+このとき，perl のある場所を自動検索して，スクリプトの先頭行に
+#!/usr/bin/perl のような行を追加してくれます．
 
 [sys2wonx.pl]
 
 #include <sys/disp.h>
 を，
-#include "wonx_include/disp.h"
+#include "wonx/disp.h"
 のように変換するフィルタです．
 
 [int2sint.pl]
@@ -861,8 +1109,7 @@ WonX は，坂井弘亮がその大部分を往復３時間の通勤電車の中で Libretto で書いた，
 作者については，添付の OMAKE.jpn を参照してください．
 
 坂井弘亮の連絡先のメールアドレスは，
-sakai@seki.ee.kagu.sut.ac.jp
-hsakai@pfu.co.jp
+hsakai@m8.people.or.jp
 です．また，本ソフトウエアの最新版を，
 http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で配布しています．

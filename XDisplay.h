@@ -17,7 +17,7 @@ typedef struct _XDisplay * XDisplay;
 
 #include <X11/Xlib.h>
 
-#include "wonx_include/key.h"
+#include "wonx/key.h"
 
 #include "WWDisplay.h"
 #include "WWLCDPanel.h"
@@ -33,7 +33,11 @@ Colormap XDisplay_GetColormap(XDisplay x_display);
 XColorGCDatabase XDisplay_GetColorGCDatabase(XDisplay x_display);
 
 unsigned int XDisplay_GetKeyPress(XDisplay x_display);
-int XDisplay_GetLCDDraw(XDisplay x_display);
+
+int XDisplay_GetLCDDrawLevel(XDisplay d);
+int XDisplay_SetLCDDrawLevel(XDisplay d, int level);
+int XDisplay_LCDDrawLevelDown(XDisplay d);
+int XDisplay_LCDDrawLevelUp(  XDisplay d);
 
 int XDisplay_GetColorMapPrint(XDisplay d);
 int XDisplay_GetPalettePrint(XDisplay d);
@@ -66,6 +70,7 @@ XDisplay XDisplay_Destroy(XDisplay x_display);
 /*---------------------------------------------------------------------------*/
 
 int XDisplay_Sync(XDisplay x_display);
+int XDisplay_Flush(XDisplay x_display);
 
 /*---------------------------------------------------------------------------*/
 /* иа╡Х                                                                      */

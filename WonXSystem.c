@@ -85,15 +85,15 @@ static int WonXTimer_Callback(WonXSystem wonx_system)
 
   /* キー入力割り込み */
   /*
-   * XDisplay_Sync() が他のところから呼ばれた場合に割り込みをとり
+   * XDisplay_Flush() が他のところから呼ばれた場合に割り込みをとり
    * こぼしてしまうので，XDisplay クラスのほうで割り込みの処理をするか，
    * フラグを立てるように改良する必要が有るかも．
-   * (別の場所で頻繁に XDisplay_Sync() が呼ばれていると，キー割り込みが
+   * (別の場所で頻繁に XDisplay_Flush() が呼ばれていると，キー割り込みが
    *  発生しなくなってしまう)
    * とりあえずは簡易的にこのような実装にしておいて問題無いだろう．
    */
   old_key = XDisplay_GetKeyPress(x_display);
-  XDisplay_Sync(x_display);
+  XDisplay_Flush(x_display);
   new_key = XDisplay_GetKeyPress(x_display);
   /* 新しいキーが押された場合 */
   /*

@@ -5,13 +5,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx/bank.h"
+#include "wonx_configure.h"
+
+#include "wonx/fcntl.h"
 
 #include "WonX.h"
 
 /*****************************************************************************/
 /* 互換関数の定義                                                            */
 /*****************************************************************************/
+
+/*
+ * void * でデータを渡す関数は，型を間違えるバグが入る可能性があるので，
+ * void * を適切な型に置き換えてある．
+ */
 
 /*
  * Xサーバとの同期の整合性がとれなくなるなどの問題が考えられるので，
@@ -29,57 +36,64 @@
  * 引数の表示の問題もあるしね．
  */
 
-void bank_set_map(int bank, int bank_num)
-{
-  return;
-}
+/*
+ * mmap() が UNIX 標準のものと WonderWitch のものでコンフリクトしてしまうことの
+ * 対策．具体的な内容や理由は README を参照してください．
+ */
+#if 0
+void * wonx_mmap(char * filename);
+void * mmap = wonx_mmap;
+#endif
+#if 0
+#ifdef wonx_mmap
+#undef wonx_mmap
+#endif
+#endif
 
-int bank_get_map(int bank)
+void * wonx_mmap(char * filename)
 {
-  return (0);
-}
+  int size = 10;
+  FILE * fp;
+  int i, c;
+  char * p;
+  void * ret;
 
-unsigned char bank_read_byte(int bank, unsigned int off)
-{
-  return (0);
-}
+  if (!WonX_IsCreated()) WonX_Create();
 
-void bank_write_byte(int bank, unsigned int off, unsigned int data)
-{
-  return;
-}
+  /* タイマを一時停止する */
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
-unsigned int bank_read_word(int bank, unsigned int off)
-{
-  return (0);
-}
+  printf("call : mmap() : filename = %s\n", filename);
+  fflush(stdout);
 
-void bank_write_word(int bank, unsigned int off, unsigned int data)
-{
-  return;
-}
+  p = (char *)malloc(size);
+  if (p == NULL) WonX_Error("mmap", "cannot allocate memory.");
 
-void bank_read_block(int bank, unsigned int off,
-		     void * buffer, unsigned int size)
-{
-  return;
-}
+  fp = fopen(filename, "rb");
+  if (fp == NULL) WonX_Error("mmap", "cannot open file.");
 
-void bank_write_block(int bank, unsigned int off,
-		      void * buffer, unsigned int size)
-{
-  return;
-}
+  i = 0;
+  while ((c = fgetc(fp)) != EOF) {
+    if (i > size - 1) {
+      p = (char *)realloc(p, size);
+      if (p == NULL) WonX_Error("mmap", "cannot reallocate memory.");
+    }
+    p[i] = c;
+    i++;
+  }
 
-void bank_fill_block(int bank, unsigned int off,
-		     unsigned int size, unsigned int data)
-{
-  return;
-}
+  fclose(fp);
+  ret = p;
 
-void bank_erase_flash(int bank)
-{
-  return;
+  WonXDisplay_Sync(WonX_GetWonXDisplay());
+
+  printf("call : mmap() : return value = 0x%p\n", ret);
+  fflush(stdout);
+
+  /* タイマをもとに戻す */
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+
+  return (ret);
 }
 
 /*****************************************************************************/

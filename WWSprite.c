@@ -107,7 +107,8 @@ WWSprite WWSprite_Create(int number, int x, int y,
 
 WWSprite WWSprite_Destroy(WWSprite sprite)
 {
-  if (sprite == NULL) return (NULL);
+  if (sprite == NULL)
+    WonX_Error("WWSprite_Destroy", "Object is not created.");
   free(sprite);
   return (NULL);
 }

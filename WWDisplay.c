@@ -2,9 +2,9 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "wonx_include/disp.h"
-#include "wonx_include/text.h"
-#include "wonx_include/libwwc.h"
+#include "wonx/disp.h"
+#include "wonx/text.h"
+#include "wonx/libwwc.h"
 
 #include "WWDisplayP.h"
 #include "WonX.h"
@@ -214,7 +214,8 @@ WWDisplay WWDisplay_Destroy(WWDisplay display)
 {
   int i;
 
-  if (display == NULL) return (NULL);
+  if (display == NULL)
+    WonX_Error("WWDisplay_Destroy", "Object is not created.");
 
   if (WWDisplay_GetColorMap(display) != NULL)
     WWDisplay_SetColorMap(display,

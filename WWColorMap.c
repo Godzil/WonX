@@ -24,7 +24,8 @@ WWColorMap WWColorMap_Create(int * lcd_colors)
 
 WWColorMap WWColorMap_Destroy(WWColorMap color_map)
 {
-  if (color_map == NULL) return (NULL);
+  if (color_map == NULL)
+    WonX_Error("WWColorMap_Destroy", "Object is not created.");
   free(color_map);
   return (NULL);
 }

@@ -1,3 +1,46 @@
+2002/2/4(月)
+
+wonx-2.2 公開
+
+mmap() を実装した．具体的には README 参照．
+
+サービス関数を追加．(デバッグ用の情報をダンプするサービス関数と，
+画面描画ON/OFF制御用のサービス関数を追加) 具体的には README 参照．
+
+bios_exit() からオブジェクトのデストラクタが呼ばれるようにして，
+各オブジェクトに適切な Destroy 関数を追加．オブジェクトの削除が適切に
+行われるように，終了処理を全般的にチェックした．
+
+key_wait() 中にも割り込みを受け付けるように修正．
+(以前はキー入力しか受け付けていなかった)
+
+タイマ割り込みを一部改良．(UNIXTimer.c)
+
+wonx_include ディレクトリを wonx に名前を変更．
+
+perl へのフルパスを自動で検索して perl スクリプトの先頭に挿入するように変更．
+
+Makefile 見直し，改良．
+
+画面描画の ON/OFF を，表示レベルによって切替えるように変更．
+(詳しくは README 参照)
+また，F9 で表示レベルを下げ，F10 で表示レベルを上げるように変更．
+それにあわせて，描画のON/OFF部分とキー入力イベント処理の一部見直しをした．
+
+キーの押下時にメッセージを表示するように修正．
+
+Obj ObjListData_GetPrev(ObjListData data)
+Obj ObjListData_GetNext(ObjListData data)
+を
+ObjListData ObjListData_GetPrev(ObjListData data)
+ObjListData ObjListData_GetNext(ObjListData data)
+に修正．
+
+Makefile に install, uninstall ターゲットを追加．challsrc.sh 修正．
+
+
+
+
 2001/1/13(土)
 
 wonx-2.1 公開

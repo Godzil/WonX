@@ -19,7 +19,7 @@ typedef struct _WWCharacter * WWCharacter;
 #include <stdlib.h>
 
 #include "WWDisplay.h"
-#include "wonx_include/libwwc.h"
+#include "wonx/libwwc.h"
 
 /*****************************************************************************/
 /* メンバ関数の宣言                                                          */

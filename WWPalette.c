@@ -71,7 +71,8 @@ WWPalette WWPalette_Create(int number, int * mapped_colors)
 
 WWPalette WWPalette_Destroy(WWPalette palette)
 {
-  if (palette == NULL) return (NULL);
+  if (palette == NULL)
+    WonX_Error("WWPalette_Destroy", "Object is not created.");
   free(palette);
   return (NULL);
 }

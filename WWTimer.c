@@ -100,6 +100,8 @@ WWTimer WWTimer_Destroy(WWTimer ww_timer)
   if (ww_timer == NULL)
     WonX_Error("WWTimer_Destroy", "Object is not created.");
 
+  WWTimer_OFF(ww_timer);
+
   free(ww_timer);
 
   return (NULL);

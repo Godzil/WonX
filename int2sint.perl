@@ -1,4 +1,4 @@
-#!/usr/local/bin/perl
+#!PATH_TO_PERL
 
 while (<STDIN>) {
 	s/([\s;\}\/])uint(\s)/$1unsigned int$2/g;
@@ -17,3 +17,5 @@ while (<STDIN>) {
 	s/_WONX_INT_/int/g;
 	print $_;
 }
+
+exit (0);

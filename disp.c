@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx_include/disp.h"
+#include "wonx/disp.h"
 
 #include "WonX.h"
 

@@ -18,7 +18,7 @@ typedef struct _WWTimer * WWTimer;
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx_include/timer.h"
+#include "wonx/timer.h"
 
 /*****************************************************************************/
 /* メンバ関数の宣言                                                          */

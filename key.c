@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx_include/key.h"
+#include "wonx/key.h"
 
 #include "WonX.h"
 
@@ -42,7 +42,7 @@ int key_press_check(void)
   printf("call : key_press_check() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
-  XDisplay_Sync(x_display);
+  XDisplay_Flush(x_display);
 
   ret = XDisplay_GetKeyPress(x_display);
 
@@ -70,7 +70,7 @@ int key_hit_check(void)
   printf("call : key_hit_check() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
-  XDisplay_Sync(x_display);
+  XDisplay_Flush(x_display);
 
   ret = XDisplay_GetKeyPress(x_display);
 
@@ -88,7 +88,7 @@ int key_hit_check(void)
 int key_wait(void)
 {
   XDisplay x_display;
-  int ret;
+  volatile int ret;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -101,13 +101,25 @@ int key_wait(void)
 
   /*
    * 以下はホットスポットになり得るので注意!
+   * key_wait() 中に割り込みを受け付けるために一時的にタイマを Unpause する．
+   * タイマ割り込みのコールバック関数中でキー入力の割り込み処理も行われるため，
+   * do〜while ループ中での XDisplay_Flush() は必要無し．
    */
-
+  UNIXTimer_Unpause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
+  /*
+   * タイマ割り込みによるキー入力処理に期待していったん Unpause するため，
+   * 再び Pause するまでは XDisplay の描画関連の関数などを呼び出しては
+   * いけないので注意．
+   * (XDisplay_GetKeyPress() は単に変数の値を返すだけなので問題無い)
+   */
   ret = 0;
   do {
-    XDisplay_Sync(x_display);
+#if 0 /* タイマを Unpause しない場合には必要 */
+    XDisplay_Flush(x_display);
+#endif
     ret = XDisplay_GetKeyPress(x_display);
   } while (ret == 0);
+  UNIXTimer_Pause(WonXSystem_GetUNIXTimer(WonX_GetWonXSystem()));
 
   WonXDisplay_Sync(WonX_GetWonXDisplay());
 
@@ -177,7 +189,7 @@ int key_hit_check_with_repeat(void)
   printf("call : key_hit_check_with_repeat() : \n"); fflush(stdout);
 
   x_display = WonXDisplay_GetXDisplay(WonX_GetWonXDisplay());
-  XDisplay_Sync(x_display);
+  XDisplay_Flush(x_display);
 
   ret = XDisplay_GetKeyPress(x_display);
 

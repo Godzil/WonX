@@ -9,6 +9,7 @@
 
 #include "XDisplayP.h"
 #include "WonX.h"
+#include "WonXDisplay.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -22,7 +23,18 @@ XColorGCDatabase XDisplay_GetColorGCDatabase(XDisplay x_display)
 { return (x_display->color_gc_database); }
 
 unsigned int XDisplay_GetKeyPress(XDisplay d) { return (d->key_press); }
-int XDisplay_GetLCDDraw(XDisplay d) { return (d->lcd_draw); }
+
+int XDisplay_GetLCDDrawLevel(XDisplay d) { return (d->lcd_draw_level); }
+int XDisplay_SetLCDDrawLevel(XDisplay d, int level)
+{
+  d->lcd_draw_level = level;
+  WonXDisplay_Flush(WonX_GetWonXDisplay());
+  return (d->lcd_draw_level);
+}
+int XDisplay_LCDDrawLevelDown(XDisplay d)
+{ return (XDisplay_SetLCDDrawLevel(d, d->lcd_draw_level - 1)); }
+int XDisplay_LCDDrawLevelUp(  XDisplay d)
+{ return (XDisplay_SetLCDDrawLevel(d, d->lcd_draw_level + 1)); }
 
 int XDisplay_GetColorMapPrint(XDisplay d) {return (d->color_map_print); }
 int XDisplay_GetPalettePrint(XDisplay d) {return (d->palette_print); }
@@ -111,6 +123,7 @@ static char * translations =
 /* 色名からピクセル値を取得する                                              */
 /*===========================================================================*/
 
+#ifdef USE_X_FONT
 static unsigned long XDisplay_GetPixelFromColorName(XDisplay x_display,
 						    char * color_name)
 {
@@ -119,6 +132,7 @@ static unsigned long XDisplay_GetPixelFromColorName(XDisplay x_display,
 		   &c0, &c1);
   return (c0.pixel);
 }
+#endif
 
 /*===========================================================================*/
 /* イベントハンドラ                                                          */
@@ -157,18 +171,28 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
     switch (key_sym) {
 
       /* WonderSwan用 */
-    case XK_Up      : press = KEY_UP1;    break;
-    case XK_Right   : press = KEY_RIGHT1; break;
-    case XK_Down    : press = KEY_DOWN1;  break;
-    case XK_Left    : press = KEY_LEFT1;  break;
-    case XK_i       : press = KEY_UP2;    break;
-    case XK_l       : press = KEY_RIGHT2; break;
-    case XK_k       : press = KEY_DOWN2;  break;
-    case XK_j       : press = KEY_LEFT2;  break;
-    case XK_s       : press = KEY_START;  break;
-    case XK_space   : press = KEY_A;      break;
-    case XK_Shift_L : press = KEY_B;      break;
+    case XK_Up      : press = KEY_UP1;    printf("key : Up1 "   ); break;
+    case XK_Right   : press = KEY_RIGHT1; printf("key : Right1 "); break;
+    case XK_Down    : press = KEY_DOWN1;  printf("key : Down1 " ); break;
+    case XK_Left    : press = KEY_LEFT1;  printf("key : Left1 " ); break;
+    case XK_i       : press = KEY_UP2;    printf("key : Up2 "   ); break;
+    case XK_l       : press = KEY_RIGHT2; printf("key : Right2 "); break;
+    case XK_k       : press = KEY_DOWN2;  printf("key : Down2 " ); break;
+    case XK_j       : press = KEY_LEFT2;  printf("key : Left2 " ); break;
+    case XK_s       : press = KEY_START;  printf("key : Start " ); break;
+    case XK_space   : press = KEY_A;      printf("key : A "     ); break;
+    case XK_Shift_L : press = KEY_B;      printf("key : B "     ); break;
     default         : press = 0;          break;
+    }
+
+    if (press) {
+      if (event->type == KeyPress) {
+	x_display->key_press |=  press;
+	printf("Pressed\n");
+      } else {
+	x_display->key_press &= ~press;
+	printf("Released\n");
+      }
     }
 
     /* WonX 操作用 */
@@ -177,11 +201,42 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
       switch (key_sym) {
 
 	/* 表示モード変更 */
+      case XK_F9        :
       case XK_F10       :
-	x_display->lcd_draw = !(x_display->lcd_draw);
 
-	if (x_display->lcd_draw) {
+	if (key_sym == XK_F9) {
+	  printf("key : F9 Pressed\n");
+	  printf("lcd_draw_level : down (%d", x_display->lcd_draw_level);
+	  (x_display->lcd_draw_level)--;
+	  printf(" -> %d)\n", x_display->lcd_draw_level);
+	} else {
+	  printf("key : F10 Pressed\n");
+	  printf("lcd_draw_level : up (%d", x_display->lcd_draw_level);
+	  (x_display->lcd_draw_level)++;
+	  printf(" -> %d)\n", x_display->lcd_draw_level);
+	}
+
+	if (x_display->lcd_draw_level > 0) {
 #if 1
+	  /*
+	   * WonXDisplay_Flush() を実行すると，XDisplay_Flush() が呼ばれて
+	   * イベントのディスパッチが行われてしまうため，イベントの処理中に
+	   * 別のイベントのディスパッチを行うことになってしまう．
+	   * X サーバが，XtDispatchEvent() によるイベントのディスパッチ時に，
+	   * イベントキューからイベントを出してからイベントの処理をするような
+	   * 実装になっている場合には問題ないが，イベントの処理をした後に
+	   * キューからイベントを取り除くような実装になっている場合には，
+	   * XtDispatchEvent() によるイベントのディスパッチ中に再び
+	   * XtDispatchEvent() が呼ばれたときに，イベントがキューから
+	   * 取り除かれることがなく，イベント処理の無限ループに陥ってしまう
+	   * 可能性があるかもしれない．
+	   * (ちなみに XFree86 では大丈夫なようであるが，いちおう)
+	   * このため WonXDisplay_Flush() は呼び出さずに，
+	   * WonXDisplay_DrawLCDWindow() でウインドウの描画のみを行うように
+	   * WonX-2.2 で修正した．
+	   */
+	  WonXDisplay_DrawLCDWindow(WonX_GetWonXDisplay());
+#elif 1
 	  WonXDisplay_Flush(WonX_GetWonXDisplay());
 #else
 	  ExposeHandler(w, p, event, dispatch);
@@ -190,16 +245,27 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
 	break;
 
 	/* データのダンプ操作 */
-      case XK_F1       : x_display->color_map_print = 1; break;
-      case XK_F2       : x_display->palette_print = 1; break;
-      case XK_F3       : x_display->character_print = 1; break;
-      case XK_F4       : x_display->sprite_print = 1; break;
+      case XK_F1       :
+	printf("key : F1 Pressed\n");
+	x_display->color_map_print = 1;
+	printf("dump : color_map\n");
+	break;
+      case XK_F2       :
+	printf("key : F2 Pressed\n");
+	x_display->palette_print   = 1;
+	printf("dump : palette\n");
+	break;
+      case XK_F3       :
+	printf("key : F3 Pressed\n");
+	x_display->character_print = 1;
+	printf("dump : character\n");
+	break;
+      case XK_F4       :
+	printf("key : F4 Pressed\n");
+	x_display->sprite_print    = 1;
+	printf("dump : sprite\n");
+	break;
       }
-    }
-
-    if (press) {
-      if (event->type == KeyPress) x_display->key_press |=  press;
-      else                         x_display->key_press &= ~press;
     }
   }
 
@@ -259,7 +325,7 @@ XDisplay XDisplay_Create(int width, int height)
   XtVaSetValues(x_display->toplevel, XtNmaxHeight, x_display->height, NULL);
 
   x_display->key_press = 0;
-  x_display->lcd_draw = 1;
+  x_display->lcd_draw_level = 1;
 
   XtRealizeWidget(x_display->toplevel);
   while (!XtIsRealized(x_display->toplevel)) { /* None */ }
@@ -293,16 +359,7 @@ XDisplay XDisplay_Create(int width, int height)
     XSetFunction(x_display->display, x_display->color_gc[i], GXcopy);
   }
 
-  /* GCのデータベース初期化 */
-  x_display->color_gc_database =
-    XColorGCDatabase_Create(x_display,
-			    0,       /* studying_flag */
-			    1,       /* cache_flag */
-			    3,       /* cache_size */
-			    256,     /* hash_number */
-			    "black", /* background_color */
-			    16       /* gradation */);
-
+#ifdef USE_X_FONT
   /* フォントの確保 */
   x_display->font = XLoadFont(x_display->display, "8x16");
   x_display->font_gc = XCreateGC(x_display->display,
@@ -313,6 +370,24 @@ XDisplay XDisplay_Create(int width, int height)
 		 XDisplay_GetPixelFromColorName(x_display, "white"));
   XSetBackground(x_display->display, x_display->font_gc,
 		 XDisplay_GetPixelFromColorName(x_display, "black"));
+#endif
+
+  /* GCのデータベース初期化 */
+  /*
+   * XColorGCDatabase_Create() の後に XCreateGC() で他の GC の生成を行うと，
+   * なぜか XFreeGC() するときに Segmentation Fault を起こす
+   * (FreeBSD の場合の話．原因不明．他の OS (ていうか正確にはXライブラリ)
+   *  では試してない)ので，XColorGCDatabase_Create() はすべての GC を
+   * 作成した後に行う必要がある．
+   */
+  x_display->color_gc_database =
+    XColorGCDatabase_Create(x_display,
+			    0,       /* studying_flag */
+			    1,       /* cache_flag */
+			    3,       /* cache_size */
+			    256,     /* hash_number */
+			    "black", /* background_color */
+			    16       /* gradation */);
 
   XFillRectangle(x_display->display, x_display->lcd_window,
 		 x_display->color_gc[0],
@@ -362,15 +437,85 @@ XDisplay XDisplay_Destroy(XDisplay x_display)
 {
   int i;
 
-  if (x_display == NULL) return (NULL);
+  if (x_display == NULL)
+    WonX_Error("XDisplay_Destroy", "Object is not created.");
 
-  /* あとでリソースの解放を追加すること */
-  if (x_display->color_gc != NULL) {
-    for (i = 0; i < 16; i++) {
-      if (x_display->color_gc[i])
-	XFreeGC(x_display->display, x_display->color_gc[i]);
+  /* Xサーバと同期をとる */
+  /* True だと，イベントキュー内のイベントを廃棄する */
+  XSync(x_display->display, True);
+
+  /* トランスレーションのアンインストール */
+  XtUninstallTranslations(x_display->toplevel);
+
+  /* アクションの削除 */
+#if 0
+  /*
+   * 一度登録したアクションを削除することはできない．
+   * (同じアクション名で新しいアクションを登録して，上書きすることはできる)
+   */
+#endif
+
+  /* アイコンの削除 */
+#if 0
+  /* アイコンの削除処理が必要な場合にはここに書く．現状では必要無し */
+#endif
+
+  /* イベントハンドラの削除 */
+  XtRemoveEventHandler(x_display->toplevel, KeyPressMask | KeyReleaseMask,
+		       False, KeyHandler, x_display);
+  XtRemoveEventHandler(x_display->toplevel, ExposureMask,
+		       False, ExposeHandler, x_display);
+  XtRemoveEventHandler(x_display->toplevel, LeaveWindowMask | FocusChangeMask,
+		       False, LeaveWindowHandler, x_display);
+
+  /* GCのデータベース終了処理 */
+  if (x_display->color_gc_database) {
+    x_display->color_gc_database =
+      XColorGCDatabase_Destroy(x_display->color_gc_database);
+  }
+
+#ifdef USE_X_FONT
+  /* フォントの解放 */
+  if (x_display->font_gc) {
+    XFreeGC(x_display->display, x_display->font_gc);
+    x_display->font_gc = 0;
+  }
+  if (x_display->font) {
+    XUnloadFont(x_display->display, x_display->font);
+    x_display->font = 0;
+  }
+#endif
+
+  for (i = 0; i < 16; i++) {
+    if (x_display->color_gc[i]) {
+      XFreeGC(x_display->display, x_display->color_gc[i]);
       x_display->color_gc[i] = 0;
     }
+  }
+
+  if (x_display->copy_gc) {
+    XFreeGC(x_display->display, x_display->copy_gc);
+    x_display->copy_gc = 0;
+  }
+
+  if (x_display->lcd_pixmap) {
+    XFreePixmap(x_display->display, x_display->lcd_pixmap);
+    x_display->lcd_pixmap = 0;
+  }
+
+  x_display->key_press = 0;
+  x_display->lcd_draw_level = 0;
+
+#if 0
+  if (x_display->app_context) {
+    XtDestroyApplicationContext(x_display->app_context);
+    x_display->app_context = 0;
+  }
+#endif
+
+  if (x_display->toplevel) {
+    XtDestroyWidget(x_display->toplevel);
+    x_display->toplevel = 0;
   }
 
   free(x_display);
@@ -384,13 +529,20 @@ XDisplay XDisplay_Destroy(XDisplay x_display)
 
 int XDisplay_Sync(XDisplay x_display)
 {
-  XEvent event;
-
   XFlush(x_display->display);
 
   /* Xサーバと同期をとる */
   /* False だと，イベントキュー内のイベントを廃棄しない */
   XSync(x_display->display, False);
+
+  return (0);
+}
+
+int XDisplay_Flush(XDisplay x_display)
+{
+  XEvent event;
+
+  XDisplay_Sync(x_display);
 
   /* イベントの処理 */
   while (XtAppPending(x_display->app_context)) {
@@ -570,7 +722,7 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWDisplay ww_display,
 GC XDisplay_CreateGC(XDisplay x_display)
 {
   GC gc;
-  gc = XCreateGC(x_display->display, x_display->root_window, 0, 0);
+  gc = XCreateGC(x_display->display, x_display->lcd_window, 0, 0);
   return (gc);
 }
 

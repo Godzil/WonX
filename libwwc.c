@@ -7,7 +7,7 @@
 
 #include "wonx_configure.h"
 
-#include "wonx_include/libwwc.h"
+#include "wonx/libwwc.h"
 
 #include "WonX.h"
 

@@ -21,8 +21,8 @@ typedef Obj (*ObjDestructor)(Obj);
 /*****************************************************************************/
 
 Obj ObjListData_GetObj(ObjListData data);
-Obj ObjListData_GetPrev(ObjListData data);
-Obj ObjListData_GetNext(ObjListData data);
+ObjListData ObjListData_GetPrev(ObjListData data);
+ObjListData ObjListData_GetNext(ObjListData data);
 int ObjList_GetLength(ObjList list);
 ObjListData ObjList_GetStartEdge(ObjList list);
 ObjListData ObjList_GetEndEdge(ObjList list);

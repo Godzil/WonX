@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 
-#include "wonx_include/comm.h"
+#include "wonx/comm.h"
 
 #include "wonx_configure.h"
 #include "WonX.h"

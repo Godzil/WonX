@@ -4,7 +4,7 @@
 
 #include <stdio.h>
 
-#include "wonx_include/service.h"
+#include "wonx/service.h"
 
 #include "WonX.h"
 
@@ -40,6 +40,7 @@ void bios_exit()
 {
   printf("call : bios_exit() : \n");
   fflush(stdout);
+  if (WonX_IsCreated()) WonX_Destroy();
   exit (0);
 }
 

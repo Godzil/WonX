@@ -45,6 +45,27 @@ WonXDisplay WonXDisplay_Create(int x_width, int x_height,
   return (wonx_display);
 }
 
+WonXDisplay WonXDisplay_Destroy(WonXDisplay wonx_display)
+{
+  XDisplay x_display;
+  WWDisplay ww_display;
+
+  if (wonx_display == NULL)
+    WonX_Error("WonXDisplay_Destroy", "Object is not created.");
+
+  x_display = WonXDisplay_GetXDisplay(wonx_display);
+  if (x_display)
+    WonXDisplay_SetXDisplay(wonx_display, XDisplay_Destroy(x_display));
+
+  ww_display = WonXDisplay_GetWWDisplay(wonx_display);
+  if (ww_display)
+    WonXDisplay_SetWWDisplay(wonx_display, WWDisplay_Destroy(ww_display));
+
+  free(wonx_display);
+
+  return (NULL);
+}
+
 int WonXDisplay_PrintData(WonXDisplay wonx_display)
 {
   int i;
@@ -89,20 +110,7 @@ int WonXDisplay_PrintData(WonXDisplay wonx_display)
   return (0);
 }
 
-int WonXDisplay_Sync(WonXDisplay wonx_display)
-{
-  XDisplay x_display;
-
-  WonXDisplay_PrintData(wonx_display);
-
-  x_display = WonXDisplay_GetXDisplay(wonx_display);
-
-  XDisplay_Sync(x_display);
-
-  return (0);
-}
-
-int WonXDisplay_Flush(WonXDisplay wonx_display)
+int WonXDisplay_DrawLCDWindow(WonXDisplay wonx_display)
 {
   XDisplay x_display;
   WWDisplay ww_display;
@@ -111,12 +119,30 @@ int WonXDisplay_Flush(WonXDisplay wonx_display)
   x_display = WonXDisplay_GetXDisplay(wonx_display);
   ww_display = WonXDisplay_GetWWDisplay(wonx_display);
 
-  if (XDisplay_GetLCDDraw(x_display)) {
+  /* 表示レベルが1以上のときだけ描画する */
+  if (XDisplay_GetLCDDrawLevel(x_display) > 0) {
     WWDisplay_DrawLCDPanel(ww_display);
     ww_lcd_panel = WWDisplay_GetLCDPanel(ww_display);
     XDisplay_DrawLCDWindow(x_display, ww_display, ww_lcd_panel);
   }
 
+  return (0);
+}
+
+int WonXDisplay_Sync(WonXDisplay wonx_display)
+{
+  XDisplay x_display;
+
+  WonXDisplay_PrintData(wonx_display);
+  x_display = WonXDisplay_GetXDisplay(wonx_display);
+  XDisplay_Flush(x_display);
+
+  return (0);
+}
+
+int WonXDisplay_Flush(WonXDisplay wonx_display)
+{
+  WonXDisplay_DrawLCDWindow(wonx_display);
   WonXDisplay_Sync(wonx_display);
 
   return (0);

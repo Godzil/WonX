@@ -19,7 +19,7 @@ typedef void (*WWInterruptCallback)();
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "wonx_include/system.h"
+#include "wonx/system.h"
 
 /*****************************************************************************/
 /* メンバ関数の宣言                                                          */

@@ -27,7 +27,9 @@ WWDisplay WonXDisplay_GetWWDisplay(WonXDisplay wonx_display);
 WonXDisplay WonXDisplay_Create(int x_width, int x_height,
 			       int ww_lcd_panel_width, int ww_lcd_panel_height,
 			       int ww_screen_width, int ww_screen_height);
+WonXDisplay WonXDisplay_Destroy(WonXDisplay wonx_display);
 int WonXDisplay_PrintData(WonXDisplay wonx_display);
+int WonXDisplay_DrawLCDWindow(WonXDisplay wonx_display);
 int WonXDisplay_Sync(WonXDisplay wonx_display);
 int WonXDisplay_Flush(WonXDisplay wonx_display);
 

@@ -7,6 +7,7 @@
 
 int WonX_IsCreated(void);
 void WonX_Create(void);
+void WonX_Destroy(void);
 WonXDisplay WonX_GetWonXDisplay(void);
 WonXSystem WonX_GetWonXSystem(void);
 WonXSerialPort WonX_GetWonXSerialPort(void);

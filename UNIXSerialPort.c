@@ -163,8 +163,10 @@ UNIXSerialPort UNIXSerialPort_Destroy(UNIXSerialPort unix_serial_port)
   if (unix_serial_port == NULL)
     WonX_Error("UNIXSerialPort_Destroy", "Object is not created.");
 
-  if (UNIXSerialPort_IsOpened(unix_serial_port))
+  if (UNIXSerialPort_IsOpened(unix_serial_port)) {
     UNIXSerialPort_Close(unix_serial_port);
+    unix_serial_port->opened = 0;
+  }
 
   free(unix_serial_port);
 

@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "wonx_include/text.h"
+#include "wonx/text.h"
 
 #include "WonX.h"
 #include "WWText.h"

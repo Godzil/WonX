@@ -46,13 +46,13 @@ Obj ObjListData_GetObj(ObjListData data)
   return (data->obj);
 }
 
-Obj ObjListData_GetPrev(ObjListData data)
+ObjListData ObjListData_GetPrev(ObjListData data)
 {
   if (data == NULL) return (NULL);
   return (data->prev);
 }
 
-Obj ObjListData_GetNext(ObjListData data)
+ObjListData ObjListData_GetNext(ObjListData data)
 {
   if (data == NULL) return (NULL);
   return (data->next);

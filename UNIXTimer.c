@@ -23,6 +23,7 @@ volatile static UNIXTimer pointed_unix_timer = NULL;
 static void UNIXTimer_CallBackFunction(int argument)
 {
   int ret;
+  int old;
 
   /*
    * static なフラグを立てて，コールバック関数からコールバック関数が
@@ -34,6 +35,9 @@ static void UNIXTimer_CallBackFunction(int argument)
 
   if (pointed_unix_timer->pause) {
     pointed_unix_timer->interrupt_in_pause++;
+    if (pointed_unix_timer->interrupt_in_pause > 1000) {
+      WonX_Error("UNIXTimer_CallBackFunction", "interrupt count is too much.");
+    }
   } else {
     if (pointed_unix_timer->interrupt_in_pause == 0)
       pointed_unix_timer->interrupt_in_pause = 1;
@@ -44,13 +48,15 @@ static void UNIXTimer_CallBackFunction(int argument)
 	/*
 	 * コールバック関数の中から UNIXTimer_Unpause() などが呼ばれて，
 	 * そこからさらにコールバック関数が呼ばれたりしたときのために，
-	 * ポーズする．
+	 * ポーズする．またこのとき，interrupt_in_pause がインクリメント
+	 * されると無限ループに陥ってしまう可能性がある(?)ので，
+	 * interrupt_in_pause を保存してコールバック関数の実行後に元に戻す．
 	 */
 	pointed_unix_timer->pause++;
-
+	old = pointed_unix_timer->interrupt_in_pause;
 	ret = (*pointed_unix_timer->callback)(pointed_unix_timer->parameter);
-
 	pointed_unix_timer->pause--;
+	pointed_unix_timer->interrupt_in_pause = old;
 
 	/*
 	 * コールバック関数の中で UNIXTimer_* 関連の関数が呼び出されると，
