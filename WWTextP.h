@@ -1,32 +1,29 @@
-#ifndef _WWCharacter_h_INCLUDED_
-#define _WWCharacter_h_INCLUDED_
+#ifndef _WWTextP_h_INCLUDED_
+#define _WWTextP_h_INCLUDED_
 
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+#include "WWText.h"
+#include "WWCharacter.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */
 /*****************************************************************************/
 
-typedef struct _WWCharacter * WWCharacter;
+typedef struct _WWText {
 
-/*****************************************************************************/
-/* メンバ関数の宣言                                                          */
-/*****************************************************************************/
+  /* テキストの描画情報 */
 
-int WWCharacter_GetNumber(WWCharacter c);
-int WWCharacter_SetNumber(WWCharacter c, int n);
-WWCharacter WWCharacter_Create(int number, unsigned char * bitmap);
-WWCharacter WWCharacter_Destroy(WWCharacter character);
-int WWCharacter_SetBitmap(WWCharacter character, unsigned char * bitmap);
-int WWCharacter_GetPixel(WWCharacter character, int x, int y);
-int WWCharacter_SetPixel(WWCharacter character, int x, int y, int pixel);
-int WWCharacter_CopyBitmap(WWCharacter dst, WWCharacter src);
-int WWCharacter_PrintData(WWCharacter character, FILE * f);
+  WWScreen screen; /* テキストスクリーン */
+  int x, y, width, height; /* テキストウインドウの領域 */
+  int base; /* 使用するキャラクタのベース */
+
+  WWPalette palette;
+  WWCharacter font[128]; /* フォント */
+
+} _WWText;
 
 /*****************************************************************************/
 /* ここまで                                                                  */

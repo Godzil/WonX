@@ -1,10 +1,14 @@
-#include <stdio.h>
-
 /*****************************************************************************/
 /* ここから                                                                  */
 /*****************************************************************************/
 
 #include "XDisplayP.h"
+#include "Wonx.h"
+#include "etc.h"
+
+#include <stdio.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -31,7 +35,10 @@ int XDisplay_SetSpritePrint(XDisplay d, int f)
 /* 内部で使用する関数などの定義                                              */
 /*****************************************************************************/
 
+#if 0
 static XrmOptionDescRec options[] = {};
+#endif
+
 static Atom wm_delete_window;
 
 static void die(Widget w)
@@ -60,7 +67,7 @@ static void iconify(Widget w, XEvent * event, String * params, Cardinal * num)
   XIconifyWindow(XtDisplay(w), XtWindow(w), DefaultScreen(XtDisplay(w)));
 }
 
-static void pause(Widget w, XEvent * event, String * params, Cardinal * num)
+static void sleep_3(Widget w, XEvent * event, String * params, Cardinal * num)
 {
   sleep(3);
 }
@@ -69,7 +76,7 @@ static XtActionsRec actions[] = {
   {"quit", quit},
   {"wm_protocols_proc", wm_protocols_proc},
   {"iconify", iconify},
-  {"pause", pause}
+  {"pause", sleep_3}
 };
 
 static char * translations =
@@ -134,7 +141,11 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
       switch (key_sym) {
 
 	/* 表示モード変更 */
-      case XK_p       : x_display->lcd_draw = !(x_display->lcd_draw); break;
+      case XK_p       :
+	x_display->lcd_draw = !(x_display->lcd_draw);
+	if (x_display->lcd_draw)
+	  WonxDisplay_Flush(Wonx_GetWonxDisplay());
+	break;
 
 	/* データのダンプ操作 */
       case XK_F1       : x_display->color_map_print = 1; break;

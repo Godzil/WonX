@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWCharacterP.h"
+#include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -101,6 +102,11 @@ int WWCharacter_SetPixel(WWCharacter character, int x, int y, int pixel)
   character->bitmap[y * 2 + x / 4] |= p;
 
   return (pixel);
+}
+
+int WWCharacter_CopyBitmap(WWCharacter dst, WWCharacter src)
+{
+  return (WWCharacter_SetBitmap(dst, src->bitmap));
 }
 
 int WWCharacter_PrintData(WWCharacter character, FILE * f)

@@ -2,9 +2,7 @@
 
 #include <sys/system.h>
 
-#include "wonx.h"
-
-#include "WonxDisplay.h"
+#include "Wonx.h"
 
 void sys_interrupt_set_hook(int type, intvector_t * intvector,
 			    intvector_t * last_intvector)
@@ -71,13 +69,16 @@ unsigned int sys_get_remote(void)
 }
 
 void * sys_alloc_iram(void *pointer, unsigned size)
-{}
+{
+  return (NULL);
+}
 
 void sys_free_iram(void * p)
 {}
 
 void * sys_get_my_iram(void)
 {
+  return (NULL);
 }
 
 unsigned int sys_get_version(void)

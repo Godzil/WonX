@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWDisplayP.h"
+#include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -203,7 +204,7 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 
   int pixel;
   int x, y, px, py;
-  int sx, sy, ex, ey;
+  int sx = 0, sy = 0, ex = 0, ey = 0;
   int mode;
 
   if (!WWScreen_GetEnable(screen)) return (0);
@@ -330,7 +331,6 @@ static int WWDisplay_DrawSprite(WWDisplay display, WWSprite sprite)
 int WWDisplay_DrawLCDPanel(WWDisplay display)
 {
   WWLCDPanel lcd_panel;
-  WWScreen screen;
   int x, y, i;
   int lcd_panel_width;
   int lcd_panel_height;

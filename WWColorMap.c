@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWColorMapP.h"
+#include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -65,7 +66,7 @@ int WWColorMap_SetLCDColor(WWColorMap color_map, int color, int lcd_color)
 
 int WWColorMap_PrintData(WWColorMap c, FILE * f)
 {
-  int i, n;
+  int i;
 
   fprintf(f, "\n");
 

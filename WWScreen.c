@@ -3,6 +3,7 @@
 /*****************************************************************************/
 
 #include "WWScreenP.h"
+#include "etc.h"
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -74,22 +75,60 @@ static WWScreenCharacter WWScreen_SetScreenCharacter(WWScreen s, int x, int y,
 /*===========================================================================*/
 
 int WWScreen_GetHorizontal(WWScreen s, int x, int y)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->horizontal); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_GetHorizontal(sc));
+}
+
 int WWScreen_GetVertical(WWScreen s, int x, int y)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->vertical); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_GetVertical(sc));
+}
+
 WWPalette WWScreen_GetPalette(WWScreen s, int x, int y)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->palette); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_GetPalette(sc));
+}
+
 WWCharacter WWScreen_GetCharacter(WWScreen s, int x, int y)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->character); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_GetCharacter(sc));
+}
 
 int WWScreen_SetHorizontal(WWScreen s, int x, int y, int f)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->horizontal = f); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_SetHorizontal(sc, f));
+}
+
 int WWScreen_SetVertical(WWScreen s, int x, int y, int f)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->vertical = f); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_SetVertical(sc, f));
+}
+
 WWPalette WWScreen_SetPalette(WWScreen s, int x, int y, WWPalette palette)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->palette = palette); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_SetPalette(sc, palette));
+}
+
 WWCharacter WWScreen_SetCharacter(WWScreen s, int x, int y, WWCharacter c)
-{ return (WWScreen_GetScreenCharacter(s, x, y)->character = c); }
+{
+  WWScreenCharacter sc;
+  sc = WWScreen_GetScreenCharacter(s, x, y);
+  return (WWScreenCharacter_SetCharacter(sc, c));
+}
 
 int WWScreen_GetNumber(WWScreen s) { return (s->number); }
 int WWScreen_GetWidth( WWScreen s) { return (s->width ); }

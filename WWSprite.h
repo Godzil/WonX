@@ -39,6 +39,7 @@ WWCharacter WWSprite_SetCharacter(WWSprite s, WWCharacter c);
 int WWSprite_GetX(WWSprite sprite);
 int WWSprite_GetY(WWSprite sprite);
 int WWSprite_SetPosition(WWSprite sprite, int x, int y);
+int WWSprite_GetPixel(WWSprite sprite, int x, int y);
 
 WWSprite WWSprite_Create(int number, int x, int y,
 			 int horizontal, int vertical,

@@ -3,9 +3,8 @@
 
 #include <sys/timer.h>
 
-#include "wonx.h"
-
-#include "WonxDisplay.h"
+#include "Wonx.h"
+#include "etc.h"
 
 typedef struct {
   unsigned char year;
@@ -49,7 +48,7 @@ void rtc_set_datetime(int field, unsigned int value)
 
 unsigned int rtc_get_datetime(int field)
 {
-  unsigned int ret;
+  unsigned int ret = 0;
   time_t timer;
   struct tm * tblock;
 
@@ -67,6 +66,7 @@ unsigned int rtc_get_datetime(int field)
   case RTC_HOUR        : ret = get_hour(  tblock); break;
   case RTC_MIN         : ret = get_minute(tblock); break;
   case RTC_SEC         : ret = get_second(tblock); break;
+  default : Error("rtc_get_datetime", "Unknown parameter.");
   }
 
   printf("call : rtc_get_datetime() : return value = %d\n", (int)ret);
@@ -187,5 +187,5 @@ unsigned int timer_get_count(int type)
   printf("call : timer_get_count() : return value = %u\n", ret);
   fflush(stdout);
 
-  return;
+  return (ret);
 }
