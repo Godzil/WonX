@@ -358,16 +358,23 @@ int XDisplay_Sync(XDisplay x_display)
 
 int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
 {
-  int x, y, n;
-  int px, py;
+  int x, y;
+  int px, py, ph;
   int num;
-  XRectangle * rectangles;
+  int n[16];
+  XRectangle * rectangles[16];
   int pixel;
   int ww_lcd_width, ww_lcd_height;
 
+  /* 隣接しているピクセルはまとめて描画するので，ピクセル数の最大値は */
+  /* 最悪の場合(縞々模様のとき)で，width * height / 2 になる．        */
   num =
-    WWLCDPanel_GetHeight(ww_lcd_panel) * WWLCDPanel_GetWidth(ww_lcd_panel);
-  rectangles = (XRectangle *)malloc(sizeof(XRectangle) * num);
+    WWLCDPanel_GetHeight(ww_lcd_panel) * WWLCDPanel_GetWidth(ww_lcd_panel) / 2;
+
+  for (pixel = 0; pixel < 16; pixel++) {
+    n[pixel] = 0;
+    rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
+  }
   if (rectangles == NULL)
     Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
 
@@ -376,37 +383,38 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
 
   /* ここの処理はホットスポットになるので，のちのちにチューニングすること */
 
-  for (pixel = 0; pixel < 16; pixel++) {
-    n = 0;
-    for (y = 0; y < ww_lcd_height; y++) {
-      for (x = 0; x < ww_lcd_width; x++) {
-	if (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) {
-	  px = (x * x_display->width ) / ww_lcd_width;
-	  py = (y * x_display->height) / ww_lcd_height;
-	  rectangles[n].x = px;
-	  rectangles[n].y = py;
-	  rectangles[n].width  = (x+1) * x_display->width  / ww_lcd_width - px;
-	  rectangles[n].height = (y+1) * x_display->height / ww_lcd_height- py;
+  for (y = 0; y < ww_lcd_height; y++) {
+    py = (y * x_display->height) / ww_lcd_height;
+    ph = (y+1) * x_display->height / ww_lcd_height- py;
+    for (x = 0; x < ww_lcd_width; x++) {
+      pixel = WWLCDPanel_GetPixel(ww_lcd_panel, x, y);
+      px = (x * x_display->width ) / ww_lcd_width;
+      rectangles[pixel][n[pixel]].x = px;
+      rectangles[pixel][n[pixel]].y = py;
+      rectangles[pixel][n[pixel]].width  =
+	(x+1) * x_display->width  / ww_lcd_width - px;
+      rectangles[pixel][n[pixel]].height = ph;
 
-	  /* 隣接してる同色のピクセルは，極力いっしょに描画する */
-	  x++;
-	  while ( (x < ww_lcd_width) &&
-		  (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) ) {
-	    rectangles[n].width = (x+1) * x_display->width / ww_lcd_width - px;
-	    x++;
-	  }
-	  x--;
-
-	  n++;
-	}
+      /* 隣接してる同色のピクセルは，極力いっしょに描画する */
+      x++;
+      while ( (x < ww_lcd_width) &&
+	      (pixel == WWLCDPanel_GetPixel(ww_lcd_panel, x, y)) ) {
+	rectangles[pixel][n[pixel]].width =
+	  (x+1) * x_display->width / ww_lcd_width - px;
+	x++;
       }
-    }
+      x--;
 
-    if (n > 0) {
+      n[pixel]++;
+    }
+  }
+
+  for (pixel = 0; pixel < 16; pixel++) {
+    if (n[pixel] > 0) {
       XFillRectangles(x_display->display,
 		      x_display->lcd_pixmap,
 		      x_display->color_gc[pixel],
-		      rectangles, n);
+		      rectangles[pixel], n[pixel]);
     }
   }
 
@@ -416,7 +424,9 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
 
   XDisplay_Sync(x_display);
 
-  free(rectangles);
+  for (pixel = 0; pixel < 16; pixel++) {
+    free(rectangles[pixel]);
+  }
 
   return (0);
 }

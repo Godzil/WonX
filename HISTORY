@@ -1,3 +1,18 @@
+2000/10/3(火)
+
+wonx-a05 公開
+
+XDisplay_DrawLCDWindow() を修正．無駄な計算をループ外に出した．
+
+WWDisplay_DrawScreen() を修正．無駄な計算をループ外に出した．
+
+ホットスポットを調べたら，Xの描画部分(XDisplay.c の XDisplay_DrawLCDWindow()の
+ループ部分)がホットスポットになっていたので，ピクセルごとに配列を
+作って，描画速度を上げた．
+
+
+
+
 2000/9/30(土)
 
 wonx-a04 公開

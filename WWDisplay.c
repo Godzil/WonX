@@ -243,15 +243,17 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
   /* したほうがいいかも                                           */
 
   for (y = 0; y < lcd_panel_height; y++) {
+
+    if (mode == WWSCREEN_INSIDE_ONLY) {
+      if (y > ey) { break; }
+      if (y < sy) { y = sy - 1; continue; }
+    }
+
+    py = y + WWScreen_GetRollY(screen);
+
     for (x = 0; x < lcd_panel_width; x++) {
-      px = x + WWScreen_GetRollX(screen);
-      py = y + WWScreen_GetRollY(screen);
 
       if (mode == WWSCREEN_INSIDE_ONLY) {
-	if (y > ey) {
-	  x = lcd_panel_width - 1; y = lcd_panel_height - 1; continue;
-	}
-	if (y < sy) { x = lcd_panel_width - 1; y = sy - 1; continue; }
 	if (x > ex) { x = lcd_panel_width - 1; continue; }
 	if (x < sx) { x = sx - 1; continue; }
       } else if (mode == WWSCREEN_OUTSIDE_ONLY) {
@@ -260,6 +262,8 @@ static int WWDisplay_DrawScreen(WWDisplay display, WWScreen screen)
 	  continue;
 	}
       }
+
+      px = x + WWScreen_GetRollX(screen);
 
       pixel = WWScreen_GetPixel(screen, px, py);
 
@@ -335,7 +339,7 @@ int WWDisplay_DrawLCDPanel(WWDisplay display)
   WWSprite sprite;
 
   lcd_panel = WWDisplay_GetLCDPanel(display);
-  lcd_panel_width = WWLCDPanel_GetWidth(lcd_panel);
+  lcd_panel_width  = WWLCDPanel_GetWidth( lcd_panel);
   lcd_panel_height = WWLCDPanel_GetHeight(lcd_panel);
   color_map = WWDisplay_GetColorMap(display);
   border = WWDisplay_GetBorder(display);
