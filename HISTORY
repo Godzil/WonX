@@ -1,4 +1,61 @@
+2001/1/13(土)
+
+wonx-2.1 公開
+
+パレットデータのダンプ時に，RGB値もダンプするようにした．
+データのダンプ部分を一部修正．
+
+perl スクリプトの行頭を，/usr/bin/perl から /usr/local/bin/perl に変更．
+(FreeBSD では，日本語 perl は /usr/local/bin に入るので)
+
+disp.c, libwwc.c の，キャラクタのビットマップデータ読み込み用・取得用関数で，
+ビットマップデータの型を unsigned char * でなく short int *, long int * などの
+適切な型に修正した．
+WWCharacter クラスのビットマップを，uchar, ushort, ulong の union とし，
+WWCharacter_GetPixel() では適切な型でアクセスすることにより，
+ビットマップデータのエンディアンの依存性を無くした．(i386, SPARC で確認済)
+
+WWCharacter_GetPixel() の 16PACKED カラーモード時の値の取得方法を修正した．
+(キャラクタが左右反転表示されていたバグが解消した)
+
+F11 で10秒間停止，もしくは Ctrl-c もしくは F12 で強制終了，
+Ctrl-i でアイコン化の追加．(もともとあった機能だったが，忘れてたのを，
+多少修正して正式サポートにした)
+
+表示/非表示の切替えキーを p から F10 に移動．マニュアル修正．
+
+XDisplay.c:XDisplay_DrawLCDWindow() で，XColorGC_CreateFromRGB() で生成した
+XColorGC オブジェクトを Destroy() していないので，メモリフローしていたバグを
+修正．(XColorGC_Destroy(x_color_gc) 追加)
+
+wonx_include/fcntl.h 追加．内容は，/usr/include/fcntl.h,
+/usr/include/sys/fcntl.h をインクルードするだけ．
+
+シリアル出力時のメッセージ(output to serial port : )の書式変更．
+("" でくくるようにした)
+etc.c:wonx_print_character() 修正．(\", \\ などを追加)
+sout2str.pl 修正．(\", \\ などを追加．上記のシリアル出力時のメッセージの
+書式変更にあわせて修正した)
+
+int2sint.pl, filters.pl, challsrc.sh 追加．
+sys2wonx.pl 変更．
+
+wonx_include/types.h の
+typedef unsigned short WORD;
+typedef unsigned long  DWORD;
+を
+typedef unsigned short int WORD;
+typedef unsigned long  int DWORD;
+に変更．
+
+README 修正．
+
+
+
+
 2001/1/3(水)
+
+wonx-2.0 公開
 
 カラー化対応．GCの管理用に，XColorGC クラスを追加．(XFireworks から流用した)
 

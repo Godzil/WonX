@@ -72,7 +72,7 @@ int WWColorMap_PrintData(WWColorMap c, FILE * f)
   fprintf(f, "\n");
 
   for (i = 0; i < 8; i++) {
-    fprintf(f, "colormap :\tcolor[%d] = %d\n",
+    fprintf(f, "colormap :\tcolor[%01d] = %d\n",
 	    i, WWColorMap_GetLCDColor(c, i));
   }
 

@@ -2,8 +2,8 @@ XINCLUDEDIR = /usr/X11R6/include
 INCLUDEDIR = .
 XLIBDIR = /usr/X11R6/lib
 
-VERSION = WonX-2.0
-PKGNAME = wonx-2.0
+VERSION = WonX-2.1
+PKGNAME = wonx-2.1
 
 SMAC = smac-b02
 WWTERM = wwterm-b05
@@ -41,9 +41,10 @@ smac :		libwonx.a
 		cp libwonx.a $(SMAC)
 		mv $(SMAC)/makefile $(SMAC)/makefile.orig
 		cp makefile_for_smac $(SMAC)/makefile
-		cp sys2wonx.pl $(SMAC)
-		echo "ここで止まったときは，sys2wonx.pl の１行目に適切なperlを指定してください"
-		cd $(SMAC) ; ./sys2wonx.pl *.[ch]
+		cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl $(SMAC)
+		# ここで止まったときは，filters.pl, sys2wonx.pl, int2sint.pl の
+		# １行目に適切なperlを指定してください"
+		cd $(SMAC) ; ./challsrc.sh *.[ch] makefile
 		cd $(SMAC) ; $(MAKE)
 
 wwterm :	libwonx.a
@@ -52,9 +53,10 @@ wwterm :	libwonx.a
 		cp libwonx.a $(WWTERM)
 		mv $(WWTERM)/makefile $(WWTERM)/makefile.orig
 		cp makefile_for_wwterm $(WWTERM)/makefile
-		cp sys2wonx.pl $(WWTERM)
-		echo "ここで止まったときは，sys2wonx.pl の１行目に適切なperlを指定してください"
-		cd $(WWTERM) ; ./sys2wonx.pl *.[ch]
+		cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl $(WWTERM)
+		# ここで止まったときは，filters.pl, sys2wonx.pl, int2sint.pl の
+		# １行目に適切なperlを指定してください"
+		cd $(WWTERM) ; ./challsrc.sh *.[ch] makefile
 		cd $(WWTERM) ; $(MAKE)
 
 package :
@@ -62,7 +64,7 @@ package :
 		rm -fR $(PKGNAME)/*
 		mkdir -p $(PKGNAME)/wonx_include
 		cp COPYING COPYRIGHT HISTORY README MANUAL OMAKE.jpn Makefile \
-			makefile_for_smac makefile_for_wwterm *.pl \
+			makefile_for_smac makefile_for_wwterm *.sh *.pl \
 			*.h *.c $(SMAC).zip $(WWTERM).zip $(PKGNAME)
 		cp wonx_include/*.h $(PKGNAME)/wonx_include
 		tar cvzf $(PKGNAME).tar.gz $(PKGNAME)

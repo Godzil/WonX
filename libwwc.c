@@ -175,7 +175,12 @@ unsigned int wwc_palette_get_color(unsigned int palette_num, unsigned int color_
   return (ret);
 }
 
-void wwc_font_set_colordata(unsigned int number, unsigned int count, unsigned char * data)
+/*
+ * data は long int × 8 で 32 バイト．
+ */
+
+void wwc_font_set_colordata(unsigned int number, unsigned int count,
+			    unsigned long int * data)
 {
   WWCharacter ww_character;
   WWDisplay ww_display;
@@ -195,8 +200,8 @@ void wwc_font_set_colordata(unsigned int number, unsigned int count, unsigned ch
   n = 0;
   for (i = 0; i < count; i++) {
     ww_character = WWDisplay_GetCharacter(ww_display, number + i);
-    for (j = 0; j < 32; j++) {
-      WWCharacter_SetBitmap(ww_character, j, data[n]);
+    for (j = 0; j < 8; j++) {
+      WWCharacter_SetBitmapAsLongInt(ww_character, j, data[n]);
       n++;
     }
   }
@@ -212,7 +217,12 @@ void wwc_font_set_colordata(unsigned int number, unsigned int count, unsigned ch
   return;
 }
 
-void wwc_font_get_colordata(unsigned int number, unsigned int count, unsigned char * data)
+/*
+ * data は long int × 8 で 32 バイト．
+ */
+
+void wwc_font_get_colordata(unsigned int number, unsigned int count,
+			    unsigned long int * data)
 {
   WWCharacter ww_character;
   WWDisplay ww_display;
@@ -232,8 +242,8 @@ void wwc_font_get_colordata(unsigned int number, unsigned int count, unsigned ch
   n = 0;
   for (i = 0; i < count; i++) {
     ww_character = WWDisplay_GetCharacter(ww_display, number + i);
-    for (j = 0; j < 32; j++) {
-      data[n] = WWCharacter_GetBitmap(ww_character, j);
+    for (j = 0; j < 8; j++) {
+      data[n] = WWCharacter_GetBitmapAsLongInt(ww_character, j);
       n++;
     }
   }

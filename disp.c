@@ -137,8 +137,7 @@ unsigned int display_status(void)
 }
 
 /*
- * void * data だと，まちがって int * でデータを指定するようなバグが
- * 入る可能性があるので，unsigned char * data にした．
+ * data は char × 8 で 8 バイト．
  */
 void font_set_monodata(unsigned int number, unsigned int count,
 		       unsigned char * data)
@@ -146,9 +145,9 @@ void font_set_monodata(unsigned int number, unsigned int count,
   WWCharacter ww_character;
   WWDisplay ww_display;
   int i, j, k, n;
-  unsigned char pixel;
   int f, b;
-  unsigned char bitmap[2];
+  unsigned short int pixel;
+  unsigned short int bitmap;
 
   if (!WonX_IsCreated()) WonX_Create();
 
@@ -168,15 +167,13 @@ void font_set_monodata(unsigned int number, unsigned int count,
   for (i = 0; i < count; i++) {
     ww_character = WWDisplay_GetCharacter(ww_display, number + i);
     for (j = 0; j < 8; j++) {
-      bitmap[0] = 0;
-      bitmap[1] = 0;
+      bitmap = 0;
       for (k = 0; k < 8; k++) {
 	pixel = (data[n] & (1 << k)) ? f : b;
-	bitmap[0] |= ( pixel       & 1) << k;
-	bitmap[1] |= ((pixel >> 1) & 1) << k;
+	bitmap |= ( pixel       & 1) << k;
+	bitmap |= ((pixel >> 1) & 1) << (k + 8);
       }
-      WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
-      WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
+      WWCharacter_SetBitmapAsShortInt(ww_character, j, bitmap);
       n++;
     }
   }
@@ -193,11 +190,10 @@ void font_set_monodata(unsigned int number, unsigned int count,
 }
 
 /*
- * void * data だと，まちがって int * でデータを指定するようなバグが
- * 入る可能性があるので，unsigned char * data にした．
+ * data は short int × 8 で 16 バイト．
  */
 void font_set_colordata(unsigned int number, unsigned int count,
-			unsigned char * data)
+			unsigned short int * data)
 {
   WWCharacter ww_character;
   WWDisplay ww_display;
@@ -217,8 +213,8 @@ void font_set_colordata(unsigned int number, unsigned int count,
   n = 0;
   for (i = 0; i < count; i++) {
     ww_character = WWDisplay_GetCharacter(ww_display, number + i);
-    for (j = 0; j < 16; j++) {
-      WWCharacter_SetBitmap(ww_character, j, data[n]);
+    for (j = 0; j < 8; j++) {
+      WWCharacter_SetBitmapAsShortInt(ww_character, j, data[n]);
       n++;
     }
   }
@@ -235,11 +231,10 @@ void font_set_colordata(unsigned int number, unsigned int count,
 }
 
 /*
- * void * data だと，まちがって int * でデータを指定するようなバグが
- * 入る可能性があるので，unsigned char * data にした．
+ * data は short int × 8 で 16 バイト．
  */
 void font_get_data(unsigned int number, unsigned int count,
-		   unsigned char * data)
+		   unsigned short int * data)
 {
   /* 関数の仕様がわからんので適当に書くぞ */
   WWCharacter ww_character;
@@ -260,8 +255,8 @@ void font_get_data(unsigned int number, unsigned int count,
   n = 0;
   for (i = 0; i < count; i++) {
     ww_character = WWDisplay_GetCharacter(ww_display, number + i);
-    for (j = 0; j < 16; j++) {
-      data[n] = WWCharacter_GetBitmap(ww_character, j);
+    for (j = 0; j < 8; j++) {
+      data[n] = WWCharacter_GetBitmapAsShortInt(ww_character, j);
       n++;
     }
   }

@@ -15,7 +15,11 @@ typedef struct _WWCharacter {
   int number;
 
   /* キャラクタのビットマップ */
-  unsigned char bitmap[32];
+  union {
+    unsigned char bitmap_char[32];
+    unsigned short int bitmap_short_int[16];
+    unsigned long int bitmap_long_int[8];
+  } bitmap;
 } _WWCharacter;
 
 /*****************************************************************************/

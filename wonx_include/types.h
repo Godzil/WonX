@@ -16,10 +16,10 @@ typedef unsigned short int ushort;
 typedef unsigned long  int ulong;
 #endif
 
-typedef unsigned char  BYTE;
-typedef unsigned short WORD;
-typedef unsigned long  DWORD;
-typedef int            BOOL;
+typedef unsigned char      BYTE;
+typedef unsigned short int WORD;
+typedef unsigned long  int DWORD;
+typedef int                BOOL;
 
 #ifndef far
 #define far  /* None */

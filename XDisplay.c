@@ -74,16 +74,16 @@ static void iconify(Widget w, XEvent * event, String * params, Cardinal * num)
   XIconifyWindow(XtDisplay(w), XtWindow(w), DefaultScreen(XtDisplay(w)));
 }
 
-static void sleep_3(Widget w, XEvent * event, String * params, Cardinal * num)
+static void sleep_10(Widget w, XEvent * event, String * params, Cardinal * num)
 {
   time_t old_t;
   time_t t;
   int i;
   /* UNIXTimer.c 内部で SIGALRM を使用しているので，sleep() は使用できない */
 #if 0
-  sleep(3);
+  sleep(10);
 #else
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 10; i++) {
     time(&t);
     old_t = t;
     while (t == old_t)
@@ -96,14 +96,15 @@ static XtActionsRec actions[] = {
   {"quit", quit},
   {"wm_protocols_proc", wm_protocols_proc},
   {"iconify", iconify},
-  {"pause", sleep_3}
+  {"pause", sleep_10}
 };
 
 static char * translations =
 "<Message>WM_PROTOCOLS: wm_protocols_proc()\n"
-"None<Key>p: pause()\n"
+"None<Key>F11: pause()\n"
 "Ctrl<Key>i: iconify()\n"
 "Ctrl<Key>c: quit()\n"
+"None<Key>F12: quit()\n"
 "None<Key>q: quit()";
 
 /*===========================================================================*/
@@ -122,6 +123,21 @@ static unsigned long XDisplay_GetPixelFromColorName(XDisplay x_display,
 /*===========================================================================*/
 /* イベントハンドラ                                                          */
 /*===========================================================================*/
+
+/*---------------------------------------------------------------------------*/
+/* イクスポーズ                                                              */
+/*---------------------------------------------------------------------------*/
+
+static void ExposeHandler(Widget w, XtPointer p, XEvent * event,
+			  Boolean * dispatch)
+{
+  XDisplay x_display = (XDisplay)p;
+
+  XCopyArea(x_display->display, x_display->lcd_pixmap,
+	    x_display->lcd_window, x_display->copy_gc,
+            0, 0, x_display->width, x_display->height, 0, 0);
+  return;
+}
 
 /*---------------------------------------------------------------------------*/
 /* キーの押下                                                                */
@@ -161,10 +177,16 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
       switch (key_sym) {
 
 	/* 表示モード変更 */
-      case XK_p       :
+      case XK_F10       :
 	x_display->lcd_draw = !(x_display->lcd_draw);
-	if (x_display->lcd_draw)
+
+	if (x_display->lcd_draw) {
+#if 1
 	  WonXDisplay_Flush(WonX_GetWonXDisplay());
+#else
+	  ExposeHandler(w, p, event, dispatch);
+#endif
+	}
 	break;
 
 	/* データのダンプ操作 */
@@ -181,21 +203,6 @@ static void KeyHandler(Widget w, XtPointer p, XEvent * event,
     }
   }
 
-  return;
-}
-
-/*---------------------------------------------------------------------------*/
-/* イクスポーズ                                                              */
-/*---------------------------------------------------------------------------*/
-
-static void ExposeHandler(Widget w, XtPointer p, XEvent * event,
-			  Boolean * dispatch)
-{
-  XDisplay x_display = (XDisplay)p;
-
-  XCopyArea(x_display->display, x_display->lcd_pixmap,
-	    x_display->lcd_window, x_display->copy_gc,
-            0, 0, x_display->width, x_display->height, 0, 0);
   return;
 }
 
@@ -407,7 +414,7 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWDisplay ww_display,
   int n[16];
   XRectangle rectangle;
   XRectangle * rectangles[16];
-  int pixel;
+  unsigned short int pixel;
   int ww_lcd_width, ww_lcd_height;
   int red, green, blue;
   XColorGCDatabase database;
@@ -534,6 +541,7 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWDisplay ww_display,
 		       rectangle.y,
 		       rectangle.width,
 		       rectangle.height);
+	XColorGC_Destroy(x_color_gc);
       }
     }
 

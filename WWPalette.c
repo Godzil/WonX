@@ -137,12 +137,13 @@ int WWPalette_PrintData(WWPalette p, WWDisplay display, FILE * f)
 {
   int i, n;
   int transparent;
+  int red, green, blue;
 
   n = WWPalette_GetNumber(p);
 
   fprintf(f, "\n");
 
-  fprintf(f, "palette[%d] :\tnumber = %d\n", n, WWPalette_GetNumber(p));
+  fprintf(f, "palette[%02d] :\tnumber = %d\n", n, WWPalette_GetNumber(p));
 
   /*
    * WonX-2.0 以降から，透明色の判定は WWDisplay で行うように変更したので，
@@ -150,16 +151,27 @@ int WWPalette_PrintData(WWPalette p, WWDisplay display, FILE * f)
    */
 #if 1
   transparent = WWDisplay_IsTransparent(display, p, 0);
-  fprintf(f, "palette[%d] :\ttransparent = %s\n",
+  fprintf(f, "palette[%02d] :\ttransparent = %s\n",
 	  n, wonx_true_false(transparent));
 #else
-  fprintf(f, "palette[%d] :\ttransparent = %s\n",
+  fprintf(f, "palette[%02d] :\ttransparent = %s\n",
           n, wonx_true_false(WWPalette_GetTransparent(p)));
 #endif
 
   for (i = 0; i < 4; i++) {
-    fprintf(f, "palette[%d] :\tcolor[%d] = %d\n",
+    fprintf(f, "palette[%02d] :\tcolor[%01d] = %d\n",
 	    n, i, WWPalette_GetMappedColor(p, i));
+  }
+
+  for (i = 0; i < 16; i++) {
+    red   = WWPalette_GetRed(  p, i);
+    green = WWPalette_GetGreen(p, i);
+    blue  = WWPalette_GetBlue( p, i);
+    fprintf(f, "palette[%02d] :\tRGB[%02d] = 0x%c%c%c\n",
+	    n, i,
+	    wonx_dec_to_hex(red),
+	    wonx_dec_to_hex(green),
+	    wonx_dec_to_hex(blue));
   }
 
   fflush(f);

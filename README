@@ -2,28 +2,17 @@ WonX - WonderWitch on X.
 
 ■ 配布に当たって
 
-WonX はまだ不完全です．実装されていない機能や，不完全な機能，おかしな
-動作をする部分などがいっぱいあります．
+ご意見，ご要望など歓迎します．どしどしお寄せください．
 バグ情報やアドバイスがあれば，作者の坂井弘亮まで，どんどんメールください．
 アドレスは，
 sakai@seki.ee.kagu.sut.ac.jp
 hsakai@pfu.co.jp
 です．
+(ただし，返事を書くとは限らないし，要望を反映するとも限りませんので
+ その点はご容赦ください)
 また，坂井の気が向く限り，アップデートは随時行っていきます．
 http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で，随時公開していきます．
-
-現在は坂井が一人で製作していますが，ひとりでは細かい点の整合性
-(初期化しなかった場合の動作の違いなど．WonderWitch と WonX では
- 微妙に異なっている)を追いきれないのが現状です．
-とくにマニュアルに書いてない部分に関しては，WonderWitch ではどのように
-動作するのか，ひとりではチェックしきれません．(ていうか面倒)
-情報をお待ち(ていうか期待)しています．
-いっしょに少しずつ，完全なものに仕上げていきましょう．
-
-ご意見，ご要望なども歓迎します．どしどしお寄せください．
-(ただし，返事を書くとは限らないし，要望を反映するとも限りませんので
- その点はご容赦ください)
 
 ■ はじめに
 
@@ -50,6 +39,33 @@ WonX は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
   あくまでデバッグ目的のもの．(そういうポリシーで開発を進める)
   従って，WonderWitch での動作を模倣することよりも，デバッグ情報を
   出力することや改造のしやすさを優先したような実装をする場合がある．
+
+■ 必要なもの
+
+WonX では，以下のものを使用しています．
+
+・perl
+  (WonderWitch用ソースコード → WonX用ソースコードの変換用 perl スクリプトを
+   添付しているので，WonderWitch用ソースコードの中に漢字が入っているのならば，
+   日本語 perl が望ましい)
+  添付の perl スクリプトは，すべて #!/usr/local/bin/perl になっているので，
+  日本語 perl が別のところにあるばあいには，修正してから使用してください．
+  日本語 perl が無ければ，まあ，ふつうの perl でもたぶん大丈夫でしょう．
+・qkc
+  漢字コード変換，改行コード変換に必要．
+  (nkf でもべつにいいんだけど，qkc だと改行コードも変換してくれるので，
+   この文書では qkc を使用しています)
+  qkc は，以下のサイトから入手できます．
+  http://hp.vector.co.jp/authors/VA000501/index.html
+  qkc には，MS-DOS 版，Windows 版，UNIX 版などがありますので，
+  UNIX 版(qkcc100.zip)を入手してください．
+  コンパイルは，make するだけなのでとっても簡単です．
+・unzip
+  添付の smac-b02.zip, wwterm-b05.zip を解凍するのに必要．
+
+このマニュアルは，以上のものがすべてインストールされていることを前提として
+説明を進めます．必要ならばインストールするか，他のアプリケーションで
+代用してください．
 
 ■ 3分WonX
 
@@ -88,16 +104,16 @@ WonX は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
 ~/wonx/smac>% ./smac
 
 ウインドウが開いて，標準出力にメッセージが出力されます．
-いったん p を押して画面描画を OFF にします．しばらくしたら
-(メッセージの内容が変わったら) p を押して再び画面表示を ON にすると，
+いったん F10 を押して画面描画を OFF にします．しばらくしたら
+(メッセージの内容が変わったら) F10 を押して再び画面表示を ON にすると，
 smac のタイトル画面が表示されます．
-ここでスペースを押して，さらにまた p で画面表示を OFF にして，
-しばらくしたら(メッセージの内容が変わったら) p で画面表示を ON にします．
+ここでスペースを押して，さらにまた F10 で画面表示を OFF にして，
+しばらくしたら(メッセージの内容が変わったら) F10 で画面表示を ON にします．
 どうですか？ SpeedMac のゲーム画面が表示されているでしょうか？
 カーソルキーで移動，スペースキーで射撃です．
 ただし，キー入力はキー入力用関数が呼ばれたときしか有効ではないので，
 キーは反応するまで長めに押してください．
-p を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
+F10 を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
 ONのままだと画面クリアとかに異常に時間がかかるからです．
 
 最後に，WonderWitch 用の端末エミュレータ "WWTerm" をコンパイル・実行
@@ -106,7 +122,7 @@ ONのままだと画面クリアとかに異常に時間がかかるからです．
 ~/wonx>% make wwterm
 (中略)
 ~/wonx>% cd wwterm
-~/wonx/smac>% ./terminal
+~/wonx/wwterm>% ./terminal
 
 ■ 10分WonX
 
@@ -125,28 +141,39 @@ ONのままだと画面クリアとかに異常に時間がかかるからです．
 libwonx.a
 ~/wonx>% 
 
-次に，libwonx.a と，wonx_include ディレクトリと，sys2wonx.pl を
-あなたの作ったプログラムのディレクトリ(ここでは例として，yoursample とします)
-にコピーします．
+次に，libwonx.a と，wonx_include ディレクトリと，
+challsrc.sh, filters.pl, sys2wonx.pl, int2sint.pl をあなたの作ったプログラムの
+ディレクトリ(ここでは例として，yoursample とします)にコピーします．
 
-~/wonx>% cp -R libwonx.a wonx_include sys2wonx.pl ../yoursample
+~/wonx>% cp -R libwonx.a wonx_include ../yoursample
+~/wonx>% cp challsrc.sh filters.pl sys2wonx.pl int2sint.pl ../yoursample
 ~/wonx>% cd ../yoursample
 ~/yoursample>% 
-
-あなたの作ったプログラムのすべてのファイルを，MS-DOS テキスト形式から
-UNIX のテキスト形式に変換します．(つまり，改行コードを \r\n から \n に
-変換して，漢字コードを SJIS から EUC に変換します)
-
-~/yoursample>% cat makefile | qkc -I -O -e -u > makefile.new
-~/yoursample>% mv makefile.new makefile
-~/yoursample>% cat sample.c | qkc -I -O -e -u > sample.c.new
-~/yoursample>% mv sample.c.new sample.c
-...(以下すべてのファイルについて，同様に繰り返し．中略)...
 
 *.C というファイル名のファイルがあったら，*.c に変更します．
 (*.C だと C++ のプログラムだと思われてしまうので)
 
 ~/yoursample>% mv SAMPLE2.C sample2.c
+
+あなたの作ったプログラムのすべてのファイルに対して，以下のことを行います．
+・MS-DOS テキスト形式から UNIX のテキスト形式に変換する．
+  (つまり，改行コードを \r\n から \n に変換して，漢字コードを SJIS から
+   EUC に変換します)
+・プログラム中の #include <sys/disp.h> のようなのを，
+  #include "wonx_include/disp.h" に変更する．(sys2wonx.pl を通す)
+・デフォルトの int を，short int に変換する．(int2sint.pl を通す)
+これらのフィルタをまとめて通してくれる filters.pl というスクリプトを
+添付してあるので，以下のようにして，すべてのソースファイルに対して，
+必要なフィルタを通してください．
+
+~/yoursample>% ./filters.pl "qkc -e -u" ./sys2wonx.pl ./int2sint.pl -f *.[ch] [Mm]akefile* MAKEFILE*
+
+もしくは，以下のようにしてもよいです．
+
+~/yoursample>% ./challsrc.sh *.[ch] [Mm]akefile* MAKEFILE*
+
+(注意! filters.pl や challsrc.sh は，ファイルの本体を書き換えてしまうので，
+ 変更されると困るようなファイルは必ずバックアップしてください)
 
 makefile を以下のように修正する．
 ・コンパイラには gcc を使用する．
@@ -160,16 +187,6 @@ makefile を以下のように修正する．
 適用できなかったときのソースの修正です)
 添付の makefile_for_smac や makefile_for_wwterm を参考にして，makefile を
 修正してください．
-
-次に，sys2wonx.pl をかけて，プログラム中の #include <sys/disp.h> のようなのを，
-#include "wonx_include/disp.h" に変更する．
-(注意! sys2wonx.pl は，ファイルの本体を書き換えてしまうので，変更されると
- 困るようなファイルは必ずバックアップしてください．
- #include <sys/disp.h> のような部分が無いファイルの場合だと，読み込んで
- そのまま出力するので，ファイルの内容自体は変わらないと思いますが，
- 日付は変わってしまいます)
-
-~/yoursample>% ./sys2wonx.pl *.[ch]
 
 最後に，make をします．
 
@@ -218,8 +235,9 @@ WonderWitch 用プログラム中の，
 (ただし，コンフリクトしないという絶対の自信があるなら，この限りではありません)
 WonderWitch のプログラムの，#include <sys/*.h> は，すべて
 #include <wonx_include/*.h> に修正する必要がある，ということです．
-(これをまとめて行うための perl スクリプトを添付してあります．
- sys2wonx.pl *.[ch] を実行すると，ごっそりと書き換えてくれます)
+(これをまとめて行うための sys2wonx.pl という perl スクリプトを添付して
+ あります．./filters.pl ./sys2wonx.pl -f *.[ch] を実行すると，ごっそりと
+ 書き換えてくれます)
 
 また，UNIXシステムによっては，/usr/include/sys/types.h で ushort, ulong を
 定義しているものといないものがあります．よって，コンパイル中に
@@ -276,12 +294,61 @@ SpeedMac は WonderWitch 用のゲームプログラムです．本来は WonderWitch を
 ~/wonx/smac-b02>% cp ../libwonx.a .
 ~/wonx/smac-b02>% 
 
-3. makefile を修正する．
+3. ソースを修正する．
+
+~/wonx/smac-b02>% emacs chara.c
+~/wonx/smac-b02>% emacs dsp.c
+... (ファイルをひとつひとつ修正する)
+
+MS-DOS のファイル形式になっているファイルは，UNIXのテキスト形式に
+変換します．具体的には，以下の変換をします．
+・改行コードを \r\n から \n にする．
+・漢字コードを SJIS から EUC にする．
+qkc というアプリケーションで，上記のことを一度に行うことができます．
+面倒なかたは，以下のようにすれば，まとめて変換されます．
+~/wonx/smac-b02>% ./filters.pl "qkc -e -u" -f *.[ch]
+qkc が無い人は... nkf とかてきとうに使って変換してください．
+
+また，ソース中の，
+#include <sys/disp.h>
+#include <sys/key.h>
+のような部分を，
+#include "wonx_include/disp.h"
+#include "wonx_include/key.h"
+のように修正します．
+
+これをまとめてやるための perl スクリプト (sys2wonx.pl) を添付してあるので，
+面倒なかたは，
+~/wonx/smac-b02>% cp ../filters.pl ../sys2wonx.pl .
+~/wonx/smac-b02>% ./filters.pl ./sys2wonx.pl -f *.[ch]
+のようにしてください．
+(filters.pl は，引数で指定したファイル自体を書き換えてしまうので注意)
+
+さらに，WonderWitch では sizeof(int) == sizeof(short int) ですが，
+UNIX ではふつうは sizeof(int) == sizeof(long int) なので，
+キャラクタのビットマップなど，int 型のバイトサイズに依存する部分で
+int を使用している場合には，short int などと明示します．
+
+これをまとめてやるための perl スクリプト (int2sint.pl) を添付してあるので，
+面倒なかたは，
+~/wonx/smac-b02>% cp ../int2sint.pl .
+~/wonx/smac-b02>% ./filters.pl ./int2sint.pl -f *.[ch]
+のようにしてください．
+(filters.pl は，引数で指定したファイル自体を書き換えてしまうので注意)
+
+日本語 perl は EUC コードでないと正常に動作しないので，
+sys2wonx.pl や int2sint.pl を使用する場合には，まず先に qkc で漢字コードを
+EUC に変換してから，sys2wonx.pl や int2sint.pl を使用してください．
+
+4. makefile を修正する．
 
 ~/wonx/smac-b02>% emacs makefile
 
 以下のように修正します．
 
+・漢字コードを EUC に，改行コードを \r\n から \n に変換する．
+  (改行コードを変換しないと make が正常に動作しません．qkc を通すと
+   いいでしょう)
 ・gcc でコンパイルをするように修正する．このときに，コンパイルオプションに，
   -I. -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
   を追加する．
@@ -294,27 +361,6 @@ SpeedMac は WonderWitch 用のゲームプログラムです．本来は WonderWitch を
 ~/wonx/smac-b02>% cp ../makefile_for_smac ./makefile
 
 のようにしてコピーしてください．
-
-4. ソースを修正する．
-
-~/wonx/smac-b02>% emacs chara.c
-~/wonx/smac-b02>% emacs dsp.c
-... (ファイルをひとつひとつ修正する)
-
-ソース中の，
-#include <sys/disp.h>
-#include <sys/key.h>
-のような部分を，
-#include "wonx_include/disp.h"
-#include "wonx_include/key.h"
-のように修正します．
-
-これをまとめてやるための perl スクリプト (sys2wonx.pl) を添付してあるので，
-面倒なかたは，
-~/wonx/smac-b02>% cp ../sys2wonx.pl .
-~/wonx/smac-b02>% ./sys2wonx.pl *.[ch]
-のようにしてください．
-(sys2wonx.pl は，引数で指定したファイル自体を書き換えてしまうので注意)
 
 5. make する．
 
@@ -351,12 +397,16 @@ smac を起動すると，ウインドウが開きます．また，ターミナルには，
 ・i,j,k,l キーが，WonderSwan のY1〜Y4ボタンに対応している．
 ・スペースバーと左シフトキーが，A,Bボタンに対応している．
 ・sキーが，STARTボタンに対応している．
-・p を押すと，表示/非表示モードを切替える．
-  (非表示だと画面への描画を行わないが高速)
 ・F1 を押すと，LCDカラーマップのデータをダンプ出力する．
 ・F2 を押すと，パレットのデータをダンプ出力する．
 ・F3 を押すと，キャラクターのデータをダンプ出力する．
 ・F4 を押すと，スプライトのデータをダンプ出力する．
+・F10 を押すと，表示/非表示モードを切替える．
+  (非表示だと画面への描画を行わないが高速)
+・F11 で10秒間停止．(画面写真をとるときなどに利用できる)
+  (F11は短めに押してください．長めに押すと，復帰しなくなるようです)
+・q もしくは Ctrl-c もしくは F12 で強制終了．
+・Ctrl-i でアイコン化．
 
 デフォルトではなにか関数が呼ばれるたびに画面の再描画を行うため，
 非常に低速です．
@@ -369,8 +419,8 @@ for (y = 0; y < 32; y++)
   }
 }
 
-このような場合は，p を押して非表示モードにして，ループ処理が終ったら
-再び p を押して表示モードに戻してください．
+このような場合は，F10 を押して非表示モードにして，ループ処理が終ったら
+再び F10 を押して表示モードに戻してください．
 
 F1 や F2 を押すと，データをダンプ出力するのですが，標準ではその他にも
 メッセージが大量に出力されているので，ふつうに F1 を押しただけでは，
@@ -383,7 +433,7 @@ smac という実行形式ができているのなら，
 もしもキャラクタ番号10番のキャラクタのデータだけが見たい場合には，
 以下のように実行してから，F3 キーを押せば良いでしょう．
 
-> smac | grep "character\[10\]"
+> smac | grep "character\[010\]"
 
 WonX は，メッセージを出力する際に，grep でフィルタリングできるように，
 かならず出力メッセージの先頭に，統一性のある文字列を追加しています．
@@ -450,24 +500,56 @@ UNIX ではふつう sizeof(short int) < sizeof(int) == sizeof(long int) です．
 なりませんが，ビットマップの格納場所として使用するようなときには，
 問題になります．
 一番問題になりやすいのは，キャラクタのビットマップを扱う場合です．
+(bmpcnv を使用して，ビットマップデータの出力が unsigned int bitmap = {
+ のようになっている場合など)
 font_set_colordata()などは，16*8 バイトのキャラクタデータを
 short int 型の配列として引数に持ちます．WonderWitch では
 sizeof(short int) == sizeof(int) なので，WonderWitch 用のプログラム上では，
 キャラクタデータを short int とせずに，int 型の配列として定義してしまう
 ことが考えられます．(当然 WonderWitch ならば問題は無いが，UNIX 上で
 実行したら，キャラクタに妙な縞々が入るだろうと思われる)
-このような場合には，UNIX 上でコンパイルするときには，short int に
-修正する必要があります．
+このような場合には，UNIX 上でコンパイルするときには，コンパイラオプションで
+デフォルトの int は short int になるように指定するか，もしくはソース中の
+int を short int にじかに修正する必要があります．i386 上で gcc を使用する
+場合には，このようなコンパイラオプションは無いので，じかにソースを修正する
+ことになります．
+int2sint.pl を通すと，明示されていない int はすべて short int に変換しますが，
+もしもあなたが int2sint.pl が信用できなければ，手で修正してください．ふつうは
+キャラクタのビットマップデータとそれを扱う部分のみを修正すれば十分でしょう．
+
+コンパイル時のワーニングもちゃんと確認してください．また，コンパイル時には
+-Wall オプションをつけましょう．
+wonx-2.1 からは，キャラクタのビットマップ設定関連(font_set_colordata()など)
+の関数の引数は，適切な型のポインタに修正したので，コンパイラがワーニングを
+出していたら，ビットマップデータの型がおかしいかもしれません．
+
+単なるカウンタやフラグとして使用しているような int は，多くの場合は
+short int でも long int でも動作は変わりませんが，たとえそうだとしても，
+WonX を使用して，gcc で -Wall オプションをつけてコンパイルすると，
+WonderWitch で動作させるときの潜在的なバグ(short int の上下限にまつわる
+バグなど)を発見できることがあるので，なるべくなら int2sint.pl で int を
+ごっそり short int にしてしまうことをおすすめします．
 
 [エンディアンの問題]
 
 WonderWitch の CPU は x86系です．SPARC などで使用する場合には，
 エンディアンに注意する必要があります．
 font_set_colordata()などは，short int 型の配列でキャラクタデータを受け取る
-ので，char * で定義したキャラクタデータを short int * にキャストして
+ので，unsigned char * で定義したキャラクタデータを short int * にキャストして
 font_set_colordata()に渡すなどのことをしていると，画像がひっくり返る
 ことが考えられます．
 i386 系のいわゆる PC-UNIX ならば，おそらく問題は無いでしょう．
+WonX-2.1 から，キャラクタデータに関しては，極力エンディアンに依存しないように
+修正しました．i386 と SPARC でエンディアンに依存しないことを動作確認
+しています．しかしそれでも，キャラクタデータを unsigned char * で定義して，
+ビットマップ読み込み用の関数にキャラクタデータを渡すときに short int * に
+キャストして渡すような書き方をしていると，依存してしまいます．
+
+キャラクタデータのビットマップ読み込み用の関数には，適切な型のデータを
+渡すようにしてください．short int * を渡すべきところに，unsigned char * を
+渡したりすると，このようなバグの原因になる可能性があります．不適切な
+ポインタを渡している場合には，コンパイラがワーニングを出すので，
+コンパイラのワーニングに十分に注意してください．
 
 [タイマ割り込みの問題]
 
@@ -563,7 +645,7 @@ gcc -g -o smac $(OBJS) -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
 make がうまく動作しなかったり，コンパイルできてもプログラム自体が
 誤動作してしまい，しかも原因に気づきにくくなってしまう可能性があります．
 makefile やソースコードは必ず，
-> cat makefile | qkc -I -O -e -u > makefile.tmp
+> cat makefile | qkc -e -u > makefile.tmp
 > mv makefile.tmp makefile
 などを通して，UNIXのテキストファイルに変換しましょう．
 
@@ -702,6 +784,75 @@ WWSprite_PrintData(WWDisplay_GetSprite(ww_display, 0), stdout);
 
 のようにして不安なコードの前後でダンプデータを取ると，デバッグに
 役立つでしょう．
+
+■ 添付のツールについて
+
+[sys2wonx.pl]
+
+#include <sys/disp.h>
+を，
+#include "wonx_include/disp.h"
+のように変換するフィルタです．
+
+[int2sint.pl]
+
+short か long か明示されていない int を，short int に変換します．
+sizeof(int) や uint* も，sizeof(short int), unsigned short int* に
+変換されます．
+ただ，ひょっとしたらおかしな変換をしてしまうかも... でもたぶんそのときには
+コンパイル時にエラーが出るだろうから，いいか．
+そうだ．perl は行単位に処理するので，
+long
+int a;
+とか，
+void func(long
+          int a)
+のような変な書き方をしていると，
+long
+short int a;
+とか，
+void func(long
+          short int a)
+に変換されてしまって，きっとエラーになることでしょう．気をつけてください．
+
+[filters.pl]
+
+複数のフィルタをまとめて通すための perl スクリプトです．
+書式は，
+filters.pl [filters...] -f [files...]
+です．例えば，
+> filters.pl sort head -f file1 file2 file3
+は，
+> cat file1 | sort | head > file1.tmp
+> mv file1.tmp file1
+> cat file2 | sort | head > file2.tmp
+> mv file2.tmp file2
+> cat file3 | sort | head > file3.tmp
+> mv file3.tmp file3
+をすることと等価です．
+
+[challsrc.sh]
+
+WonderWitch用ソース → wonx用ソース への変換をするためのシェルスクリプトです．
+内容は，単に，
+./filters.pl "qkc -e -u" ./sys2wonx.pl ./int2sint.pl -f [files]
+するだけです．
+日本語 perl を使用する場合には，漢字コードは EUC でないと正常に動作しないので，
+"qkc -e -u" を通してから ./sys2wonx.pl と ./int2sint.pl を
+通すような順番になっています．
+
+[sout2str.pl]
+
+wonx は，シリアルポートへの出力は，
+output to serial port : "A"
+とか，
+output to serial port : "\n"
+のように，標準出力に出力します．sout2str.pl は，この "" でくくられた部分
+のみを抽出して，\n や \t を適切なコードに変換して出力するフィルタです．
+シリアルポートを使用するプログラム(例: wwterm)を起動するときには，
+> wwterm | ./sout2str.pl
+のようにして，sout2str.pl を通して起動することにより，実際のシリアルポート
+への出力をモニタすることができます．
 
 ■ 作者
 

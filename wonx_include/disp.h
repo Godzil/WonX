@@ -68,9 +68,9 @@ unsigned int display_status(void);
 void font_set_monodata(unsigned int number, unsigned int count,
 		       unsigned char * data);
 void font_set_colordata(unsigned int number, unsigned int count,
-			unsigned char * data);
+			unsigned short int * data);
 void font_get_data(unsigned int number, unsigned int count,
-		   unsigned char * data);
+		   unsigned short int * data);
 void font_set_color(unsigned int colors);
 unsigned int font_get_color(void);
 void screen_set_char(int screen, int x, int y, int w, int h,

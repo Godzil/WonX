@@ -165,9 +165,9 @@ int comm_send_char(unsigned char c)
   if (!UNIXSerialPort_IsOpened(unix_serial_port))
     WonX_Error("comm_send_char", "UNIX serial port is not opened.");
 
-  printf("output to serial port : ");
+  printf("output to serial port : \"");
   comm_output(c);
-  printf("\n");
+  printf("\"\n");
   fflush(stdout);
   ret = 0;
 
@@ -292,11 +292,11 @@ int comm_send_string(char * string)
   if (!UNIXSerialPort_IsOpened(unix_serial_port))
     WonX_Error("comm_send_string", "UNIX serial port is not opened.");
 
-  printf("output to serial port : ");
+  printf("output to serial port : \"");
   for (i = 0; string[i]; i++) {
     comm_output(string[i]);
   }
-  printf("\n");
+  printf("\"\n");
   fflush(stdout);
   ret = 0;
 
@@ -336,11 +336,11 @@ int comm_send_block(void * buffer, int size)
   if (!UNIXSerialPort_IsOpened(unix_serial_port))
     WonX_Error("comm_send_block", "UNIX serial port is not opened.");
 
-  printf("output to serial port : ");
+  printf("output to serial port : \"");
   for (i = 0; i < size; i++) {
     comm_output(((char *)buffer)[i]);
   }
-  printf("\n");
+  printf("\"\n");
   fflush(stdout);
   ret = 0;
 

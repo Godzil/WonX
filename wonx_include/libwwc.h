@@ -23,8 +23,10 @@ unsigned int wwc_set_color_mode(unsigned int mode);
 unsigned int wwc_get_color_mode(void);
 void wwc_palette_set_color(unsigned int palette_num, unsigned int color_num, unsigned int rgb);
 unsigned int wwc_palette_get_color(unsigned int palette_num, unsigned int color_num);
-void wwc_font_set_colordata(unsigned int number, unsigned int count, unsigned char * data);
-void wwc_font_get_colordata(unsigned int number, unsigned int count, unsigned char * data);
+void wwc_font_set_colordata(unsigned int number, unsigned int count,
+			    unsigned long int * data);
+void wwc_font_get_colordata(unsigned int number, unsigned int count,
+			    unsigned long int * data);
 unsigned int wwc_get_hardarch(void);
 void wwc_clear_font(void);
 

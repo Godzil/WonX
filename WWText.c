@@ -73,9 +73,9 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
 {
   WWCharacter ww_character;
   int j, k, n;
-  unsigned char pixel;
   int f, b;
-  unsigned char bitmap[2];
+  unsigned short int pixel;
+  unsigned short int bitmap;
 
   if ((character < 0) || (character > 127)) {
     WonX_Warning("WWText_PutCharacter", "Character number is out of range.");
@@ -122,15 +122,13 @@ int WWText_PutCharacter(WWText ww_text, int x, int y, int character,
 
   n = character * 8;
   for (j = 0; j < 8; j++) {
-    bitmap[0] = 0;
-    bitmap[1] = 0;
+    bitmap = 0;
     for (k = 0; k < 8; k++) {
       pixel = (fonts[n] & (1 << k)) ? f : b;
-      bitmap[0] |= ( pixel       & 1) << k;
-      bitmap[1] |= ((pixel >> 1) & 1) << k;
+      bitmap |= ( pixel       & 1) << k;
+      bitmap |= ((pixel >> 1) & 1) << (k + 8);
     }
-    WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
-    WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
+    WWCharacter_SetBitmapAsShortInt(ww_character, j, bitmap);
     n++;
   }
 #endif
@@ -155,9 +153,9 @@ WWText WWText_Create(WWScreen screen,
   WWText ww_text;
   WWCharacter ww_character;
   int i, j, k, n;
-  unsigned char pixel;
   int f, b;
-  unsigned char bitmap[2];
+  unsigned short int pixel;
+  unsigned short int bitmap;
 
   ww_text = (WWText)malloc(sizeof(_WWText));
   if (ww_text == NULL) WonX_Error("WWText_Create", "Cannot allocate memory.");
@@ -181,15 +179,13 @@ WWText WWText_Create(WWScreen screen,
   for (i = 0; i < 128; i++) {
     ww_character = WWCharacter_Create(i);
     for (j = 0; j < 8; j++) {
-      bitmap[0] = 0;
-      bitmap[1] = 0;
+      bitmap = 0;
       for (k = 0; k < 8; k++) {
 	pixel = (fonts[n] & (1 << k)) ? f : b;
-	bitmap[0] |= ( pixel       & 1) << k;
-	bitmap[1] |= ((pixel >> 1) & 1) << k;
+	bitmap |= ( pixel       & 1) << k;
+	bitmap |= ((pixel >> 1) & 1) << (k + 8);
       }
-      WWCharacter_SetBitmap(ww_character, j*2  , bitmap[0]);
-      WWCharacter_SetBitmap(ww_character, j*2+1, bitmap[1]);
+      WWCharacter_SetBitmapAsShortInt(ww_character, j, bitmap);
       n++;
     }
     WWText_SetFont(ww_text, i, ww_character);
