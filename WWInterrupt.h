@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/system.h"
+#include "wonx_include/system.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */

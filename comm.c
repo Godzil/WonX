@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/comm.h"
+#include "wonx_include/comm.h"
 
 #include "Wonx.h"
 
@@ -35,7 +35,7 @@ void comm_open(void)
 void comm_close(void)
 {}
 
-int comm_send_char(unsigned char byte)
+int comm_send_char(unsigned char c)
 {
   return (0);
 }
@@ -65,11 +65,11 @@ int comm_receive_block(void * buffer, int size)
   return (0);
 }
 
-void comm_set_timeout(int receive_timeout, int send_timeout)
+void comm_set_timeout(int recv_timeout, int send_timeout)
 {
 }
 
-void comm_set_baudrate(int speed)
+void comm_set_baudrate(int baudrate)
 {
 }
 
@@ -87,12 +87,10 @@ unsigned int comm_get_cancel_key(void)
   return (0);
 }
 
-#if 0
 int comm_xmodem(void * xmodem)
 {
   return (0);
 }
-#endif
 
 /*****************************************************************************/
 /* ここまで                                                                  */

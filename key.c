@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/key.h"
+#include "wonx_include/key.h"
 
 #include "Wonx.h"
 

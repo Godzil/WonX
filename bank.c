@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/bank.h"
+#include "wonx_include/bank.h"
 
 #include "Wonx.h"
 
@@ -39,39 +39,39 @@ int bank_get_map(int bank)
   return (0);
 }
 
-unsigned char bank_read_byte(int bank, unsigned int offset)
+unsigned char bank_read_byte(int bank, unsigned int off)
 {
   return (0);
 }
 
-void bank_write_byte(int bank, unsigned int offset, unsigned int data)
+void bank_write_byte(int bank, unsigned int off, unsigned int data)
 {
   return;
 }
 
-unsigned int bank_read_word(int bank, unsigned int offset)
+unsigned int bank_read_word(int bank, unsigned int off)
 {
   return (0);
 }
 
-void bank_write_word(int bank, unsigned int offset, unsigned int data)
+void bank_write_word(int bank, unsigned int off, unsigned int data)
 {
   return;
 }
 
-void bank_read_block(int bank, unsigned int offset,
+void bank_read_block(int bank, unsigned int off,
 		     void * buffer, unsigned int size)
 {
   return;
 }
 
-void bank_write_block(int bank, unsigned int offset,
+void bank_write_block(int bank, unsigned int off,
 		      void * buffer, unsigned int size)
 {
   return;
 }
 
-void bank_fill_block(int bank, unsigned int offset,
+void bank_fill_block(int bank, unsigned int off,
 		     unsigned int size, unsigned int data)
 {
   return;

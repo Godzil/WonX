@@ -63,7 +63,8 @@ WWSprite WWSprite_Create(int number, int x, int y,
   WWSprite sprite;
 
   sprite = (WWSprite)malloc(sizeof(_WWSprite));
-  if (sprite == NULL) Error("WWSprite_Create", "Cannot allocate memory.");
+  if (sprite == NULL)
+    Wonx_Error("WWSprite_Create", "Cannot allocate memory.");
 
   WWSprite_SetNumber(sprite, number);
   WWSprite_SetHorizontal(sprite, horizontal);

@@ -2,14 +2,14 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <unistd.h>
+
 #include "XDisplayP.h"
 #include "Wonx.h"
 #include "etc.h"
-
-#include <stdio.h>
-#include <time.h>
-#include <unistd.h>
-#include <sys/types.h>
 
 /*****************************************************************************/
 /* メンバ関数の定義                                                          */
@@ -55,7 +55,7 @@ static void quit(Widget w, XEvent * event, String * params, Cardinal * num)
 static void wm_protocols_proc(Widget w, XEvent * event, String * params,
 			      Cardinal * num)
 {
-  if ((event->type == ClientMessage) && 
+  if ((event->type == ClientMessage) &&
       (event->xclient.data.l[0] != wm_delete_window)) {
     XBell(XtDisplay(w), 0);
   } else {
@@ -226,7 +226,8 @@ XDisplay XDisplay_Create(int width, int height)
   int i;
 
   x_display = (XDisplay)malloc(sizeof(_XDisplay));
-  if (x_display == NULL) Error("XDisplay_Create", "Cannot allocate memory.");
+  if (x_display == NULL)
+    Wonx_Error("XDisplay_Create", "Cannot allocate memory.");
 
   x_display->width = width;
   x_display->height = height;
@@ -405,7 +406,7 @@ int XDisplay_DrawLCDWindow(XDisplay x_display, WWLCDPanel ww_lcd_panel)
     rectangles[pixel] = (XRectangle *)malloc(sizeof(XRectangle) * num);
   }
   if (rectangles == NULL)
-    Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
+    Wonx_Error("XDisplay_DrawLCDWindow", "Cannot allocate memory.");
 
   ww_lcd_width  = WWLCDPanel_GetWidth( ww_lcd_panel);
   ww_lcd_height = WWLCDPanel_GetHeight(ww_lcd_panel);

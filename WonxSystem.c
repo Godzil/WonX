@@ -2,8 +2,9 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include "wonx_configure.h"
+
 #include "WonxSystemP.h"
-#include "configure.h"
 #include "etc.h"
 
 /*****************************************************************************/
@@ -79,29 +80,29 @@ WonxSystem WonxSystem_Create()
 
   wonx_system = (WonxSystem)malloc(sizeof(_WonxSystem));
   if (wonx_system == NULL)
-    Error("WonxSystem_Create", "Cannot allocate memory.");
+    Wonx_Error("WonxSystem_Create", "Cannot allocate memory.");
 
   ww_interrupt = WWInterrupt_Create();
   if (ww_interrupt == NULL)
-    Error("WonxSystem_Create", "Cannot create WonderWitch interrupt.");
+    Wonx_Error("WonxSystem_Create", "Cannot create WonderWitch interrupt.");
   WonxSystem_SetWWInterrupt(wonx_system, ww_interrupt);
 
   /* VBlank は WONX_VBLANK_INTERVAL * 0.1 秒毎とする */
   ww_timer = WWTimer_Create(1, WONX_VBLANK_INTERVAL);
   if (ww_timer == NULL)
-    Error("WonxSystem_Create", "Cannot create WonderWitch VBlank timer.");
+    Wonx_Error("WonxSystem_Create", "Cannot create WonderWitch VBlank timer.");
   WonxSystem_SetWWVBlankTimer(wonx_system, ww_timer);
 
   ww_timer = WWTimer_Create(0, WONX_VBLANK_INTERVAL);
   if (ww_timer == NULL)
-    Error("WonxSystem_Create",
-	  "Cannot create WonderWitch VBlank count up timer.");
+    Wonx_Error("WonxSystem_Create",
+	       "Cannot create WonderWitch VBlank count up timer.");
   WonxSystem_SetWWVBlankCountUpTimer(wonx_system, ww_timer);
 
   ww_timer = WWTimer_Create(0, WONX_HBLANK_INTERVAL);
   if (ww_timer == NULL)
-    Error("WonxSystem_Create",
-	  "Cannot create WonderWitch HBlank count up timer.");
+    Wonx_Error("WonxSystem_Create",
+	       "Cannot create WonderWitch HBlank count up timer.");
   WonxSystem_SetWWHBlankCountUpTimer(wonx_system, ww_timer);
 
   WWTimer_Reset(WonxSystem_GetWWVBlankTimer(       wonx_system));
@@ -113,10 +114,10 @@ WonxSystem WonxSystem_Create()
   WWTimer_OFF(WonxSystem_GetWWHBlankCountUpTimer(wonx_system));
 
   /* タイマのインターバルは，0.1 秒単位とする */
-  unix_timer = UNIXTimer_Create(1, WONX_TIMER_INTERVAL, wonx_system, 
+  unix_timer = UNIXTimer_Create(1, WONX_TIMER_INTERVAL, wonx_system,
 				(UNIXTimerCallBack)WonxTimer_Callback);
   if (unix_timer == NULL)
-    Error("WonxSystem_Create", "Cannot create UNIX timer.");
+    Wonx_Error("WonxSystem_Create", "Cannot create UNIX timer.");
   WonxSystem_SetUNIXTimer(wonx_system, unix_timer);
 
   UNIXTimer_ON(unix_timer);
@@ -131,7 +132,7 @@ WonxSystem WonxSystem_Destroy(WonxSystem wonx_system)
   UNIXTimer unix_timer;
 
   if (wonx_system == NULL)
-    Error("WonxSystem_Destroy", "Object is not created.");
+    Wonx_Error("WonxSystem_Destroy", "Object is not created.");
 
   unix_timer = WonxSystem_GetUNIXTimer(wonx_system);
 

@@ -2,10 +2,11 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "sys/text.h"
+#include "wonx_include/text.h"
 
 #include "Wonx.h"
 #include "WWText.h"
@@ -30,7 +31,7 @@
  * 引数の表示の問題もあるしね．
  */
 
-static void _text_window_init(int x, int y, int w, int h, unsigned font_base)
+static void _text_window_init(int x, int y, int w, int h, unsigned int base)
 {
   WWText ww_text;
   WWDisplay ww_display;
@@ -38,7 +39,7 @@ static void _text_window_init(int x, int y, int w, int h, unsigned font_base)
   ww_text = WonxText_GetWWText(Wonx_GetWonxText());
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
-  WWText_SetTextWindow(ww_text, x, y, w, h, font_base, ww_display);
+  WWText_SetTextWindow(ww_text, x, y, w, h, base, ww_display);
 
   WWScreen_SetRollX(WWText_GetScreen(ww_text), 0);
   WWScreen_SetRollY(WWText_GetScreen(ww_text), 0);
@@ -74,7 +75,7 @@ void text_screen_init(void)
   return;
 }
 
-void text_window_init(int x, int y, int w, int h, unsigned int font_base)
+void text_window_init(int x, int y, int w, int h, unsigned int base)
 {
   WWDisplay ww_display;
 
@@ -83,12 +84,12 @@ void text_window_init(int x, int y, int w, int h, unsigned int font_base)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : text_window_init() : x = %d, y = %d, width = %d, height = %d, base = %u\n", x, y, w, h, (int)font_base);
+  printf("call : text_window_init() : x = %d, y = %d, width = %d, height = %d, base = %u\n", x, y, w, h, (int)base);
   fflush(stdout);
 
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
-  _text_window_init(x, y, w, h, font_base);
+  _text_window_init(x, y, w, h, base);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
@@ -109,7 +110,7 @@ int text_get_mode(void)
   return (0);
 }
 
-void _text_put_char(int x, int y, unsigned int c)
+static void _text_put_char(int x, int y, unsigned int c)
 {
   WWText ww_text;
   WWDisplay ww_display;
@@ -144,7 +145,7 @@ void text_put_char(int x, int y, unsigned int c)
   return;
 }
 
-static int _text_put_string(int x, int y, char * s)
+static int _text_put_string(int x, int y, char * string)
 {
   int i, len, ret;
   WWText ww_text;
@@ -153,17 +154,17 @@ static int _text_put_string(int x, int y, char * s)
   ww_text = WonxText_GetWWText(Wonx_GetWonxText());
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
-  len = strlen(s);
+  len = strlen(string);
   ret = 0;
   for (i = 0; i < len; i++) {
-    if (WWText_PutCharacter(ww_text, x + i, y, s[i], ww_display) >= 0)
+    if (WWText_PutCharacter(ww_text, x + i, y, string[i], ww_display) >= 0)
       ret++;
   }
 
   return (ret);
 }
 
-int text_put_string(int x, int y, char * s)
+int text_put_string(int x, int y, char * string)
 {
   int ret;
 
@@ -172,10 +173,10 @@ int text_put_string(int x, int y, char * s)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : text_put_string() : x = %d, y = %d, string = %s\n", x, y, s);
+  printf("call : text_put_string() : x = %d, y = %d, string = %s\n", x, y, string);
   fflush(stdout);
 
-  ret = _text_put_string(x, y, s);
+  ret = _text_put_string(x, y, string);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
@@ -188,7 +189,7 @@ int text_put_string(int x, int y, char * s)
   return (ret);
 }
 
-int text_put_substring(int x, int y, char * s, int len)
+int text_put_substring(int x, int y, char * s, int length)
 {
   int i, ret;
   WWText ww_text;
@@ -199,14 +200,14 @@ int text_put_substring(int x, int y, char * s, int len)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : text_put_substring() : x = %d, y = %d, string = %s, length = %d\n", x, y, s, len);
+  printf("call : text_put_substring() : x = %d, y = %d, string = %s, length = %d\n", x, y, s, length);
   fflush(stdout);
 
   ww_text = WonxText_GetWWText(Wonx_GetWonxText());
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
   ret = 0;
-  for (i = 0; i < len; i++) {
+  for (i = 0; i < length; i++) {
     if (WWText_PutCharacter(ww_text, x + i, y, s[i], ww_display) >= 0)
       ret++;
   }
@@ -222,7 +223,7 @@ int text_put_substring(int x, int y, char * s, int len)
   return (ret);
 }
 
-void text_put_numeric(int x, int y, int len, int format, int number)
+void text_put_numeric(int x, int y, int length, int format, int number)
 {
   char buf[20];
   char f[20];
@@ -232,13 +233,13 @@ void text_put_numeric(int x, int y, int len, int format, int number)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : text_put_numeric() : x = %d, y = %d, len = %d, format = %04x, number = %d\n", x, y, len, format, number);
+  printf("call : text_put_numeric() : x = %d, y = %d, length = %d, format = %04x, number = %d\n", x, y, length, format, number);
   fflush(stdout);
 
   strcpy(f, "%");
 
   if (format & NUM_PADZERO) strcat(f, "0");
-  sprintf(f + strlen(f), "%d", len);
+  sprintf(f + strlen(f), "%d", length);
   if (format & NUM_HEXA) strcat(f, "x");
   else if (format & NUM_SIGNED) strcat(f, "d");
   else strcat(f, "u");
@@ -258,11 +259,11 @@ void text_put_numeric(int x, int y, int len, int format, int number)
   return;
 }
 
-void text_store_numeric(char * buffer, int len, int format, int number)
+void text_store_numeric(char * buffer, int length, int format, int number)
 {
 }
 
-void text_fill_char(int x, int y, int len, int code)
+void text_fill_char(int x, int y, int length, int c)
 {
   int i;
 
@@ -271,11 +272,11 @@ void text_fill_char(int x, int y, int len, int code)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : text_fill_char() : x = %d, y = %d, length = %d, code = %d\n", x, y, len, code);
+  printf("call : text_fill_char() : x = %d, y = %d, length = %d, character = %d\n", x, y, length, c);
   fflush(stdout);
 
-  for (i = 0; i < len; i++) {
-    _text_put_char(x + i, y, code);
+  for (i = 0; i < length; i++) {
+    _text_put_char(x + i, y, c);
   }
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
@@ -346,16 +347,15 @@ int text_get_palette(void)
   return (num);
 }
 
-void text_set_ank_font(int font_base_num, int is_color, int font_count,
-		       void * font)
+void text_set_ank_font(int base, int color, int count, void * font)
 {
 }
 
-void text_set_sjis_font(void * font_address)
+void text_set_sjis_font(void * p)
 {
 }
 
-void text_get_fontdata(int char_code, void * fontdata_buffer)
+void text_get_fontdata(int c, void * buffer)
 {
 }
 
@@ -416,7 +416,7 @@ int text_get_screen(void)
   return (n);
 }
 
-void cursor_display(int cursor_enable)
+void cursor_display(int flag)
 {
 }
 
@@ -429,16 +429,16 @@ void cursor_set_location(int x, int y, int w, int h)
 {
 }
 
-unsigned long cursor_get_location(void)
+unsigned long int cursor_get_location(void)
 {
   return (0);
 }
 
-void cursor_set_type(int palette_num, int blink_interval)
+void cursor_set_type(int palette_num, int interval)
 {
 }
 
-unsigned long cursor_get_type(void)
+unsigned long int cursor_get_type(void)
 {
   return (0);
 }

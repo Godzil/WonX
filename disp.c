@@ -5,13 +5,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/disp.h"
+#include "wonx_include/disp.h"
 
 #include "Wonx.h"
 
 /*****************************************************************************/
 /* 互換関数の定義                                                            */
 /*****************************************************************************/
+
+/*
+ * void * でデータを渡す関数は，型を間違えるバグが入る可能性があるので，
+ * void * を適切な型に置き換えてある．
+ */
 
 /*
  * Xサーバとの同期の整合性がとれなくなるなどの問題が考えられるので，
@@ -72,7 +77,7 @@ void display_control(unsigned int flags)
   return;
 }
 
-unsigned int display_status()
+unsigned int display_status(void)
 {
   WWDisplay ww_display;
   unsigned short int ret;
@@ -123,12 +128,16 @@ unsigned int display_status()
   return (ret);
 }
 
-void font_set_monodata(unsigned int number, unsigned int count, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned char * data にした．
+ */
+void font_set_monodata(unsigned int number, unsigned int count,
+		       unsigned char * data)
 {
   WWCharacter c;
   int i, x, y, n, p;
   int f, b;
-  unsigned char * d;
   WWDisplay ww_display;
 
   if (!Wonx_IsCreated()) Wonx_Create();
@@ -137,20 +146,19 @@ void font_set_monodata(unsigned int number, unsigned int count, void * data)
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : font_set_monodata() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, data); fflush(stdout);
+	 (int)number, (int)count, (void *)data); fflush(stdout);
 
   ww_display = WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay());
 
-  n = 0;
-  d = (unsigned char *)data; /* ひとつのキャラクタデータは８バイト */
   f = WWDisplay_GetForegroundColor(ww_display);
   b = WWDisplay_GetBackgroundColor(ww_display);
 
+  n = 0;
   for (i = 0; i < count; i++) {
     c = WWDisplay_GetCharacter(ww_display, number + i);
     for (y = 0; y < 8; y++) {
       for (x = 0; x < 8; x++) {
-	p = (d[n] & (1 << (7 - x))) ? f : b; /*これでよいのか？*/
+	p = (data[n] & (1 << (7 - x))) ? f : b; /*これでよいのか？*/
 	WWCharacter_SetPixel(c, x, y, p);
       }
       n++;
@@ -168,12 +176,15 @@ void font_set_monodata(unsigned int number, unsigned int count, void * data)
   return;
 }
 
-void font_set_colordata(unsigned int number,
-			unsigned int count, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned char * data にした．
+ */
+void font_set_colordata(unsigned int number, unsigned int count,
+			unsigned char * data)
 {
   WWCharacter c;
   int i, x, y, n, p;
-  unsigned char * d;
 
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -181,10 +192,9 @@ void font_set_colordata(unsigned int number,
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : font_set_colordata() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, data); fflush(stdout);
+	 (int)number, (int)count, (void *)data); fflush(stdout);
 
   n = 0;
-  d = (unsigned char *)data; /* ひとつのキャラクタデータは16バイト */
 
   for (i = 0; i < count; i++) {
     c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
@@ -193,8 +203,8 @@ void font_set_colordata(unsigned int number,
       for (x = 0; x < 8; x++) {
 
 	/*これでよいのか？*/
-	p = ((d[n] & (1 << (7-x))) ? 2 : 0)
-	  + ((d[n + 1] & (1 << (7-x))) ? 1 : 0);
+	p = ((data[n] & (1 << (7-x))) ? 2 : 0)
+	  + ((data[n + 1] & (1 << (7-x))) ? 1 : 0);
 
 	WWCharacter_SetPixel(c, x, y, p);
       }
@@ -214,13 +224,16 @@ void font_set_colordata(unsigned int number,
   return;
 }
 
-void font_get_data(unsigned int number,
-		   unsigned int count, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned char * data にした．
+ */
+void font_get_data(unsigned int number, unsigned int count,
+		   unsigned char * data)
 {
   /* 関数の仕様がわからんので適当に書くぞ */
   WWCharacter c;
   int i, x, y, n, p;
-  unsigned char * d;
 
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -228,22 +241,21 @@ void font_get_data(unsigned int number,
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : font_get_data() : number = %u, count = %u, data = %p\n",
-	 (int)number, (int)count, data); fflush(stdout);
+	 (int)number, (int)count, (void *)data); fflush(stdout);
 
   n = 0;
-  d = (unsigned char *)data; /* ひとつのキャラクタデータは16バイト？ */
 
   for (i = 0; i < count; i++) {
     c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			       number + i);
     for (y = 0; y < 8; y++) {
-      d[n  ] = 0;
-      d[n+1] = 0;
+      data[n  ] = 0;
+      data[n+1] = 0;
       for (x = 0; x < 8; x++) {
 	p = WWCharacter_GetPixel(c, x, y);
 	/* これでよいのか？ */
-	d[n  ] |= (((unsigned char)p & 0x02) ? 1 : 0) << (7-x);
-	d[n+1] |= (((unsigned char)p & 0x01) ? 1 : 0) << (7-x);
+	data[n  ] |= (((unsigned char)p & 0x02) ? 1 : 0) << (7-x);
+	data[n+1] |= (((unsigned char)p & 0x01) ? 1 : 0) << (7-x);
       }
       n++;
       n++;
@@ -347,10 +359,14 @@ static void _screen_set_char1(int screen, int x, int y,
   return;
 }
 
-void screen_set_char(int screen, int x, int y, int w, int h, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned short int * data にした．
+ */
+void screen_set_char(int screen, int x, int y, int w, int h,
+		     unsigned short int * data)
 {
   int i, j;
-  unsigned short int * d;
 
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -358,15 +374,13 @@ void screen_set_char(int screen, int x, int y, int w, int h, void * data)
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : screen_set_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p\n",
-	 screen, x, y, w, h, data);
+	 screen, x, y, w, h, (void *)data);
   fflush(stdout);
-
-  d = (unsigned short int *)data;
 
   for (j = 0; j < h; j++) {
     for (i = 0; i < w; i++) {
-      _screen_set_char1(screen, x + i, y + j, *d);
-      d++;
+      _screen_set_char1(screen, x + i, y + j, *data);
+      data++;
     }
   }
 
@@ -411,10 +425,14 @@ static unsigned int _screen_get_char1(int screen, int x, int y)
   return (ret);
 }
 
-void screen_get_char(int screen, int x, int y, int w, int h, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned short int * data にした．
+ */
+void screen_get_char(int screen, int x, int y, int w, int h,
+		     unsigned short int * data)
 {
   int i, j;
-  unsigned short int * d;
 
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -422,15 +440,13 @@ void screen_get_char(int screen, int x, int y, int w, int h, void * data)
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : screen_get_char() : screen = %d, x = %d, y = %d, w = %d, h = %d, data = %p\n",
-	 screen, x, y, w, h, data);
+	 screen, x, y, w, h, (void *)data);
   fflush(stdout);
-
-  d = (unsigned short int *)data;
 
   for (j = 0; j < h; j++) {
     for (i = 0; i < w; i++) {
-      *d = _screen_get_char1(screen, x, y);
-      d++;
+      *data = _screen_get_char1(screen, x, y);
+      data++;
     }
   }
 
@@ -535,20 +551,20 @@ void screen_fill_attr(int screen, int x, int y, int w, int h,
   return;
 }
 
-void sprite_set_range(unsigned int sprite_start, unsigned int sprite_count)
+void sprite_set_range(unsigned int start, unsigned int number)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : sprite_set_range() : start = %u, count = %u\n",
-	 (int)sprite_start, (int)sprite_count); fflush(stdout);
+  printf("call : sprite_set_range() : start = %u, number = %u\n",
+	 (int)start, (int)number); fflush(stdout);
 
   WWDisplay_SetSpriteStart(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
-			   sprite_start);
+			   start);
   WWDisplay_SetSpriteCount(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
-			   sprite_count);
+			   number);
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
 
@@ -575,8 +591,10 @@ static void _sprite_set_char(unsigned int sprite_num, unsigned int data)
   WWSprite_SetPriority(  s, (data >> 13) ? 1 : 0);
   WWSprite_SetClipping(  s, (data >> 12) ? 1 : 0);
 
+  /* 8を引いた値でパレット番号が指定されるので，8を足してやる */
   p = WWDisplay_GetPalette(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
-			   (data >> 9) & 0x07);
+			   ((data >> 9) & 0x07) + 8);
+
   c = WWDisplay_GetCharacter(WonxDisplay_GetWWDisplay(Wonx_GetWonxDisplay()),
 			     data & 0x1ff);
 
@@ -628,7 +646,9 @@ static unsigned int _sprite_get_char(unsigned int sprite_num)
 
   p = WWSprite_GetPalette(s);
   c = WWSprite_GetCharacter(s);
-  ret |= (WWPalette_GetNumber(p) & 0x07) << 9;
+
+  /* 8を引いた値でパレット番号が指定されるので，8を引いてやる */
+  ret |= ((WWPalette_GetNumber(p) - 8) & 0x07) << 9;
   ret |= WWCharacter_GetNumber(c);
 
   return (ret);
@@ -794,10 +814,14 @@ unsigned long int sprite_get_char_location(unsigned int sprite_num)
   return (ret);
 }
 
-void sprite_set_data(unsigned int sprite_num, unsigned int count, void * data)
+/*
+ * void * data だと，まちがって int * でデータを指定するようなバグが
+ * 入る可能性があるので，unsigned long int * data にした．
+ */
+void sprite_set_data(unsigned int sprite_num, unsigned int count,
+		     unsigned long int * data)
 {
   int i;
-  unsigned long int * n;
 
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -805,15 +829,14 @@ void sprite_set_data(unsigned int sprite_num, unsigned int count, void * data)
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
   printf("call : sprite_set_data() : number = %u, count = %u, data = %p\n",
-	 (int)sprite_num, (int)count, data);
+	 (int)sprite_num, (int)count, (void *)data);
   fflush(stdout);
 
-  n = (unsigned long int *)data;
   for (i = 0; i < count; i++) {
     _sprite_set_char_location(sprite_num + i,
-			      n[i] >> 16,
-			      (n[i] >> 8) & 0xff,
-			      n[i] & 0xff);
+			      data[i] >> 16,
+			      (data[i] >> 8) & 0xff,
+			      data[i] & 0xff);
   }
 
   WonxDisplay_Flush(Wonx_GetWonxDisplay());
@@ -1019,8 +1042,7 @@ unsigned long int sprite_get_window(void)
   return (ret);
 }
 
-void palette_set_color(unsigned int palette_num,
-		       unsigned int colors)
+void palette_set_color(unsigned int palette_num, unsigned int colors)
 {
   int mapped_colors[4];
   WWPalette palette;
@@ -1166,7 +1188,7 @@ unsigned long int lcd_get_color(void)
   return (ret);
 }
 
-void lcd_set_segments(unsigned segments)
+void lcd_set_segments(unsigned int segments)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -1200,7 +1222,7 @@ unsigned int lcd_get_segments(void)
   return (0);
 }
 
-void lcd_set_sleep(unsigned slp)
+void lcd_set_sleep(unsigned int slp)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -1234,7 +1256,7 @@ unsigned int lcd_get_sleep(void)
   return (0);
 }
 
-void screen_set_vram(int screen, int locationID)
+void screen_set_vram(int screen, int location_id)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 
@@ -1251,7 +1273,7 @@ void screen_set_vram(int screen, int locationID)
   return;
 }
 
-void sprite_set_vram(int locationID)
+void sprite_set_vram(int location_id)
 {
   if (!Wonx_IsCreated()) Wonx_Create();
 

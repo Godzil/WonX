@@ -2,9 +2,10 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
+#include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/system.h"
+#include "wonx_include/system.h"
 
 #include "Wonx.h"
 
@@ -28,8 +29,8 @@
  * 引数の表示の問題もあるしね．
  */
 
-void sys_interrupt_set_hook(int type, intvector_t * intvector,
-			    intvector_t * last_intvector)
+void sys_interrupt_set_hook(int type, intvector_t * vector,
+			    intvector_t * old_vector)
 {
   WWInterrupt ww_interrupt;
 
@@ -38,18 +39,18 @@ void sys_interrupt_set_hook(int type, intvector_t * intvector,
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : sys_interrupt_set_hook() : type = %d, intvector = %p, last_intvector = %p\n", type, intvector, last_intvector);
+  printf("call : sys_interrupt_set_hook() : type = %d, vector = %p, old_vector = %p\n", type, vector, old_vector);
   fflush(stdout);
 
   ww_interrupt = WonxSystem_GetWWInterrupt(Wonx_GetWonxSystem());
 
-  last_intvector->callback = WWInterrupt_GetCallback(ww_interrupt, type);
-  last_intvector->cs = WWInterrupt_GetCS(ww_interrupt, type);
-  last_intvector->ds = WWInterrupt_GetDS(ww_interrupt, type);
+  old_vector->callback = WWInterrupt_GetCallback(ww_interrupt, type);
+  old_vector->cs = WWInterrupt_GetCS(ww_interrupt, type);
+  old_vector->ds = WWInterrupt_GetDS(ww_interrupt, type);
 
-  WWInterrupt_SetCallback(ww_interrupt, type, intvector->callback);
-  WWInterrupt_SetCS(ww_interrupt, type, intvector->cs);
-  WWInterrupt_SetDS(ww_interrupt, type, intvector->ds);
+  WWInterrupt_SetCallback(ww_interrupt, type, vector->callback);
+  WWInterrupt_SetCS(ww_interrupt, type, vector->cs);
+  WWInterrupt_SetDS(ww_interrupt, type, vector->ds);
 
   printf("call : sys_interrupt_set_hook() : return value = none\n");
   fflush(stdout);
@@ -60,7 +61,7 @@ void sys_interrupt_set_hook(int type, intvector_t * intvector,
   return;
 }
 
-void sys_interrupt_reset_hook(int type, intvector_t * last_intvector)
+void sys_interrupt_reset_hook(int type, intvector_t * old_vector)
 {
   WWInterrupt ww_interrupt;
 
@@ -69,14 +70,14 @@ void sys_interrupt_reset_hook(int type, intvector_t * last_intvector)
   /* タイマを一時停止する */
   UNIXTimer_Pause(WonxSystem_GetUNIXTimer(Wonx_GetWonxSystem()));
 
-  printf("call : sys_interrupt_reset_hook() : type = %d, last_intvector = %p\n", type, last_intvector);
+  printf("call : sys_interrupt_reset_hook() : type = %d, old_vector = %p\n", type, old_vector);
   fflush(stdout);
 
   ww_interrupt = WonxSystem_GetWWInterrupt(Wonx_GetWonxSystem());
 
-  WWInterrupt_SetCallback(ww_interrupt, type, last_intvector->callback);
-  WWInterrupt_SetCS(ww_interrupt, type, last_intvector->cs);
-  WWInterrupt_SetDS(ww_interrupt, type, last_intvector->ds);
+  WWInterrupt_SetCallback(ww_interrupt, type, old_vector->callback);
+  WWInterrupt_SetCS(ww_interrupt, type, old_vector->cs);
+  WWInterrupt_SetDS(ww_interrupt, type, old_vector->ds);
 
   printf("call : sys_interrupt_reset_hook() : return value = none\n");
   fflush(stdout);
@@ -87,7 +88,7 @@ void sys_interrupt_reset_hook(int type, intvector_t * last_intvector)
   return;
 }
 
-void sys_wait(unsigned int time)
+void sys_wait(unsigned int wait_time)
 {
 }
 
@@ -104,29 +105,29 @@ void sys_set_sleep_time(int sleep_time)
 {
 }
 
-int  sys_get_sleep_time(void)
+int sys_get_sleep_time(void)
 {
   return (0);
 }
 
-void sys_set_awake_key(int awake_key_pattern)
+void sys_set_awake_key(int pattern)
 {
 }
 
-int  sys_get_awake_key(void)
+int sys_get_awake_key(void)
 {
   return (0);
 }
 
-void sys_set_keepalive_int(int keepalive_pattern)
+void sys_set_keepalive_int(int pattern)
 {
 }
 
-void sys_get_ownerinfo(int size, char *buffer)
+void sys_get_ownerinfo(int size, char * buffer)
 {
 }
 
-int  sys_suspend(int core)
+int sys_suspend(int core)
 {
   return (0);
 }
@@ -135,7 +136,7 @@ void sys_resume(int core)
 {
 }
 
-void sys_set_remote(int remote_enable)
+void sys_set_remote(int remote)
 {
 }
 
@@ -144,7 +145,7 @@ unsigned int sys_get_remote(void)
   return (0);
 }
 
-void * sys_alloc_iram(void *pointer, unsigned size)
+void * sys_alloc_iram(void * p, unsigned int size)
 {
   return (NULL);
 }
@@ -174,6 +175,13 @@ void sys_set_resume(unsigned int flags)
 unsigned int sys_get_resume(void)
 {
   return (0);
+}
+
+void bios_exit()
+{
+  printf("call : bios_exit() : \n");
+  fflush(stdout);
+  exit (0);
 }
 
 /*****************************************************************************/

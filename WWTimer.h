@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/timer.h"
+#include "wonx_include/timer.h"
 
 /*****************************************************************************/
 /* クラスの定義                                                              */

@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "sys/sound.h"
+#include "wonx_include/sound.h"
 
 #include "Wonx.h"
 

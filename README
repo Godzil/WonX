@@ -1,28 +1,27 @@
 Wonx - WonderWitch on X.
 
-■ αバージョン配布に当たって
+■ 配布に当たって
 
-Wonx はまだ不完全なαバージョンです．実装されていない機能や，
-不完全な機能，おかしな動作をする部分などがいっぱいあります．
+Wonx はまだ不完全です．実装されていない機能や，不完全な機能，おかしな
+動作をする部分などがいっぱいあります．
 バグ情報やアドバイスがあれば，作者の坂井弘亮まで，どんどんメールください．
 アドレスは，
 sakai@seki.ee.kagu.sut.ac.jp
 hsakai@pfu.co.jp
 です．
-また，リリース版ができるまでは，アップデートは頻繁に行っていきます．
+また，坂井の気が向く限り，アップデートは随時行っていきます．
 http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で，随時公開していきます．
 
 現在は坂井が一人で製作していますが，ひとりでは細かい点の整合性
 (初期化しなかった場合の動作の違いなど．WonderWitch と Wonx では
- 微妙に異なっていると思う)を追いきれないのが現状です．
+ 微妙に異なっている)を追いきれないのが現状です．
 とくにマニュアルに書いてない部分に関しては，WonderWitch ではどのように
-動作するのか，ひとりではチェックしきれません．
-情報をお待ち(ていうか期待)しています(そのためのα版配布です)．
+動作するのか，ひとりではチェックしきれません．(ていうか面倒)
+情報をお待ち(ていうか期待)しています．
 いっしょに少しずつ，完全なものに仕上げていきましょう．
 
-広く情報を募るために，早い段階でα版として公開します．ご意見，ご要望なども
-歓迎します．どしどしお寄せください．
+ご意見，ご要望なども歓迎します．どしどしお寄せください．
 (ただし，返事を書くとは限らないし，要望を反映するとも限りませんので
  その点はご容赦ください)
 
@@ -47,29 +46,64 @@ Wonx は，WonderWitch 用のプログラムを X アプリケーションとしてコンパイルする
 ・描画速度は遅いが，デバッグ目的のためなので，速度を速くすることは
   あまり考えていない．(それよりも上記のデバッグ性を優先する)
 ・WonderWitch 用のプログラムを，X上で楽しむためのものではない．
+  また，エミュレーションが目的なのではない．
   あくまでデバッグ目的のもの．(そういうポリシーで開発を進める)
+  従って，WonderWitch での動作を模倣することよりも，デバッグ情報を
+  出力することや改造のしやすさを優先したような実装をする場合がある．
 
-■ 足りないもの
+■ 3分wonx
 
-以下のものにはまだ対応してません．したがって，例えばサウンド関連の
-関数を呼び出しても，何も起こりません．(空の関数になっている)
+とりあえず，どんなものか見てみたいことでしょう．そんな人は，
+サンプルプログラムをコンパイル・実行してみましょう．
+以下のようにしてみてください．
 
-・文字表示関連 (ターミナルにそのまま出力する)
-  とくに，文字だけでタイトル画面を書いてるゲームの場合などは，
-  なにも表示されないことになってしまうので注意してください．
-  (正常に動作していても，画面が真っ白で固まっているように見えてしまう)
-・画面周りの細かいところ(ウインドウ機能など)
-・サウンド
-・シリアルポート
-・割り込み処理関連
-  割り込みを使用している場合は注意してください．そのままではまともに
-  動かないでしょう．
-  そのうちシグナル使ってなんとかサポートしたいと思います．
+~>% tar xvzf wonx.tgz
+(中略)
+~>% cd wonx
 
-■ Wonx概要
+~/wonx>% make sample1
+(中略)
+~/wonx>% ./sample1
+
+ウインドウが開いて，標準出力にメッセージが出力されます．
+スペース・バーを押すと，終了します．
+
+~/wonx>% make sample2
+(中略)
+~/wonx>% ./sample2
+
+カーソルキーの上下で，キャラクタを移動します．
+スペース・バーを押すと，終了します．
+
+~/wonx>% more sample1.c
+~/wonx>% more sample2.c
+
+で，サンプルプログラムのリストを見てみましょう．
+
+次に，WonderWitch 用のゲーム，"SpeedMac" をコンパイル・実行してみます．
+
+~/wonx>% make smac
+(中略)
+~/wonx>% cd smac
+~/wonx/smac>% ./smac
+
+ウインドウが開いて，標準出力にメッセージが出力されます．
+いったん p を押して画面描画を OFF にします．しばらくしたら
+(メッセージの内容が変わったら) p を押して再び画面表示を ON にすると，
+smac のタイトル画面が表示されます．
+ここでスペースを押して，さらにまた p で画面表示を OFF にして，
+しばらくしたら(メッセージの内容が変わったら) p で画面表示を ON にします．
+どうですか？ SpeedMac のゲーム画面が表示されているでしょうか？
+カーソルキーで移動，スペースキーで射撃です．
+ただし，キー入力はキー入力用関数が呼ばれたときしか有効ではないので，
+キーは反応するまで長めに押してください．
+p を押して頻繁に描画の ON, OFF を切替えるのは，描画が非常に遅いため，
+ONのままだと画面クリアとかに異常に時間がかかるからです．
+
+■ Wonx 概要
 
 Wonx は，WonderWitch の display_control() とか display_status() といった
-関数(システムコール)と互換の関数を持っています．
+関数(BIOS に対するシステムコール)と代替の関数を持っています．
 これらの関数は，X上にウインドウを開いて，そこで WonderWitch と互換の動作を
 するように書いてあります．
 
@@ -78,18 +112,47 @@ Wonx を make すると，libwonx.a というライブラリができます．
 WonderWitch の display_control() とかのかわりに，Wonx の display_control() が
 リンクされ，X 上で動作するようになる，という仕組みです．
 
-■ インストール
+■ ヘッダファイルについて
 
-インストールするには，以下のことを行う必要があります．
+Wonx は，UNIXシステム上にある libc を使用します．つまり，/usr/include の
+下を include します．
+また，WonderWitch には，sys/types.h などといったヘッダファイルがあります．
+よって，WonderWitch のヘッダファイル構成をそのまま Wonx に引き継ぐと，
+Wonx のヘッダファイルと UNIX のヘッダファイルがコンフリクトする
+可能性が出てきます．
+(たとえば，WonderWitch の sys/types.h と /usr/include/sys/types が
+ コンフリクトする，などです)
+これは，WonderWitch用のアプリケーションをコンパイルするときに，要注意です．
+コンパイルがうまくとおらないという障害の原因は，ほとんどがこのような，
+「ヘッダファイルのコンフリクトもしくは誤認」に起因しています．
 
-・Wonx のコンパイルには，WonderWitch 付属のヘッダファイル(sys/disp.h とか)が
-  必要なので，それらをコピーします．
-・Wonx をコンパイルします．→ libwonx.a ができあがります．
-・ヘッダファイル(sys/disp.h とか)と libwonx.a を，適切なディレクトリに
-  置きます．
-  (アプリケーションのコンパイルには，WonderWitch 付属のヘッダファイルが必要)
+対策として，Wonx では wonx_include というディレクトリの下にヘッダファイルを
+格納してあります．(本当は sys というディレクトリにしたかったが，
+上記の対策のため，このようにした)
+WonderWitch 用プログラム中の，
+#include <sys/types.h>
+のような部分は，すべて，
+#include <wonx_include/types.h>
+のように修正する必要があります．
+(stdio.h や stdlib.h は，UNIX システム付属のものを使用するので，
+ そのままでかまいません)
+(ただし，コンフリクトしないという絶対の自信があるなら，この限りではありません)
+WonderWitch のプログラムの，#include <sys/*.h> は，すべて
+#include <wonx_include/*.h> に修正する必要がある，ということです．
+(これをまとめて行うための perl スクリプトを添付してあります．
+ sys2wonx.pl *.[ch] を実行すると，ごっそりと書き換えてくれます)
 
-インストールは，以下の手順で行います．
+また，UNIXシステムによっては，/usr/include/sys/types.h で ushort, ulong を
+定義しているものといないものがあります．よって，コンパイル中に
+ulong が２重定義されているとおこられる場合があります．
+このあたりの微調整には，wonx_include 以下のファイルを直接修正して
+調整してください．wonx_include/system_configure.h を修正することにより，
+調整できるようになってます．
+
+■ Wonx のコンパイル
+
+まず Wonx をコンパイルして，libwonx.a を作成する必要があります．
+Wonx のコンパイルは，以下の手順で行います．
 
 1. Wonx を展開する．
 
@@ -97,40 +160,7 @@ WonderWitch の display_control() とかのかわりに，Wonx の display_control() が
 ~>% cd wonx
 ~/wonx>% 
 
-2. WonderWitch 付属のヘッダファイルをコピーする．
-
-~/wonx>% mkdir sys
-~/wonx>% cp ~/WWitch/include/bank.h sys
-~/wonx>% cp ~/WWitch/include/comm.h sys
-~/wonx>% cp ~/WWitch/include/disp.h sys
-~/wonx>% cp ~/WWitch/include/key.h sys
-~/wonx>% cp ~/WWitch/include/sound.h sys
-~/wonx>% cp ~/WWitch/include/system.h sys
-~/wonx>% cp ~/WWitch/include/text.h sys
-~/wonx>% cp ~/WWitch/include/timer.h sys
-~/wonx>% cp ~/WWitch/include/types.h sys
-
-3. 以下の内容のファイル(sys/service.h)を作成する．
-
-~/wonx>% emacs sys/service.h
-
-==== ここから ====
-#ifndef _service_h_INCLUDED_
-#define _service_h_INCLUDED_
-
-#define far  /* None */
-#define near /* None */
-
-#endif
-==== ここまで ====
-
-sys/service.h は，disp.h などの中から，
-#include <sys/service.h>
-のようにしてインクルードされますが，コンパイル時には -I. でコンパイル
-されるので，ばあいによっては，sys/sys/service.h にする必要があるかも
-しれません．(未確認)
-
-4. Wonx を make する．
+2. Wonx を make する．
 
 ~/wonx>% make
 gcc -c WWCharacter.c -O -I. -I/usr/X11R6/include
@@ -142,61 +172,99 @@ ar ruc libwonx.a WWCharacter.o WWColorMap.o WWDisplay.o WWLCDPanel.o WWPalette.o
 libwonx.a
 ~/wonx>% 
 
-ここまでで，ライブラリとヘッダファイルの作成は終りです．
+ここまでで，ライブラリの作成は終りです．
 
 ■ WonderWitch 用アプリケーションのコンパイル
 
-拙作の SpeedMac をコンパイルしてみます．
+次に，Wonx の利用の例として，拙作の SpeedMac という WonderWitch 用の
+ゲームをコンパイルしてみます．
+(SpeedMac はサンプルプログラムとして，Wonx に標準添付してあります)
+SpeedMac は WonderWitch 用のゲームプログラムです．本来は WonderWitch を
+使用してコンパイルし，WonderSwan 上でゲームを楽しむためのものです．
+今回は例として，SpeedMac に Wonx をリンクして，X 上で動作する SpeedMac の
+実行形式を作成してみます．
 
 1. 展開する．
 
-~/wonx>% cd
-~>% unzip xvzf smac-b02.zip
+~/wonx>% unzip smac-b02.zip
 ...(中略)...
-~>% cd smac-b02
-~/smac-b02>% 
+~/wonx>% cd smac-b02
+~/wonx/smac-b02>% 
 
 2. ヘッダファイルと libwonx.a をコピーする．
 
-~/smac-b02>% mkdir sys
-~/smac-b02>% cp ~/wonx/sys/* ./sys
-~/smac-b02>% cp ~/wonx/libwonx.a .
-~/smac-b02>% 
+~/wonx/smac-b02>% cp -R ../wonx_include .
+~/wonx/smac-b02>% cp ../libwonx.a .
+~/wonx/smac-b02>% 
 
-3. Makefile を修正する．
+3. makefile を修正する．
 
-~/smac-b02>% emacs Makefile
+~/wonx/smac-b02>% emacs makefile
 
 以下のように修正します．
 
 ・gcc でコンパイルをするように修正する．このときに，コンパイルオプションに，
-  -I. -I/usr/X11R6/include -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
+  -I. -L. -L/usr/X11R6/lib -lwonx -lX11 -lXt
   を追加する．
   (必要なら，-g も追加する)
 ・mkfent によるファイルのコンバートなどがあったら，削除する．
 
-4. make する．
+修正後の makefile を添付してあるので，面倒なかたは手で編集するかわりに，
 
-~/smac-b02>% make
+~/wonx/smac-b02>% mv makefile makefile.orig
+~/wonx/smac-b02>% cp ../makefile_for_smac ./makefile
+
+のようにしてコピーしてください．
+
+4. ソースを修正する．
+
+~/wonx/smac-b02>% emacs chara.c
+~/wonx/smac-b02>% emacs dsp.c
+... (ファイルをひとつひとつ修正する)
+
+ソース中の，
+#include <sys/disp.h>
+#include <sys/key.h>
+のような部分を，
+#include "wonx_include/disp.h"
+#include "wonx_include/key.h"
+のように修正します．
+
+これをまとめてやるための perl スクリプト (sys2wonx.pl) を添付してあるので，
+面倒なかたは，
+~/wonx/smac-b02>% cp ../sys2wonx.pl .
+~/wonx/smac-b02>% ./sys2wonx.pl *.[ch]
+のようにしてください．
+(sys2wonx.pl は，引数で指定したファイル自体を書き換えてしまうので注意)
+
+5. make する．
+
+~/wonx/smac-b02>% make
 gcc -c chara.c -g -I.
 gcc -c game.c -g -I.
 ...(中略)...
 gcc -c main.c -g -I.
 gcc -g -o smac chara.o game.o man.o mansub.o mansub2.o map.o mapsub.o menu.o monster.o picture.o player.o smac.o stage.o dsp.o etc.o main.o -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
-~/smac-b02>% ls smac
+~/wonx/smac-b02>% ls smac
 smac
-~/smac-b02>% 
+~/wonx/smac-b02>% 
 
-5. smac を起動する．
+6. smac を起動する．
 
-~/smac-b02>% ./smac
+~/wonx/smac-b02>% ./smac
+
+と，ここまでけっこう面倒ですが，実は，
+
+~/wonx>% make smac
+
+すると，これらの作業を全部やってくれるようになってます．
 
 ■ 操作
 
 smac を起動すると，ウインドウが開きます．また，ターミナルには，
 以下のデバッグ用の情報が表示されます．
 
-・WonderWitch の互換関数が呼ばれると，引数と戻り値を表示します．
+・WonderWitch の代替関数が呼ばれると，引数と戻り値を表示します．
 
 またここでは，以下の操作が行えます．
 
@@ -211,9 +279,11 @@ smac を起動すると，ウインドウが開きます．また，ターミナルには，
 ・F3 を押すと，キャラクターのデータをダンプ出力する．
 ・F4 を押すと，スプライトのデータをダンプ出力する．
 
-標準ではなにか関数が呼ばれるたびに画面の再描画を行うため，非常に低速です．
+デフォルトではなにか関数が呼ばれるたびに画面の再描画を行うため，
+非常に低速です．
 たとえば，以下のようなことをやっていると，非常に低速になります．
 
+/* 画面のクリア */
 for (y = 0; y < 32; y++)
   for (x = 0; x < 32; x++) {
     screen_fill_char(0, x, y, 1, 1, 0x0000); /* ここで毎回再描画される */
@@ -236,8 +306,8 @@ smac という実行形式ができているのなら，
 
 > smac | grep "character\[10\]"
 
-wonx は，メッセージを出力する再に，grep でフィルタリングできるように，
-かならず行の先頭に統一性のある文字列を追加しています．
+wonx は，メッセージを出力する際に，grep でフィルタリングできるように，
+かならず出力メッセージの先頭に，統一性のある文字列を追加しています．
 たとえば，関数呼び出し時に表示されるメッセージには，先頭に必ず
 "call" という文字列が追加されてます．よって，grep -v call を通せば，
 関数呼び出しのメッセージがごっそり出なくなる，というようになってます．
@@ -249,10 +319,99 @@ wonx は，メッセージを出力する再に，grep でフィルタリングできるように，
 
 のようにして，ログをとるのも有効でしょう．
 
+> smac > /dev/null
+
+だと，文字列を kterm などに表示しないぶん，高速になります．
+
+■ 足りないもの
+
+以下のものにはまだ対応してません．したがって，例えばサウンド関連の
+関数を呼び出しても，何も起こりません．(空の関数になっている)
+
+・サウンド
+・シリアル通信
+・その他いっぱい
+
+■ 注意しなければならないこと
+
+Wonx は，本来は WonderWitch 用として書かれた(もしくは，書かれる)プログラムを，
+UNIX 上でコンパイル・リンクするためのライブラリであり，ハードウエアを
+エミュレートするものではありません．
+ですから，WonderWitch と UNIX 上のC言語のギャップのため，気をつけなければ
+ならないことがいくつかあります．これらは Wonx の性質上，仕方の無いことです．
+
+以下のことは，意識することと，きれいなプログラムを書くことで，
+かなり回避できると思います．(short int にすべきところでは，省略せずに
+ちゃんと short int と明示するとか)
+
+まあ，Wonx の目的は論理的なバグを早い段階で無くすことにあるので，このへんは
+そういうものだと割り切って使ってください．
+Wonx を使う限り，なるべく機種依存を無くすように心がけましょう．
+(とくに int のサイズにあまり依存しないようにしましょう)
+
+[コンパイルの問題]
+
+先にも書きましたが，コンパイルできないという障害が出たら，原因はたいていは
+ヘッダファイルのコンフリクトです．とくに，WonderWitch で sys 以下の
+ファイルをインクルードしている場合は注意してください．
+ushort, ulong などは，sys/types.h で定義されているシステムもあるし，
+そうでないシステムもあります．このへんは，wonx_include/system_configure.h で
+調整してください．
+(FreeBSD では ushort のみ定義されているが，RedHat Linux では，
+ uchort, ulong ともに定義されているので，そのままだとコンパイル中に
+ ２重定義のワーニングが出ます)
+
+[int 型の扱い]
+
+WonderWitch では sizeof(short int) == sizeof(int) < sizeof(long int) ですが，
+UNIX ではふつう sizeof(short int) < sizeof(int) == sizeof(long int) です．
+このことは，int 型を単なるカウンタとして使用するような場合には問題に
+なりませんが，ビットマップの格納場所として使用するようなときには，
+問題になります．
+一番問題になりやすいのは，キャラクタのビットマップを扱う場合です．
+font_set_colordata()などは，16*8 バイトのキャラクタデータを
+short int 型の配列として引数に持ちます．WonderWitch では
+sizeof(short int) == sizeof(int) なので，WonderWitch 用のプログラム上では，
+キャラクタデータを short int とせずに，int 型の配列として定義してしまう
+ことが考えられます．(当然 WonderWitch ならば問題は無いが，UNIX 上で
+実行したら，キャラクタに妙な縞々が入るだろうと思われる)
+このような場合には，UNIX 上でコンパイルするときには，short int に
+修正する必要があります．
+
+[エンディアンの問題]
+
+WonderWitch の CPU は x86系です．SPARC などで使用する場合には，
+エンディアンに注意する必要があります．
+font_set_colordata()などは，short int 型の配列でキャラクタデータを受け取る
+ので，char * で定義したキャラクタデータを short int * にキャストして
+font_set_colordata()に渡すなどのことをしていると，画像がひっくり返る
+ことが考えられます．
+i386 系の PC-UNIX ならば，おそらく問題は無いでしょう．
+
+[割り込みの問題]
+
+WonderWitch にはタイマ割り込みがありますが，Wonx の動作は非常に遅いため，
+WonderWitch の時間単位をそのまま UNIX に持ってきたら，割り込みが
+かかりっぱなしになってしまいます．よってタイマ割り込みの時間単位は，
+WonderWitch よりもかなり大きめにしてあります．
+これは，wonx_configure.h で調整できます．
+割り込みハンドラの中で，非常に時間のかかる画面描画などをしている
+場合には，割り込みの時間単位を大きくしてください．でないと，ハンドラから
+戻った瞬間にまたハンドラが呼ばれて，全然実行が先に進まない，ということに
+なり得ます．
+
+[キー入力について]
+
+キー入力は，キー入力用関数が呼ばれたときのみ感知するので，長めに押してないと
+反応しないことがあります．
+反応しないからといってなんども押すのでなく，１回を長く確実に押すように
+してください．
+
 ■ 作者
 
-Wonx は，坂井弘亮が通勤電車の中で Libretto で書いた作品です．
-GPLで配布します．
+Wonx は，坂井弘亮がその大部分を往復３時間の通勤電車の中で Libretto で書いた，
+「電車ソフトウエア」です．GPLで配布します．
+作者については，添付の OMAKE.jpn を参照してください．
 
 坂井弘亮の連絡先のメールアドレスは，
 sakai@seki.ee.kagu.sut.ac.jp
@@ -260,5 +419,10 @@ hsakai@pfu.co.jp
 です．また，本ソフトウエアの最新版を，
 http://www.seki.ee.kagu.sut.ac.jp/~sakai/WonderWitch/index.html
 で配布しています．
+以下はミラーサイトです．
+http://hp.vector.co.jp/authors/VA014157/index.html
+http://www.people.or.jp/~hsakai/index.html
+ミラーサイトは，坂井が気が向いたときにアップデートするので，常に最新，
+というわけではありません．あくまでバックアップ用です．
 
 ■ このファイルはここまで

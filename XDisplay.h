@@ -5,7 +5,7 @@
 /* ここから                                                                  */
 /*****************************************************************************/
 
-#include "sys/key.h"
+#include "wonx_include/key.h"
 
 #include "WWLCDPanel.h"
 

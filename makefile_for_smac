@@ -1,0 +1,38 @@
+SOURCES = chara.c game.c man.c mansub.c mansub2.c map.c mapsub.c menu.c monster.c picture.c player.c smac.c stage.c dsp.c etc.c
+
+# コマンドラインの長さには制限があるので，長さに注意すること
+OBJS = chara.o game.o man.o mansub.o mansub2.o map.o mapsub.o menu.o monster.o picture.o player.o smac.o stage.o dsp.o etc.o main.o
+
+.SUFFIXES: .c .o
+
+all :		smac
+
+smac :		$(OBJS)
+		gcc -g -o smac $(OBJS) -lwonx -lX11 -lXt -L. -L/usr/X11R6/lib
+
+# xsmac
+
+#smac :	smac.fx
+
+#smac.fx :	smac.bin
+#	doscmd mkfent16 smac.cf
+
+#smac.bin :	$(OBJS)
+#	echo $(OBJS) > objs
+#	doscmd lcc86 -o smac.bin -O @objs
+
+.c.o :	$*.c
+	gcc -c $*.c -g -I.
+
+clean :
+	rm -f smac.fx smac.bin smac $(OBJS)
+
+package :	smac.fx
+	rm -fR smac-b02
+	mkdir -p smac-b02
+	cp -R copying copyrigh readme history makefile doscmdrc *.c *.h \
+		smac.bin smac.cf smac.fx pic8 \
+		smac-b02
+	zip -r smac-b02 smac-b02
+
+xsmac :

@@ -41,7 +41,7 @@ static WWScreenCharacter WWScreenCharacter_Create(int horizontal, int vertical,
 
   screen_character = (WWScreenCharacter)malloc(sizeof(_WWScreenCharacter));
   if (screen_character == NULL)
-    Error("WWScreenCharacter", "Cannot allocate memory.");
+    Wonx_Error("WWScreenCharacter", "Cannot allocate memory.");
 
   WWScreenCharacter_SetHorizontal(screen_character, horizontal);
   WWScreenCharacter_SetVertical(screen_character, vertical);
@@ -200,7 +200,8 @@ WWScreen WWScreen_Create(int number,
   int x, y;
 
   screen = (WWScreen)malloc(sizeof(_WWScreen));
-  if (screen == NULL) Error("WWScreen_Create", "Cannot allocate memory.");
+  if (screen == NULL)
+    Wonx_Error("WWScreen_Create", "Cannot allocate memory.");
 
   WWScreen_SetNumber(screen, number);
   WWScreen_SetWidth( screen, width);

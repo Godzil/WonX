@@ -1,9 +1,9 @@
 #include "WonxP.h"
 #include "etc.h"
 
-#include "sys/disp.h"
-#include "sys/text.h"
-#include "sys/system.h"
+#include "wonx_include/disp.h"
+#include "wonx_include/text.h"
+#include "wonx_include/system.h"
 
 /*****************************************************************************/
 /* ディスプレイの確保                                                        */
@@ -22,7 +22,7 @@ void Wonx_Create(void)
   WWPalette palette;
 
   wonx = (Wonx)malloc(sizeof(_Wonx));
-  if (wonx == NULL) Error("Wonx_Create", "Cannot allocate memory.");
+  if (wonx == NULL) Wonx_Error("Wonx_Create", "Cannot allocate memory.");
 
   wonx->wonx_display =
     WonxDisplay_Create(LCD_PIXEL_WIDTH * 2, LCD_PIXEL_HEIGHT * 2,

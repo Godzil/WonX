@@ -150,7 +150,7 @@ int UNIXTimer_Pause(UNIXTimer unix_timer)
 int UNIXTimer_Unpause(UNIXTimer unix_timer)
 {
   if (unix_timer->pause == 0)
-    Error("UNIXTimer_Unpause", "Duplicated unpause.");
+    Wonx_Error("UNIXTimer_Unpause", "Duplicated unpause.");
 
   if (unix_timer->pause == 1) {
     if (unix_timer->interrupt_in_pause > 0) {
@@ -243,7 +243,7 @@ UNIXTimer UNIXTimer_Create(int auto_preset, int interval, void * parameter,
 
   unix_timer = (UNIXTimer)malloc(sizeof(_UNIXTimer));
   if (unix_timer == NULL)
-    Error("UNIXTimer_Create", "Cannot allocate memory.");
+    Wonx_Error("UNIXTimer_Create", "Cannot allocate memory.");
 
   unix_timer->timer_on           = 0;
   unix_timer->pause              = 0;
@@ -281,7 +281,7 @@ UNIXTimer UNIXTimer_Create(int auto_preset, int interval, void * parameter,
 UNIXTimer UNIXTimer_Destroy(UNIXTimer unix_timer)
 {
   if (unix_timer == NULL)
-    Error("UNIXTimer_Destroy", "Object is not created.");
+    Wonx_Error("UNIXTimer_Destroy", "Object is not created.");
 
   UNIXTimer_OFF(unix_timer);
 

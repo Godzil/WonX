@@ -29,17 +29,17 @@ WonxDisplay WonxDisplay_Create(int x_width, int x_height,
 
   wonx_display = (WonxDisplay)malloc(sizeof(_WonxDisplay));
   if (wonx_display == NULL)
-    Error("WonxDisplay_Create", "Cannot allocate memory.");
+    Wonx_Error("WonxDisplay_Create", "Cannot allocate memory.");
 
   ww_display = WWDisplay_Create(ww_lcd_panel_width, ww_lcd_panel_height,
 				ww_screen_width, ww_screen_height);
   if (ww_display == NULL)
-    Error("WonxDisplay_Create", "Cannot create WonderWitch display.");
+    Wonx_Error("WonxDisplay_Create", "Cannot create WonderWitch display.");
   WonxDisplay_SetWWDisplay(wonx_display, ww_display);
 
   x_display = XDisplay_Create(x_width, x_height);
   if (x_display == NULL)
-    Error("WonxDisplay_Create", "Cannot create X display.");
+    Wonx_Error("WonxDisplay_Create", "Cannot create X display.");
   WonxDisplay_SetXDisplay(wonx_display, x_display);
 
   return (wonx_display);

@@ -1,4 +1,25 @@
-wonx-b02
+2000/11/13(月)
+
+wonx-b03 公開
+
+ヘッダファイルを独自に作成．Wonx のみでコンパイル可能になった．
+libwonx.a のリンク時に Error() 関数がぶつかる可能性があるので，
+Wonx_Error() に変更した．
+bios_exit() を追加．
+sprite_set_char, sprite_get_char で，パレット番号が８を引いた値で
+指定されていないバグを修正．
+disp.c の font_set_monodata(), font_set_colordata(), font_get_data(),
+screen_set_char(), screen_get_char(), sprite_set_data() の引数を
+void * から適切な型に変更．
+サンプルプログラムと SpeedMac を添付した．
+ドキュメントを追加した．
+
+
+
+
+2000/11/3(金)
+
+wonx-b02 公開
 
 割り込み処理の追加．タイマ割り込みサポート．
 (UNIXTimer, WWInterrupt, WWTimer, WonxSystem 追加)
